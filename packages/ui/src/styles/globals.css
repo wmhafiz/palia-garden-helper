@@ -41,6 +41,26 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* Palia Garden Planner Theme Colors */
+  --palia-blue: #4A90E2;
+  --palia-blue-dark: #2C5282;
+  --palia-accent: #F7FAFC;
+  --palia-primary: #FFFFFF;
+  --palia-neutral: #4A5568;
+
+  /* Bonus colors for crops and fertilizers */
+  --water-retain: #3182CE;
+  --harvest-boost: #38A169;
+  --harvest-boost-dark: #2F855A;
+  --quality-increase: #D69E2E;
+  --quality-increase-dark: #B7791F;
+  --weed-prevention: #9F7AEA;
+  --speed-increase: #ED8936;
+
+  /* Additional game-specific colors */
+  --gold: #FFD700;
+  --star: #FFC107;
 }
 
 .dark {
@@ -115,13 +135,65 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Palia Garden Planner Theme Colors */
+  --color-palia-blue: var(--palia-blue);
+  --color-palia-blue-dark: var(--palia-blue-dark);
+  --color-palia-accent: var(--palia-accent);
+  --color-palia-primary: var(--palia-primary);
+  --color-palia-neutral: var(--palia-neutral);
+
+  /* Bonus colors for crops and fertilizers */
+  --color-water-retain: var(--water-retain);
+  --color-harvest-boost: var(--harvest-boost);
+  --color-harvest-boost-dark: var(--harvest-boost-dark);
+  --color-quality-increase: var(--quality-increase);
+  --color-quality-increase-dark: var(--quality-increase-dark);
+  --color-weed-prevention: var(--weed-prevention);
+  --color-speed-increase: var(--speed-increase);
+
+  /* Additional game-specific colors */
+  --color-gold: var(--gold);
+  --color-star: var(--star);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Garden Planner specific styles */
+@layer components {
+  .garden-tile {
+    @apply relative w-12 h-12 border border-gray-300 bg-white cursor-pointer transition-all duration-200;
+  }
+
+  .garden-tile:hover {
+    @apply border-palia-blue bg-palia-accent;
+  }
+
+  .garden-plot {
+    @apply grid grid-cols-3 gap-1 p-2 border-2 border-gray-400 rounded-lg bg-gray-50;
+  }
+
+  .bonus-indicator {
+    @apply absolute inset-0 pointer-events-none opacity-30;
+  }
+
+  .crop-button {
+    @apply relative w-16 h-16 border-2 border-transparent rounded-lg overflow-hidden cursor-pointer transition-all duration-200;
+  }
+
+  .crop-button:hover {
+    @apply border-palia-blue transform scale-105;
+  }
+
+  .crop-button.selected {
+    @apply border-palia-blue-dark bg-palia-accent;
   }
 }

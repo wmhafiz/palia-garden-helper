@@ -9,7 +9,9 @@
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:watch": "vitest --watch"
   },
   "dependencies": {
     "@workspace/ui": "workspace:*",
@@ -17,14 +19,28 @@
     "next": "^15.2.3",
     "next-themes": "^0.4.4",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "zustand": "^4.4.7",
+    "clsx": "^2.0.0",
+    "tailwind-merge": "^2.2.0",
+    "uniqid": "^5.4.0",
+    "html2canvas": "^1.4.1",
+    "date-fns": "^2.30.0",
+    "framer-motion": "^10.16.16",
+    "@radix-ui/react-dialog": "^1.0.5",
+    "@radix-ui/react-tooltip": "^1.0.7"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/uniqid": "^5.3.4",
     "@workspace/eslint-config": "workspace:^",
     "@workspace/typescript-config": "workspace:*",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vitest": "^1.0.0",
+    "@testing-library/react": "^14.0.0",
+    "@testing-library/jest-dom": "^6.0.0",
+    "@vitejs/plugin-react": "^4.0.0"
   }
 }

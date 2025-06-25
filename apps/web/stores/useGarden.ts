@@ -12,6 +12,7 @@ interface GardenState {
     clearGarden: () => void
     setLoading: (loading: boolean) => void
     setError: (error: string | null) => void
+    initializeGarden: (rows: number, cols: number) => void
 }
 
 export const useGarden = create<GardenState>()(
@@ -24,5 +25,17 @@ export const useGarden = create<GardenState>()(
         clearGarden: () => set({ garden: null }),
         setLoading: (isLoading) => set({ isLoading }),
         setError: (error) => set({ error }),
+        initializeGarden: (rows, cols) => {
+            try {
+                set({ isLoading: true, error: null })
+                const newGarden = new Garden(rows, cols)
+                set({ garden: newGarden, isLoading: false })
+            } catch (error) {
+                set({
+                    error: error instanceof Error ? error.message : 'Failed to initialize garden',
+                    isLoading: false
+                })
+            }
+        },
     }))
 ) 

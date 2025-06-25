@@ -27,7 +27,7 @@ export function TileComponent({
 }: TileComponentProps) {
     const [isHovered, setIsHovered] = useState(false)
     const { selectedItem, selectedItemType, isEraseMode } = useSelectedItem()
-    const { garden } = useGarden()
+    const { garden, forceUpdate } = useGarden()
     const { addToast } = useToasts()
     const { showTooltips } = useUISettings()
 
@@ -61,6 +61,9 @@ export function TileComponent({
                     message: `Fertiliser applied`
                 })
             }
+
+            // Trigger re-render by forcing a version update
+            forceUpdate()
         } catch (error) {
             addToast({
                 type: 'error',

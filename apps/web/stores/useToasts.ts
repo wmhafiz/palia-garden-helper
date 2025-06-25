@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { toast } from 'sonner'
 
 export interface Toast {
     id: string
@@ -12,40 +13,62 @@ export interface Toast {
 }
 
 interface ToastState {
-    toasts: Toast[]
-
-    // Actions
+    // Actions - keeping the same API but using Sonner internally
     addToast: (toast: Omit<Toast, 'id'>) => void
     removeToast: (id: string) => void
     clearAllToasts: () => void
 }
 
 export const useToasts = create<ToastState>((set, get) => ({
-    toasts: [],
+    addToast: (toastData) => {
+        const { type, message, action, duration } = toastData
 
-    addToast: (toast) => {
-        const id = Date.now().toString() + Math.random().toString(36)
-        const newToast: Toast = {
-            id,
-            duration: 5000, // 5 seconds default
-            ...toast,
-        }
-
-        set((state) => ({
-            toasts: [...state.toasts, newToast],
-        }))
-
-        // Auto remove toast after duration
-        if (newToast.duration && newToast.duration > 0) {
-            setTimeout(() => {
-                get().removeToast(id)
-            }, newToast.duration)
+        switch (type) {
+            case 'success':
+                toast.success(message, {
+                    duration,
+                    action: action ? {
+                        label: action.label,
+                        onClick: action.onClick,
+                    } : undefined,
+                })
+                break
+            case 'error':
+                toast.error(message, {
+                    duration,
+                    action: action ? {
+                        label: action.label,
+                        onClick: action.onClick,
+                    } : undefined,
+                })
+                break
+            case 'warning':
+                toast.warning(message, {
+                    duration,
+                    action: action ? {
+                        label: action.label,
+                        onClick: action.onClick,
+                    } : undefined,
+                })
+                break
+            case 'info':
+            default:
+                toast.info(message, {
+                    duration,
+                    action: action ? {
+                        label: action.label,
+                        onClick: action.onClick,
+                    } : undefined,
+                })
+                break
         }
     },
 
-    removeToast: (id) => set((state) => ({
-        toasts: state.toasts.filter((toast) => toast.id !== id),
-    })),
+    removeToast: (id) => {
+        toast.dismiss(id)
+    },
 
-    clearAllToasts: () => set({ toasts: [] }),
+    clearAllToasts: () => {
+        toast.dismiss()
+    },
 })) 

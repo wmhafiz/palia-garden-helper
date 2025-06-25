@@ -1,25 +1,32 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useGarden, useToasts } from '@/stores'
-import { ToastContainer } from './ui/toast-container'
 import { GardenDisplay } from './garden-display'
 import { ItemSelector } from './item-selector'
 
 export function GardenPlanner() {
     const { garden, initializeGarden, isLoading, error } = useGarden()
     const { addToast } = useToasts()
+    const hasShownWelcome = useRef(false)
 
     useEffect(() => {
         // Initialize with a default 3x3 garden
         if (!garden) {
             initializeGarden(3, 3)
+        }
+    }, [garden, initializeGarden])
+
+    // Show welcome message after garden is initialized and component is mounted
+    useEffect(() => {
+        if (garden && !hasShownWelcome.current) {
+            hasShownWelcome.current = true
             addToast({
                 type: 'info',
                 message: 'Welcome to Palia Garden Planner! Your garden has been initialized with a 3x3 layout.'
             })
         }
-    }, [garden, initializeGarden, addToast])
+    }, [garden, addToast])
 
     if (isLoading) {
         return (
@@ -99,9 +106,6 @@ export function GardenPlanner() {
                     </div>
                 </div>
             </main>
-
-            {/* Toast Notifications */}
-            <ToastContainer />
         </div>
     )
 } 

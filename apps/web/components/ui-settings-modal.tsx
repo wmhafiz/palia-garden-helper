@@ -26,12 +26,16 @@ export function UISettingsModal({ open, onOpenChange }: UISettingsModalProps) {
         isDarkMode,
         isCompactMode,
         autoSave,
+        enableNotifications,
+        enableSoundNotifications,
         toggleBonusIndicators,
         toggleGridLines,
         toggleTooltips,
         toggleDarkMode,
         toggleCompactMode,
-        toggleAutoSave
+        toggleAutoSave,
+        toggleNotifications,
+        toggleSoundNotifications
     } = useUISettings()
 
     return (
@@ -126,6 +130,41 @@ export function UISettingsModal({ open, onOpenChange }: UISettingsModalProps) {
                                 id="dark-mode"
                                 checked={isDarkMode}
                                 onCheckedChange={toggleDarkMode}
+                            />
+                        </div>
+                    </div>
+
+                    <Separator />
+
+                    {/* Notifications Settings */}
+                    <div className="space-y-4">
+                        <h3 className="text-sm font-medium text-gray-900">Notifications</h3>
+
+                        <div className="flex items-center justify-between">
+                            <div className="space-y-0.5">
+                                <Label htmlFor="notifications">Browser Notifications</Label>
+                                <p className="text-sm text-gray-500">
+                                    Show browser notifications for harvest reminders
+                                </p>
+                            </div>
+                            <Switch
+                                id="notifications"
+                                checked={enableNotifications}
+                                onCheckedChange={toggleNotifications}
+                            />
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                            <div className="space-y-0.5">
+                                <Label htmlFor="sound-notifications">Sound Notifications</Label>
+                                <p className="text-sm text-gray-500">
+                                    Play sound alerts for harvest reminders
+                                </p>
+                            </div>
+                            <Switch
+                                id="sound-notifications"
+                                checked={enableSoundNotifications}
+                                onCheckedChange={toggleSoundNotifications}
                             />
                         </div>
                     </div>

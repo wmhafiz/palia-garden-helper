@@ -8,6 +8,8 @@ interface UISettings {
     isDarkMode: boolean
     isCompactMode: boolean
     autoSave: boolean
+    enableNotifications: boolean
+    enableSoundNotifications: boolean
 }
 
 interface UISettingsState extends UISettings {
@@ -20,6 +22,8 @@ interface UISettingsState extends UISettings {
     toggleDarkMode: () => void
     toggleCompactMode: () => void
     toggleAutoSave: () => void
+    toggleNotifications: () => void
+    toggleSoundNotifications: () => void
 }
 
 const defaultSettings: UISettings = {
@@ -29,6 +33,8 @@ const defaultSettings: UISettings = {
     isDarkMode: false,
     isCompactMode: false,
     autoSave: true,
+    enableNotifications: true,
+    enableSoundNotifications: true,
 }
 
 export const useUISettings = create<UISettingsState>()(
@@ -71,6 +77,16 @@ export const useUISettings = create<UISettingsState>()(
             toggleAutoSave: () => set((state) => ({
                 ...state,
                 autoSave: !state.autoSave,
+            })),
+
+            toggleNotifications: () => set((state) => ({
+                ...state,
+                enableNotifications: !state.enableNotifications,
+            })),
+
+            toggleSoundNotifications: () => set((state) => ({
+                ...state,
+                enableSoundNotifications: !state.enableSoundNotifications,
             })),
         }),
         {

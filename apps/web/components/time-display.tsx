@@ -1,8 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Clock } from 'lucide-react'
 import { format } from 'date-fns'
+import { useUISettings } from '@/stores'
+import { notificationManager } from '@/lib/notifications'
+import { useAudioContext } from '@/hooks/useAudioContext'
 
 export function TimeDisplay() {
     const [currentTime, setCurrentTime] = useState(new Date())
@@ -14,6 +17,17 @@ export function TimeDisplay() {
         isHarvestTime: false
     })
     const [nextHarvestTime, setNextHarvestTime] = useState(new Date())
+    const [minutesUntilHarvest, setMinutesUntilHarvest] = useState(0)
+
+    // Refs to track notification state
+    const hasShownTwoMinuteWarning = useRef(false)
+    const hasShownHarvestNotification = useRef(false)
+    const lastHarvestHour = useRef(-1)
+
+    const { enableNotifications, enableSoundNotifications } = useUISettings()
+
+    // Initialize audio context on user interaction
+    useAudioContext()
 
     const calculatePaliaTime = () => {
         const now = new Date()
@@ -65,19 +79,81 @@ export function TimeDisplay() {
         return nextHarvestTime
     }
 
+    const calculateMinutesUntilHarvest = (nextHarvest: Date) => {
+        const now = new Date()
+        const diffMs = nextHarvest.getTime() - now.getTime()
+        return Math.ceil(diffMs / (1000 * 60)) // Convert to minutes and round up
+    }
+
+    const handleNotifications = async (minutesLeft: number, nextHarvest: Date) => {
+        const currentHour = nextHarvest.getHours()
+
+        // Reset notification flags when we move to a new harvest hour
+        if (lastHarvestHour.current !== currentHour) {
+            hasShownTwoMinuteWarning.current = false
+            hasShownHarvestNotification.current = false
+            lastHarvestHour.current = currentHour
+        }
+
+        // Show 2-minute warning
+        if (minutesLeft === 2 && !hasShownTwoMinuteWarning.current) {
+            hasShownTwoMinuteWarning.current = true
+
+            if (enableNotifications) {
+                await notificationManager.showHarvestReminder(2)
+            }
+
+            if (enableSoundNotifications) {
+                await notificationManager.playNotificationSound()
+            }
+        }
+
+        // Show harvest time notification
+        if (minutesLeft <= 0 && !hasShownHarvestNotification.current) {
+            hasShownHarvestNotification.current = true
+
+            if (enableNotifications) {
+                await notificationManager.showHarvestTime()
+            }
+
+            if (enableSoundNotifications) {
+                await notificationManager.playNotificationSound()
+            }
+        }
+    }
+
     useEffect(() => {
         const timer = setInterval(() => {
-            setCurrentTime(new Date())
+            const now = new Date()
+            const nextHarvest = calculateNextHarvestTime()
+            const minutesLeft = calculateMinutesUntilHarvest(nextHarvest)
+
+            setCurrentTime(now)
             setPaliaTime(calculatePaliaTime())
-            setNextHarvestTime(calculateNextHarvestTime())
+            setNextHarvestTime(nextHarvest)
+            setMinutesUntilHarvest(minutesLeft)
+
+            // Handle notifications
+            handleNotifications(minutesLeft, nextHarvest)
         }, 1000)
 
         // Initialize immediately
+        const initialNextHarvest = calculateNextHarvestTime()
+        const initialMinutesLeft = calculateMinutesUntilHarvest(initialNextHarvest)
+
         setPaliaTime(calculatePaliaTime())
-        setNextHarvestTime(calculateNextHarvestTime())
+        setNextHarvestTime(initialNextHarvest)
+        setMinutesUntilHarvest(initialMinutesLeft)
 
         return () => clearInterval(timer)
-    }, [])
+    }, [enableNotifications, enableSoundNotifications])
+
+    // Request notification permission on first render if notifications are enabled
+    useEffect(() => {
+        if (enableNotifications) {
+            notificationManager.requestPermission()
+        }
+    }, [enableNotifications])
 
     return (
         <div className="flex items-center gap-4 text-sm text-white px-3 py-2">
@@ -95,11 +171,11 @@ export function TimeDisplay() {
 
             {/* Next Harvest Time */}
             <div className="flex flex-col leading-tight border-l border-blue-200/30 pl-4">
-                <span className="font-medium text-orange-300">
+                <span className={`font-medium ${minutesUntilHarvest <= 2 ? 'text-orange-400 animate-pulse' : 'text-orange-300'}`}>
                     {format(nextHarvestTime, 'h:mm a')}
                 </span>
                 <span className="text-xs text-blue-200">
-                    Next Harvest
+                    Next Harvest ({minutesUntilHarvest}m)
                 </span>
             </div>
 

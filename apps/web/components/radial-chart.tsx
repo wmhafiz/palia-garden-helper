@@ -27,7 +27,7 @@ export function RadialChart({
         <div className="flex flex-col items-center gap-1 group relative">
             <div
                 className={cn(
-                    "radial-progress bg-secondary hover:bg-accent relative flex items-center justify-center rounded-full border-4 border-gray-200",
+                    "radial-progress bg-secondary hover:bg-accent relative flex items-center justify-center rounded-full border-1 border-gray-200",
                     className
                 )}
                 style={{
@@ -36,7 +36,7 @@ export function RadialChart({
                     height: size,
                 } as React.CSSProperties}
             >
-                <div className="absolute inset-2 bg-white rounded-full flex flex-col items-center justify-center gap-0 pt-1">
+                <div className="absolute inset-1 bg-white rounded-full flex flex-col items-center justify-center gap-0 pt-1">
                     <div className="flex flex-col items-center justify-center text">
                         {icon}
                     </div>

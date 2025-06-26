@@ -90,7 +90,7 @@ export function GardenPlanner() {
                         </div>
 
                         {/* Stats Display - Right Sidebar */}
-                        <div className="w-80 flex-shrink-0">
+                        <div className="w-120 flex-shrink-0">
                             <StatsDisplay />
                         </div>
                     </div>

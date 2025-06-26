@@ -7,6 +7,7 @@ import { HorizontalCropSelector } from './horizontal-crop-selector'
 import { HorizontalFertilizerSelector } from './horizontal-fertilizer-selector'
 import { MenuBar } from './menu-bar'
 import { StatsDisplay } from './stats-display'
+import { CurrentSelectionDisplay } from './current-selection-display'
 
 export function GardenPlanner() {
     const { garden, initializeGarden, isLoading, error } = useGarden()
@@ -71,7 +72,12 @@ export function GardenPlanner() {
                     <HorizontalCropSelector />
 
                     {/* Horizontal Fertilizer Selection Bar */}
-                    <HorizontalFertilizerSelector />
+
+                    {/* Current selection indicator */}
+                    <div className="flex justify-between">
+                        <HorizontalFertilizerSelector />
+                        <CurrentSelectionDisplay showLabel={false} />
+                    </div>
 
                     {/* Garden and Stats Layout */}
                     <div className="flex gap-8">

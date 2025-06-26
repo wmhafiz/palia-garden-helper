@@ -1,11 +1,22 @@
 'use client'
 
+import { Crop } from '@/lib/garden-planner/classes'
 import { useSelectedItem } from '@/stores'
 
 interface CurrentSelectionDisplayProps {
     variant?: 'default' | 'compact' | 'inline'
     showLabel?: boolean
     className?: string
+}
+
+function CropDisplayInfo(crop: Crop) {
+    return (
+        <div className="flex flex-col">
+            <div>Growth: {crop.produceInfo?.growthTime || 'N/A'}d</div>
+            <div>{crop.size || ''} | {crop.cropBonus || ''}</div>
+            <div>Value: {crop.goldValues.crop || 'N/A'}g</div>
+        </div>
+    )
 }
 
 export function CurrentSelectionDisplay({
@@ -36,11 +47,11 @@ export function CurrentSelectionDisplay({
                     <img
                         src={selectedItem.image}
                         alt={selectedItem.type}
-                        className="w-4 h-4 object-contain"
+                        className="w-16 h-16 object-contain"
                     />
                 ) : '📦',
                 description: selectedItemType === 'crop'
-                    ? `Growth: ${(selectedItem as any).produceInfo?.growthTime || 'N/A'}d`
+                    ? CropDisplayInfo(selectedItem as Crop)
                     : selectedItemType === 'fertiliser'
                         ? `Effect: ${(selectedItem as any).effect || 'N/A'}`
                         : 'Selected item',
@@ -92,7 +103,7 @@ export function CurrentSelectionDisplay({
                 <span className="text-sm font-medium text-gray-700">Current selection:</span>
             )}
             <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 flex items-center justify-center">
+                <div className="w-12 h-12 flex items-center justify-center">
                     {typeof displayInfo.icon === 'string' ? (
                         <span className="text-sm">{displayInfo.icon}</span>
                     ) : (

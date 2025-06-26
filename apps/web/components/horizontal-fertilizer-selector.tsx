@@ -5,7 +5,6 @@ import fertiliserList from '@/lib/garden-planner/fertiliserList'
 import { FertiliserType } from '@/lib/garden-planner/enums'
 import { Fertiliser } from '@/lib/garden-planner/classes'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@workspace/ui/components/tooltip'
-import { CurrentSelectionDisplay } from './current-selection-display'
 
 export function HorizontalFertilizerSelector() {
     const { selectedItem, selectedItemType, selectFertiliser, setEraseMode, isEraseMode, clearSelection } = useSelectedItem()
@@ -145,10 +144,6 @@ export function HorizontalFertilizerSelector() {
                         </Tooltip>
                     </div>
 
-                    {/* Current selection indicator */}
-                    <div className="flex-1 flex justify-end">
-                        <CurrentSelectionDisplay />
-                    </div>
                 </div>
             </div>
         </div>

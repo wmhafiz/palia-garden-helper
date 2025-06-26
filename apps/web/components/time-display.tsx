@@ -16,13 +16,13 @@ export function TimeDisplay() {
     }, [])
 
     return (
-        <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-md">
-            <Clock className="w-4 h-4" />
-            <div className="flex flex-col">
-                <span className="font-medium">
+        <div className="flex items-center gap-2 text-sm text-white px-3 py-2">
+            <Clock className="w-4 h-4 text-blue-200" />
+            <div className="flex flex-col leading-tight">
+                <span className="font-medium text-white">
                     {format(currentTime, 'MMM d, yyyy')}
                 </span>
-                <span className="text-xs">
+                <span className="text-xs text-blue-200">
                     {format(currentTime, 'h:mm:ss a')}
                 </span>
             </div>

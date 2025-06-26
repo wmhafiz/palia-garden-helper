@@ -197,3 +197,34 @@
     @apply border-palia-blue-dark bg-palia-accent;
   }
 }
+
+/* Palia Garden Planner utility classes */
+@layer utilities {
+  .bg-palia-blue {
+    background-color: var(--color-palia-blue);
+  }
+
+  .bg-palia-blue-dark {
+    background-color: var(--color-palia-blue-dark);
+  }
+
+  .bg-palia-accent {
+    background-color: var(--color-palia-accent);
+  }
+
+  .text-palia-blue {
+    color: var(--color-palia-blue);
+  }
+
+  .text-palia-blue-dark {
+    color: var(--color-palia-blue-dark);
+  }
+
+  .border-palia-blue {
+    border-color: var(--color-palia-blue);
+  }
+
+  .border-palia-blue-dark {
+    border-color: var(--color-palia-blue-dark);
+  }
+}

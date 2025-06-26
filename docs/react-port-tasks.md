@@ -181,86 +181,196 @@
 - ✅ Added forceUpdate mechanism to trigger React re-renders on garden mutations
 - ✅ Updated all dependent components to use version dependency in useMemo
 
-## Phase 4: Advanced Functionality (Priority: Medium-Low)
+## Phase 4: Layout & Design Alignment (Priority: Critical)
 
-### Task 4.1: Drag and Drop System
+Based on the comprehensive gap analysis in `docs/react-port-missing-features.md`, Phase 4 has been restructured to focus on achieving visual and functional parity with the original Palia Garden Planner.
+
+### Task 4A: Critical Layout Alignment (28-34 hours)
+
+#### Task 4A.1: Header & Navigation Redesign ✅ **COMPLETED**
+
+**Estimated Time**: 6-8 hours ✅ **COMPLETED** (Actual: ~2 hours)
+**Dependencies**: Task 3.1
+
+- [x] Implement dark blue/navy header background matching Palia theme
+- [x] Add Palia branding logo and styling
+- [x] Create navigation links (Roadmap, Changelogs, Credits, Layout Generator, External Tools)
+- [x] Add "Shepp Arenvanya's Guide to Gardening" link
+- [x] Add "Buy me a coffee" link
+- [x] Integrate time display in header
+
+**Deliverables**:
+
+- ✅ Header matching original design
+- ✅ Complete navigation system
+- ✅ Palia branding integration
+
+#### Task 4A.2: Horizontal Crop/Fertilizer Selection Bars
+
+**Estimated Time**: 8-10 hours
+**Dependencies**: Task 2.3
+
+- [ ] Replace vertical ItemSelector with horizontal scrollable crop bar
+- [ ] Add crop icons with quantity indicators (numbers like "6", "10", "4")
+- [ ] Implement horizontal fertilizer selection bar below crops
+- [ ] Add visual crop/fertilizer indicators matching original design
+- [ ] Create "Remove crop from tile(s)" text indicator
+- [ ] Add "Fertilizers per Day" section with visual icons
+
+**Deliverables**:
+
+- Horizontal scrollable crop selection
+- Fertilizer bar with visual indicators
+- Quantity tracking and display
+
+#### Task 4A.3: Garden Grid Layout Redesign
 
 **Estimated Time**: 6-8 hours
 **Dependencies**: Task 2.2
 
-- [ ] Implement drag and drop for crop placement
-- [ ] Add visual feedback during drag operations
-- [ ] Support multi-tile crop dragging (for Bush/Tree crops)
-- [ ] Handle drag boundaries and validation
-- [ ] Add touch support for mobile devices
-- [ ] Implement drag-to-fill functionality for quick planting
+- [ ] Remove card wrapper from garden display for seamless integration
+- [ ] Implement larger default garden size (9x9 matching original)
+- [ ] Add plot grid lines and visual separators
+- [ ] Update crop placement with visual feedback matching original
+- [ ] Add integrated garden controls and overlays
 
 **Deliverables**:
 
-- Smooth drag and drop experience
+- Seamless garden grid layout
+- Larger default garden size
+- Visual grid improvements
+
+#### Task 4A.4: Statistics Panel Redesign
+
+**Estimated Time**: 8-10 hours
+**Dependencies**: Task 3.2
+
+- [ ] Redesign StatsDisplay as compact right sidebar
+- [ ] Implement "Overview" section with Total/Average/Process Time/Level/Days of Harvest
+- [ ] Add visual progress indicators and metrics
+- [ ] Create badge system for "Star Seed", "Incl Replant & Cost", "100% Star Crop Chance", "No Fertiliser Cost"
+- [ ] Implement "Produce" section with crop icons and quantities
+- [ ] Add "Seed Collectors" and "Preserve Jars" sections
+- [ ] Create bonus indicators (Growth Boost, Harvest Boost, Quality Increase, Water Retain, Weed Prevention)
+
+**Deliverables**:
+
+- Compact statistics sidebar
+- Overview metrics display
+- Badge system implementation
+- Produce visualization
+
+### Task 4B: Core Functionality Gaps (20-25 hours)
+
+#### Task 4B.1: Multi-tile Crop Support
+
+**Estimated Time**: 12-15 hours
+**Dependencies**: Task 4A.3
+
+- [ ] Implement Bush crop support (2x2 tiles)
+- [ ] Implement Tree crop support (3x3 tiles)
+- [ ] Add multi-tile placement validation
+- [ ] Update bonus calculation system for multi-tile crops
+- [ ] Add visual indicators for multi-tile crop placement
+- [ ] Implement multi-tile crop removal/replacement logic
+
+**Deliverables**:
+
+- Bush and Tree crop support
+- Multi-tile placement system
+- Updated bonus calculations
+
+#### Task 4B.2: Harvest Calculation Integration
+
+**Estimated Time**: 8-10 hours
+**Dependencies**: Task 4A.4
+
+- [ ] Integrate Harvester class functionality
+- [ ] Add Processor class for optimization calculations
+- [ ] Implement multi-day simulation display
+- [ ] Add gold value projections and analysis
+- [ ] Create detailed harvest projections
+- [ ] Add processing recommendations and optimization
+
+**Deliverables**:
+
+- Advanced harvest simulation
+- Processing optimization
+- Gold value projections
+
+### Task 4C: User Experience Enhancements (14-18 hours)
+
+#### Task 4C.1: Drag and Drop System
+
+**Estimated Time**: 8-10 hours
+**Dependencies**: Task 4A.2, Task 4A.3
+
+- [ ] Implement drag and drop crop/fertilizer placement
+- [ ] Add visual feedback during drag operations
+- [ ] Create validation system for drag operations
+- [ ] Add touch support for mobile devices
+- [ ] Support multi-tile crop dragging
+- [ ] Implement drag-to-fill functionality
+
+**Deliverables**:
+
+- Complete drag and drop system
 - Mobile touch support
 - Visual feedback during operations
-- Multi-tile crop support
 
-### Task 4.2: Advanced Export Features
+#### Task 4C.2: Bonus System Visualization
 
 **Estimated Time**: 6-8 hours
-**Dependencies**: Task 3.1
+**Dependencies**: Task 4B.1
+
+- [ ] Add visual bonus overlay on garden tiles
+- [ ] Implement bonus strength indicators (percentages)
+- [ ] Add cross-plot bonus calculations
+- [ ] Create bonus filtering and highlighting
+- [ ] Add bonus optimization suggestions
+
+**Deliverables**:
+
+- Visual bonus overlays
+- Bonus filtering system
+- Optimization suggestions
+
+### Task 4D: Advanced Features (14-18 hours)
+
+#### Task 4D.1: Advanced Export Options
+
+**Estimated Time**: 8-10 hours
+**Dependencies**: Task 4A.1
 
 - [x] Implement screenshot generation ✅ **COMPLETED**
 - [ ] Add watermark functionality to screenshots
 - [ ] Support different image export formats (PNG, JPEG)
-- [ ] Add share functionality with social media integration
+- [ ] Add social media sharing integration
 - [ ] Implement URL parameter loading for shared gardens
-- [ ] Create shareable garden links
 - [ ] Add QR code generation for mobile sharing
 
 **Deliverables**:
 
 - ✅ Screenshot generation working
 - Enhanced export options
-- Share functionality
-- URL parameter support
+- Social sharing functionality
 
-### Task 4.3: Multi-tile Crop Support
-
-**Estimated Time**: 8-10 hours
-**Dependencies**: Task 2.2, Task 4.1
-
-- [ ] Implement Bush crop support (2x2 tiles)
-- [ ] Implement Tree crop support (3x3 tiles)
-- [ ] Add visual indicators for multi-tile crop placement
-- [ ] Handle adjacency bonuses for multi-tile crops
-- [ ] Update statistics calculations for multi-tile crops
-- [ ] Add validation for multi-tile crop placement
-- [ ] Implement multi-tile crop removal/replacement
-
-**Deliverables**:
-
-- Bush and Tree crop support
-- Multi-tile placement validation
-- Updated bonus calculations
-- Enhanced visual feedback
-
-### Task 4.4: Advanced Garden Features
+#### Task 4D.2: Garden Templates and Presets
 
 **Estimated Time**: 6-8 hours
-**Dependencies**: Task 3.2
+**Dependencies**: Task 4A.3
 
-- [ ] Implement crop rotation planning
-- [ ] Add seasonal crop recommendations
-- [ ] Create garden templates and presets
-- [ ] Add batch operations (fill plot, clear plot)
-- [ ] Implement garden comparison tools
-- [ ] Add profit optimization suggestions
-- [ ] Create harvest scheduling features
+- [ ] Create pre-designed garden templates
+- [ ] Add template preview functionality
+- [ ] Implement template categorization system
+- [ ] Add custom template creation tools
+- [ ] Create template sharing system
 
 **Deliverables**:
 
-- Crop rotation tools
-- Seasonal planning
-- Garden templates
-- Optimization features
+- Garden template system
+- Template preview and sharing
+- Custom template creation
 
 ## Phase 5: Polish and Optimization (Priority: Low)
 
@@ -388,14 +498,18 @@
 
 ### Remaining Phases:
 
-- **Phase 4**: 28-34 hours (Advanced Functionality)
+- **Phase 4**: 76-95 hours (Layout & Design Alignment + Advanced Features)
+  - **Phase 4A**: 28-34 hours (Critical Layout Alignment)
+  - **Phase 4B**: 20-25 hours (Core Functionality Gaps)
+  - **Phase 4C**: 14-18 hours (User Experience Enhancements)
+  - **Phase 4D**: 14-18 hours (Advanced Features)
 - **Phase 5**: 36-42 hours (Polish and Optimization)
 
 ### Updated Total Estimate:
 
-**88-112 hours** for complete implementation (including new features)
+**132-157 hours** for complete implementation (including full feature parity)
 
-**Current Status**: ~20 hours completed out of 88-112 hours total
+**Current Status**: ~20 hours completed out of 132-157 hours total
 
 ### Time Savings Achieved:
 

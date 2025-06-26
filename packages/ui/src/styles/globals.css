@@ -227,4 +227,14 @@
   .border-palia-blue-dark {
     border-color: var(--color-palia-blue-dark);
   }
+
+  /* Scrollbar hiding utilities */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }

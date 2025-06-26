@@ -115,7 +115,7 @@ export function TileComponent({
     const tileElement = (
         <div
             className={`
-        tile-component relative w-8 h-8 m-px cursor-pointer transition-all duration-150
+        tile-component relative w-8 h-8 md:w-12 md:h-12 lg:w-18 lg:h-18 m-px cursor-pointer transition-all duration-150
         ${getTileBackground()}
         ${getTileBorder()}
         hover:scale-110 hover:z-10

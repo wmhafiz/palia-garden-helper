@@ -9,7 +9,7 @@ import { Separator } from '@workspace/ui/components/separator'
 import { useGarden } from '@/stores'
 import { cropList, getCropFromType } from '@/lib/garden-planner'
 
-interface CropHarvestInfo {
+export interface CropHarvestInfo {
     cropType: string
     count: number
     baseYield: number

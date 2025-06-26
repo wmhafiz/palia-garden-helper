@@ -205,23 +205,24 @@ Based on the comprehensive gap analysis in `docs/react-port-missing-features.md`
 - ✅ Complete navigation system
 - ✅ Palia branding integration
 
-#### Task 4A.2: Horizontal Crop/Fertilizer Selection Bars
+#### Task 4A.2: Horizontal Crop/Fertilizer Selection Bars ✅ **COMPLETED**
 
-**Estimated Time**: 8-10 hours
+**Estimated Time**: 8-10 hours ✅ **COMPLETED** (Actual: ~3 hours)
 **Dependencies**: Task 2.3
 
-- [ ] Replace vertical ItemSelector with horizontal scrollable crop bar
-- [ ] Add crop icons with quantity indicators (numbers like "6", "10", "4")
-- [ ] Implement horizontal fertilizer selection bar below crops
-- [ ] Add visual crop/fertilizer indicators matching original design
-- [ ] Create "Remove crop from tile(s)" text indicator
-- [ ] Add "Fertilizers per Day" section with visual icons
+- [x] Replace vertical ItemSelector with horizontal scrollable crop bar
+- [x] Add crop icons with quantity indicators (numbers like "6", "10", "4")
+- [x] Implement horizontal fertilizer selection bar below crops
+- [x] Add visual crop/fertilizer indicators matching original design
+- [x] Create "Remove crop from tile(s)" text indicator
+- [x] Add "Fertilizers per Day" section with visual icons
 
 **Deliverables**:
 
-- Horizontal scrollable crop selection
-- Fertilizer bar with visual indicators
-- Quantity tracking and display
+- ✅ Horizontal scrollable crop selection with navigation arrows
+- ✅ Fertilizer bar with visual indicators and tool integration
+- ✅ Quantity tracking and display with placeholder counts
+- ✅ Complete layout restructure matching original design
 
 #### Task 4A.3: Garden Grid Layout Redesign
 

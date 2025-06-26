@@ -28,7 +28,7 @@ export function GardenDisplay() {
 
             <div
                 className={`
-          garden-grid inline-block p-4 bg-green-50 rounded-lg border-2 border-green-200
+          garden-grid inline-block p-1 bg-green-50 rounded-lg border-2 border-green-200
           ${showGridLines ? 'border-dashed' : ''}
         `}
             >

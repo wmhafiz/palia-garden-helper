@@ -27,7 +27,7 @@ export function PlotComponent({
     const plotElement = (
         <div
             className={`
-        plot-component m-1 p-2 rounded-lg transition-all duration-200
+        plot-component m-1 transition-all duration-200
         ${plot.isActive ? 'bg-white border-2 border-gray-300' : 'bg-gray-200 border-2 border-gray-400'}
         ${isHovered ? 'shadow-lg scale-105' : 'shadow-sm'}
         ${showGridLines ? 'border-dashed' : ''}

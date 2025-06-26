@@ -3,7 +3,8 @@
 import { useEffect, useRef } from 'react'
 import { useGarden, useToasts } from '@/stores'
 import { GardenDisplay } from './garden-display'
-import { ItemSelector } from './item-selector'
+import { HorizontalCropSelector } from './horizontal-crop-selector'
+import { HorizontalFertilizerSelector } from './horizontal-fertilizer-selector'
 import { MenuBar } from './menu-bar'
 import { StatsDisplay } from './stats-display'
 
@@ -65,26 +66,27 @@ export function GardenPlanner() {
 
             {/* Main Content */}
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                    {/* Item Selector - Left Panel */}
-                    <div className="lg:col-span-1">
-                        <div className="bg-white rounded-lg shadow p-6">
-                            <h2 className="text-lg font-semibold mb-4">Item Selector</h2>
-                            <ItemSelector />
-                        </div>
-                    </div>
+                <div className="space-y-6">
+                    {/* Horizontal Crop Selection Bar */}
+                    <HorizontalCropSelector />
 
-                    {/* Garden Display - Center Panel */}
-                    <div className="lg:col-span-2">
-                        <div className="bg-white rounded-lg shadow p-6" data-garden-display>
-                            <h2 className="text-lg font-semibold mb-4">Garden Layout</h2>
-                            <GardenDisplay />
-                        </div>
-                    </div>
+                    {/* Horizontal Fertilizer Selection Bar */}
+                    <HorizontalFertilizerSelector />
 
-                    {/* Stats Display - Right Panel */}
-                    <div className="lg:col-span-1">
-                        <StatsDisplay />
+                    {/* Garden and Stats Layout */}
+                    <div className="flex gap-8">
+                        {/* Garden Display - Main Content */}
+                        <div className="flex-1">
+                            <div className="bg-white rounded-lg shadow p-6" data-garden-display>
+                                <h2 className="text-lg font-semibold mb-4">Garden Layout</h2>
+                                <GardenDisplay />
+                            </div>
+                        </div>
+
+                        {/* Stats Display - Right Sidebar */}
+                        <div className="w-80 flex-shrink-0">
+                            <StatsDisplay />
+                        </div>
                     </div>
                 </div>
             </main>

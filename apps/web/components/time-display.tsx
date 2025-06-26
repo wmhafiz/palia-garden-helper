@@ -13,6 +13,7 @@ export function TimeDisplay() {
         formatted: '12:00 AM',
         isHarvestTime: false
     })
+    const [nextHarvestTime, setNextHarvestTime] = useState(new Date())
 
     const calculatePaliaTime = () => {
         const now = new Date()
@@ -44,14 +45,36 @@ export function TimeDisplay() {
         }
     }
 
+    const calculateNextHarvestTime = () => {
+        const now = new Date()
+        const currentMinutes = now.getMinutes()
+
+        // Harvest time occurs at :15 minutes past each hour
+        const harvestMinute = 15
+
+        let nextHarvestTime = new Date(now)
+
+        if (currentMinutes < harvestMinute) {
+            // Next harvest is in the current hour
+            nextHarvestTime.setMinutes(harvestMinute, 0, 0)
+        } else {
+            // Next harvest is in the next hour
+            nextHarvestTime.setHours(now.getHours() + 1, harvestMinute, 0, 0)
+        }
+
+        return nextHarvestTime
+    }
+
     useEffect(() => {
         const timer = setInterval(() => {
             setCurrentTime(new Date())
             setPaliaTime(calculatePaliaTime())
+            setNextHarvestTime(calculateNextHarvestTime())
         }, 1000)
 
         // Initialize immediately
         setPaliaTime(calculatePaliaTime())
+        setNextHarvestTime(calculateNextHarvestTime())
 
         return () => clearInterval(timer)
     }, [])
@@ -67,6 +90,16 @@ export function TimeDisplay() {
                 </span>
                 <span className="text-xs text-blue-200">
                     {format(currentTime, 'h:mm a')} Local
+                </span>
+            </div>
+
+            {/* Next Harvest Time */}
+            <div className="flex flex-col leading-tight border-l border-blue-200/30 pl-4">
+                <span className="font-medium text-orange-300">
+                    {format(nextHarvestTime, 'h:mm a')}
+                </span>
+                <span className="text-xs text-blue-200">
+                    Next Harvest
                 </span>
             </div>
 

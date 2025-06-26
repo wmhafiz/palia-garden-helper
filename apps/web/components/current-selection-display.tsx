@@ -24,16 +24,53 @@ export function CurrentSelectionDisplay({
     showLabel = true,
     className = ''
 }: CurrentSelectionDisplayProps) {
-    const { selectedItem, selectedItemType, isEraseMode } = useSelectedItem()
+    const {
+        selectedItem,
+        selectedItemType,
+        isEraseMode,
+        isEraseCropMode,
+        isEraseFertiliserMode,
+        isErasePlotMode
+    } = useSelectedItem()
 
     const getDisplayInfo = () => {
         if (isEraseMode) {
             return {
                 type: 'Tool',
-                name: 'Erase Mode',
+                name: 'Erase Both',
                 icon: '🗑️',
-                description: 'Clear crops and fertilizers',
+                description: 'Clear crops and fertilizers (per tile)',
                 color: 'text-red-600'
+            }
+        }
+
+        if (isEraseCropMode) {
+            return {
+                type: 'Tool',
+                name: 'Erase Crops',
+                icon: '🌱',
+                description: 'Clear crops only (per tile)',
+                color: 'text-red-600'
+            }
+        }
+
+        if (isEraseFertiliserMode) {
+            return {
+                type: 'Tool',
+                name: 'Erase Fertilizers',
+                icon: '🧪',
+                description: 'Clear fertilizers only (per tile)',
+                color: 'text-blue-600'
+            }
+        }
+
+        if (isErasePlotMode) {
+            return {
+                type: 'Tool',
+                name: 'Erase Plot',
+                icon: '🧹',
+                description: 'Clear entire plot (all 9 tiles)',
+                color: 'text-purple-600'
             }
         }
 

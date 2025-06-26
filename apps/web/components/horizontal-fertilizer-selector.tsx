@@ -7,7 +7,7 @@ import { Fertiliser } from '@/lib/garden-planner/classes'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@workspace/ui/components/tooltip'
 
 export function HorizontalFertilizerSelector() {
-    const { selectedItem, selectedItemType, selectFertiliser, setEraseMode, isEraseMode, clearSelection } = useSelectedItem()
+    const { selectedItem, selectedItemType, selectFertiliser } = useSelectedItem()
     const { showTooltips } = useUISettings()
 
     const handleFertiliserSelect = (fertiliserType: FertiliserType) => {
@@ -86,64 +86,6 @@ export function HorizontalFertilizerSelector() {
                             ) : fertilizerButton
                         })}
                     </div>
-
-                    {/* Divider */}
-                    <div className="h-8 w-px bg-gray-300"></div>
-
-                    {/* Tool buttons */}
-                    <div className="flex space-x-2">
-                        {/* Erase tool */}
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <button
-                                    onClick={setEraseMode}
-                                    className={`
-                                        relative w-12 h-12 rounded-lg border-2 transition-all duration-200
-                                        ${isEraseMode
-                                            ? 'border-red-500 bg-red-50 shadow-md'
-                                            : 'border-gray-300 bg-white hover:border-red-400 hover:shadow-sm'
-                                        }
-                                    `}
-                                >
-                                    <div className="w-full h-full flex items-center justify-center text-lg">
-                                        🗑️
-                                    </div>
-
-                                    {/* Selection indicator */}
-                                    {isEraseMode && (
-                                        <div className="absolute inset-0 rounded-lg border-4 border-red-500"></div>
-                                    )}
-                                </button>
-                            </TooltipTrigger>
-                            <TooltipContent side="bottom" sideOffset={8}>
-                                <div className="text-xs">
-                                    <div className="font-semibold">Erase Tool</div>
-                                    <div className="text-gray-500">Clear crops and fertilizers</div>
-                                </div>
-                            </TooltipContent>
-                        </Tooltip>
-
-                        {/* Clear selection */}
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <button
-                                    onClick={clearSelection}
-                                    className="relative w-12 h-12 rounded-lg border-2 border-gray-300 bg-white hover:border-gray-400 hover:shadow-sm transition-all duration-200"
-                                >
-                                    <div className="w-full h-full flex items-center justify-center text-lg">
-                                        ✋
-                                    </div>
-                                </button>
-                            </TooltipTrigger>
-                            <TooltipContent side="bottom" sideOffset={8}>
-                                <div className="text-xs">
-                                    <div className="font-semibold">Clear Selection</div>
-                                    <div className="text-gray-500">Deselect all items</div>
-                                </div>
-                            </TooltipContent>
-                        </Tooltip>
-                    </div>
-
                 </div>
             </div>
         </div>

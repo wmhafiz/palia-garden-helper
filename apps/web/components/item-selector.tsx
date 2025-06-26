@@ -12,7 +12,21 @@ type TabType = 'crops' | 'fertilisers' | 'tools'
 
 export function ItemSelector() {
     const [activeTab, setActiveTab] = useState<TabType>('crops')
-    const { selectedItem, selectedItemType, isEraseMode, selectCrop, selectFertiliser, setEraseMode, clearSelection } = useSelectedItem()
+    const {
+        selectedItem,
+        selectedItemType,
+        isEraseMode,
+        isEraseCropMode,
+        isEraseFertiliserMode,
+        isErasePlotMode,
+        selectCrop,
+        selectFertiliser,
+        setEraseMode,
+        setEraseCropMode,
+        setEraseFertiliserMode,
+        setErasePlotMode,
+        clearSelection
+    } = useSelectedItem()
     const { showTooltips } = useUISettings()
 
     const handleCropSelect = (cropType: CropType) => {
@@ -78,7 +92,22 @@ export function ItemSelector() {
                 {isEraseMode ? (
                     <div className="text-red-600 font-medium flex items-center space-x-2">
                         <span>🗑️</span>
-                        <span>Erase Mode</span>
+                        <span>Erase Mode (Both)</span>
+                    </div>
+                ) : isEraseCropMode ? (
+                    <div className="text-red-600 font-medium flex items-center space-x-2">
+                        <span>🌱</span>
+                        <span>Erase Crops</span>
+                    </div>
+                ) : isEraseFertiliserMode ? (
+                    <div className="text-blue-600 font-medium flex items-center space-x-2">
+                        <span>🧪</span>
+                        <span>Erase Fertilizers</span>
+                    </div>
+                ) : isErasePlotMode ? (
+                    <div className="text-purple-600 font-medium flex items-center space-x-2">
+                        <span>🧹</span>
+                        <span>Erase Plot</span>
                     </div>
                 ) : selectedItem ? (
                     <div className="text-palia-blue font-medium flex items-center space-x-2">
@@ -192,6 +221,52 @@ export function ItemSelector() {
                 {activeTab === 'tools' && (
                     <div className="space-y-2">
                         <button
+                            onClick={setEraseCropMode}
+                            className={`
+                w-full p-3 rounded-lg border-2 transition-all duration-200 text-left
+                ${isEraseCropMode
+                                    ? 'border-red-500 bg-red-50'
+                                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                                }
+              `}
+                        >
+                            <div className="flex items-center space-x-2">
+                                <div className="w-8 h-8 bg-red-100 rounded flex items-center justify-center text-sm">
+                                    🌱
+                                </div>
+                                <div>
+                                    <div className="font-medium text-sm">Erase Crops</div>
+                                    <div className="text-xs text-gray-500">
+                                        Clear crops only (per tile)
+                                    </div>
+                                </div>
+                            </div>
+                        </button>
+
+                        <button
+                            onClick={setEraseFertiliserMode}
+                            className={`
+                w-full p-3 rounded-lg border-2 transition-all duration-200 text-left
+                ${isEraseFertiliserMode
+                                    ? 'border-blue-500 bg-blue-50'
+                                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                                }
+              `}
+                        >
+                            <div className="flex items-center space-x-2">
+                                <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center text-sm">
+                                    🧪
+                                </div>
+                                <div>
+                                    <div className="font-medium text-sm">Erase Fertilizers</div>
+                                    <div className="text-xs text-gray-500">
+                                        Clear fertilizers only (per tile)
+                                    </div>
+                                </div>
+                            </div>
+                        </button>
+
+                        <button
                             onClick={setEraseMode}
                             className={`
                 w-full p-3 rounded-lg border-2 transition-all duration-200 text-left
@@ -206,9 +281,32 @@ export function ItemSelector() {
                                     🗑️
                                 </div>
                                 <div>
-                                    <div className="font-medium text-sm">Erase Tool</div>
+                                    <div className="font-medium text-sm">Erase Both</div>
                                     <div className="text-xs text-gray-500">
-                                        Clear crops and fertilisers
+                                        Clear crops and fertilizers (per tile)
+                                    </div>
+                                </div>
+                            </div>
+                        </button>
+
+                        <button
+                            onClick={setErasePlotMode}
+                            className={`
+                w-full p-3 rounded-lg border-2 transition-all duration-200 text-left
+                ${isErasePlotMode
+                                    ? 'border-purple-500 bg-purple-50'
+                                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                                }
+              `}
+                        >
+                            <div className="flex items-center space-x-2">
+                                <div className="w-8 h-8 bg-purple-100 rounded flex items-center justify-center text-sm">
+                                    🧹
+                                </div>
+                                <div>
+                                    <div className="font-medium text-sm">Erase All (Plot)</div>
+                                    <div className="text-xs text-gray-500">
+                                        Clear entire plot (all 9 tiles)
                                     </div>
                                 </div>
                             </div>
@@ -240,7 +338,11 @@ export function ItemSelector() {
                     <div className="font-semibold mb-1">Keyboard Shortcuts:</div>
                     <div>C - Crops tab</div>
                     <div>F - Fertilisers tab</div>
-                    <div>E - Erase mode</div>
+                    <div>T - Tools tab</div>
+                    <div>1 - Erase crops only</div>
+                    <div>2 - Erase fertilizers only</div>
+                    <div>3 - Erase both (per tile)</div>
+                    <div>4 - Erase entire plot</div>
                     <div>Esc - Clear selection</div>
                 </div>
             </div>

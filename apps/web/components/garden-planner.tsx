@@ -1,10 +1,11 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { useGarden, useToasts } from '@/stores'
+import { useGarden, useToasts, useSelectedItem } from '@/stores'
 import { GardenDisplay } from './garden-display'
 import { HorizontalCropSelector } from './horizontal-crop-selector'
 import { HorizontalFertilizerSelector } from './horizontal-fertilizer-selector'
+import { HorizontalToolSelector } from './horizontal-tool-selector'
 import { MenuBar } from './menu-bar'
 import { StatsDisplay } from './stats-display'
 import { CurrentSelectionDisplay } from './current-selection-display'
@@ -12,6 +13,13 @@ import { CurrentSelectionDisplay } from './current-selection-display'
 export function GardenPlanner() {
     const { garden, initializeGarden, isLoading, error } = useGarden()
     const { addToast } = useToasts()
+    const {
+        setEraseCropMode,
+        setEraseFertiliserMode,
+        setEraseMode,
+        setErasePlotMode,
+        clearSelection
+    } = useSelectedItem()
     const hasShownWelcome = useRef(false)
 
     useEffect(() => {
@@ -31,6 +39,62 @@ export function GardenPlanner() {
             })
         }
     }, [garden, addToast])
+
+    // Keyboard shortcuts
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            // Ignore if user is typing in an input field
+            if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+                return
+            }
+
+            switch (event.key) {
+                case '1':
+                    event.preventDefault()
+                    setEraseCropMode()
+                    addToast({
+                        type: 'info',
+                        message: 'Erase Crops mode activated'
+                    })
+                    break
+                case '2':
+                    event.preventDefault()
+                    setEraseFertiliserMode()
+                    addToast({
+                        type: 'info',
+                        message: 'Erase Fertilizers mode activated'
+                    })
+                    break
+                case '3':
+                    event.preventDefault()
+                    setEraseMode()
+                    addToast({
+                        type: 'info',
+                        message: 'Erase Both mode activated'
+                    })
+                    break
+                case '4':
+                    event.preventDefault()
+                    setErasePlotMode()
+                    addToast({
+                        type: 'info',
+                        message: 'Erase Plot mode activated'
+                    })
+                    break
+                case 'Escape':
+                    event.preventDefault()
+                    clearSelection()
+                    addToast({
+                        type: 'info',
+                        message: 'Selection cleared'
+                    })
+                    break
+            }
+        }
+
+        window.addEventListener('keydown', handleKeyDown)
+        return () => window.removeEventListener('keydown', handleKeyDown)
+    }, [setEraseCropMode, setEraseFertiliserMode, setEraseMode, setErasePlotMode, clearSelection, addToast])
 
     if (isLoading) {
         return (
@@ -68,14 +132,13 @@ export function GardenPlanner() {
             {/* Main Content */}
             <main className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="space-y-6">
-                    {/* Horizontal Crop Selection Bar */}
-                    <HorizontalCropSelector />
 
-                    {/* Horizontal Fertilizer Selection Bar */}
-
-                    {/* Current selection indicator */}
-                    <div className="flex justify-between">
+                    <div className="flex justify-between gap-4">
+                        <HorizontalCropSelector />
                         <HorizontalFertilizerSelector />
+                    </div>
+                    <div className="flex  gap-4">
+                        <HorizontalToolSelector />
                         <CurrentSelectionDisplay showLabel={false} />
                     </div>
 

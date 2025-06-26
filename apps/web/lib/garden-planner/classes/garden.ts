@@ -84,6 +84,54 @@ class Garden {
         }
     }
 
+    /**
+     * Clears all crops and fertilizers from a specific plot
+     * @param row Plot row index
+     * @param col Plot column index
+     */
+    clearPlot(row: number, col: number): void {
+        const plot = this.getPlot(row, col)
+        if (plot && plot.isActive) {
+            plot.tiles = [
+                [new Tile(null), new Tile(null), new Tile(null)],
+                [new Tile(null), new Tile(null), new Tile(null)],
+                [new Tile(null), new Tile(null), new Tile(null)],
+            ]
+        }
+    }
+
+    /**
+     * Clears only crops from a specific plot, leaving fertilizers intact
+     * @param row Plot row index
+     * @param col Plot column index
+     */
+    clearCropsFromPlot(row: number, col: number): void {
+        const plot = this.getPlot(row, col)
+        if (plot && plot.isActive) {
+            for (let tileRow = 0; tileRow < 3; tileRow++) {
+                for (let tileCol = 0; tileCol < 3; tileCol++) {
+                    plot.removeCropFromTile(tileRow, tileCol)
+                }
+            }
+        }
+    }
+
+    /**
+     * Clears only fertilizers from a specific plot, leaving crops intact
+     * @param row Plot row index
+     * @param col Plot column index
+     */
+    clearFertilizersFromPlot(row: number, col: number): void {
+        const plot = this.getPlot(row, col)
+        if (plot && plot.isActive) {
+            for (let tileRow = 0; tileRow < 3; tileRow++) {
+                for (let tileCol = 0; tileCol < 3; tileCol++) {
+                    plot.removeFertiliserFromTile(tileRow, tileCol)
+                }
+            }
+        }
+    }
+
     get activePlotCount(): number {
         return this._layout.flat().filter(plot => plot.isActive).length
     }

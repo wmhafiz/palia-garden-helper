@@ -76,7 +76,6 @@ export function HorizontalCropSelector() {
             <div className="flex items-center justify-between px-4 py-2 bg-gray-100 border-b border-gray-300 rounded-t-lg">
                 <div className="flex items-center space-x-2">
                     <span className="text-sm font-semibold text-gray-700">Crops</span>
-                    <span className="text-xs text-gray-500">⭐</span>
                 </div>
                 <div className="flex items-center space-x-2">
                     <button
@@ -100,7 +99,7 @@ export function HorizontalCropSelector() {
             <div
                 ref={scrollRef}
                 onScroll={handleScroll}
-                className="flex overflow-x-auto scrollbar-hide p-3 space-x-2"
+                className="flex  p-3 space-x-2"
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
                 {crops.map((crop: Crop) => {

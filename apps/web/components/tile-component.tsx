@@ -39,7 +39,14 @@ export function TileComponent({
     previewOrigin
 }: TileComponentProps) {
     const [isHovered, setIsHovered] = useState(false)
-    const { selectedItem, selectedItemType, isEraseMode } = useSelectedItem()
+    const {
+        selectedItem,
+        selectedItemType,
+        isEraseMode,
+        isEraseCropMode,
+        isEraseFertiliserMode,
+        isErasePlotMode
+    } = useSelectedItem()
     const { garden, forceUpdate } = useGarden()
     const { addToast } = useToasts()
     const { showTooltips } = useUISettings()
@@ -127,12 +134,33 @@ export function TileComponent({
 
         try {
             if (isEraseMode) {
-                // Erase mode - clear tile
+                // Erase mode - clear both crop and fertilizer from tile
                 tile.crop = null
                 tile.fertiliser = null
                 addToast({
                     type: 'info',
-                    message: 'Tile cleared'
+                    message: 'Tile cleared (both crop and fertilizer)'
+                })
+            } else if (isEraseCropMode) {
+                // Erase crop mode - clear only crop from tile
+                tile.crop = null
+                addToast({
+                    type: 'info',
+                    message: 'Crop cleared from tile'
+                })
+            } else if (isEraseFertiliserMode) {
+                // Erase fertilizer mode - clear only fertilizer from tile
+                tile.fertiliser = null
+                addToast({
+                    type: 'info',
+                    message: 'Fertilizer cleared from tile'
+                })
+            } else if (isErasePlotMode) {
+                // Erase plot mode - clear entire plot
+                garden.clearPlot(plotRowIndex, plotColIndex)
+                addToast({
+                    type: 'info',
+                    message: 'Entire plot cleared'
                 })
             } else if (selectedItemType === 'crop' && selectedItem) {
                 const crop = selectedItem as any

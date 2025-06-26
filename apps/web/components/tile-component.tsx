@@ -130,18 +130,18 @@ export function TileComponent({
                     <img
                         src={tile.crop.image}
                         alt={tile.crop.type}
-                        className="w-6 h-6 object-contain"
+                        className="w-6 h-6 md:w-10 md:h-10 lg:w-14 lg:h-14 object-contain"
                     />
                 </div>
             )}
 
             {/* Fertiliser display */}
             {tile.fertiliser && (
-                <div className="absolute bottom-0 left-0 w-4 h-4 bg-blue-100 rounded-full flex items-center justify-center overflow-hidden border border-blue-300">
+                <div className="absolute bottom-0 left-0 w-4 h-4 md:w-6 md:h-6 lg:w-8 lg:h-8 bg-blue-100 rounded-full flex items-center justify-center overflow-hidden border border-blue-300">
                     <img
                         src={tile.fertiliser.image}
                         alt={tile.fertiliser.type}
-                        className="w-3 h-3 object-contain"
+                        className="w-3 h-3 md:w-5 md:h-5 lg:w-7 lg:h-7 object-contain"
                     />
                 </div>
             )}

@@ -36,7 +36,7 @@ export function GardenDisplay() {
 
             <div
                 className={`
-          garden-grid inline-block p-1 bg-green-50 rounded-lg border-2 border-green-200
+          garden-grid w-full flex justify-center p-1 rounded-lg 
           ${showGridLines ? 'border-dashed' : ''}
         `}
             >

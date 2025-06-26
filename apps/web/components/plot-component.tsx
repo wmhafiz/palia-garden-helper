@@ -51,7 +51,7 @@ export function PlotComponent({
                             {Array.from({ length: 3 }, (_, colIdx) => (
                                 <div
                                     key={`${rowIdx}-${colIdx}`}
-                                    className="w-8 h-8 md:w-12 md:h-12 lg:w-18 lg:h-18 m-px"
+                                    className="w-8 h-8 md:w-12 md:h-12 lg:w-16 lg:h-16 m-px"
                                 />
                             ))}
                         </div>

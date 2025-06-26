@@ -432,7 +432,7 @@ export function OutputDisplay() {
                                 <div key={harvest.cropType} className="border rounded-lg p-3">
                                     <div className="flex items-center justify-between mb-2">
                                         <h4 className="font-medium">{harvest.cropType}</h4>
-                                        <Badge variant="outline">{harvest.count} planted</Badge>
+                                        <Badge variant="outline">{harvest.count}</Badge>
                                     </div>
                                     <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
                                         <div>Yield: {harvest.totalYield}</div>

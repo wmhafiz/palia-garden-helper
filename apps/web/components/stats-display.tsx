@@ -1,19 +1,20 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { BarChart3, TrendingUp, Coins, Clock, Zap, Wheat, Star, Droplets, Shield } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card'
 import { Progress } from '@workspace/ui/components/progress'
 import { Badge } from '@workspace/ui/components/badge'
 import { Separator } from '@workspace/ui/components/separator'
 import { useGarden } from '@/stores'
-import { CropType, FertiliserType, Bonus } from '@/lib/garden-planner'
+import { CropType, FertiliserType, Bonus, getCropFromType } from '@/lib/garden-planner'
 import { OutputDisplay } from './output-display'
 import { ScrollArea } from '@workspace/ui/components/scroll-area'
 import { RadialChart } from './radial-chart'
 
 export function StatsDisplay() {
     const { garden, version } = useGarden()
+    const [starredCrops, setStarredCrops] = useState<Set<CropType>>(new Set())
 
     const stats = useMemo(() => {
         if (!garden) {
@@ -123,7 +124,7 @@ export function StatsDisplay() {
     }
 
     return (
-        <ScrollArea className="h-[calc(100vh-10rem)] pr-8">
+        <ScrollArea className="h-[calc(100vh-4rem)] lg:h-[calc(100vh-4rem)] max-h-[600px] lg:max-h-none pr-4 lg:pr-8">
             <div className="space-y-4">
                 {/* Bonus Coverage Statistics */}
                 <Card>
@@ -134,7 +135,7 @@ export function StatsDisplay() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="flex gap-4 justify-center flex-wrap">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 justify-items-center">
                             <RadialChart
                                 totalCrops={stats.totalCrops}
                                 covered={stats.bonusCoverage[Bonus.SpeedIncrease]}
@@ -175,7 +176,7 @@ export function StatsDisplay() {
                 </Card>
 
                 {/* Overall Stats */}
-                {/* <Card>
+                <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <BarChart3 className="w-5 h-5" />
@@ -183,7 +184,7 @@ export function StatsDisplay() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
                             <div>
                                 <div className="text-gray-500">Garden Size</div>
                                 <div className="font-medium">{garden.rows} × {garden.columns}</div>
@@ -218,7 +219,7 @@ export function StatsDisplay() {
                             <Progress value={stats.tileUtilization} className="h-2" />
                         </div>
                     </CardContent>
-                </Card> */}
+                </Card>
 
                 {/* Crop Statistics */}
                 <Card>
@@ -235,12 +236,69 @@ export function StatsDisplay() {
                             <div className="space-y-2">
                                 {Object.entries(stats.cropCounts)
                                     .sort(([, a], [, b]) => b - a)
-                                    .map(([cropType, count]) => (
-                                        <div key={cropType} className="flex items-center justify-between">
-                                            <span className="text-sm">{cropType}</span>
-                                            <Badge variant="secondary">{count}</Badge>
-                                        </div>
-                                    ))}
+                                    .map(([cropType, count]) => {
+                                        const starred = starredCrops.has(cropType as CropType)
+                                        const crop = getCropFromType(cropType as any)
+                                        const cropValue = crop?.calculateGoldValue(count, 'crop', starred)
+                                        const preserveValue = crop?.calculateGoldValue(count, 'preserve', starred)
+                                        const preserveCount = crop?.convertCropToSeed(count).count
+                                        const seedValue = crop?.calculateGoldValue(count, 'seed', starred)
+                                        const seedCount = crop?.convertCropToSeed(count).count
+
+                                        const toggleStarred = () => {
+                                            setStarredCrops(prev => {
+                                                const newSet = new Set(prev)
+                                                if (newSet.has(cropType as CropType)) {
+                                                    newSet.delete(cropType as CropType)
+                                                } else {
+                                                    newSet.add(cropType as CropType)
+                                                }
+                                                return newSet
+                                            })
+                                        }
+
+                                        return (
+                                            <div key={cropType} className="flex items-center justify-between p-2 rounded-md hover:bg-gray-50">
+                                                <div className="flex items-center gap-2 min-w-0 flex-1">
+                                                    <button
+                                                        onClick={toggleStarred}
+                                                        className="p-1 hover:bg-gray-200 rounded transition-colors"
+                                                        title={starred ? "Remove from starred" : "Add to starred"}
+                                                    >
+                                                        <Star
+                                                            className={`w-4 h-4 ${starred ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400 hover:text-yellow-400'}`}
+                                                        />
+                                                    </button>
+                                                    <span className="text-sm font-medium">{cropType}</span>
+                                                    <Badge variant="secondary">{count}</Badge>
+                                                </div>
+                                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 min-w-0">
+                                                    <div className="flex items-center gap-1 min-w-[60px] justify-start sm:justify-end">
+                                                        <img src={crop?.cropImage} alt={cropType} className="w-4 h-4 flex-shrink-0" title='Crop' />
+                                                        <span className="text-sm tabular-nums">{cropValue?.toLocaleString()}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1 min-w-[60px] justify-start sm:justify-end">
+                                                        {preserveValue !== 0 && (
+                                                            <>
+                                                                <img src={crop?.preserveImage} alt="preserve" className="w-4 h-4 flex-shrink-0" title={`Preserve`} />
+                                                                <span className="text-sm tabular-nums">{preserveValue?.toLocaleString()}</span>
+                                                                <Badge variant="secondary" className="ml-1">x{preserveCount}</Badge>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex items-center gap-1 min-w-[60px] justify-start sm:justify-end">
+                                                        {seedValue && (
+                                                            <>
+                                                                <img src={crop?.seedImage} alt="seed" className="w-4 h-4 flex-shrink-0" title={`Seed`} />
+                                                                <span className="text-sm tabular-nums">{seedValue.toLocaleString()}</span>
+                                                                <Badge variant="secondary" className="ml-1">x{preserveCount}</Badge>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )
+                                    })}
                             </div>
                         )}
                     </CardContent>

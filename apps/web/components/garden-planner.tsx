@@ -66,7 +66,7 @@ export function GardenPlanner() {
             <MenuBar />
 
             {/* Main Content */}
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <main className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="space-y-6">
                     {/* Horizontal Crop Selection Bar */}
                     <HorizontalCropSelector />
@@ -80,17 +80,17 @@ export function GardenPlanner() {
                     </div>
 
                     {/* Garden and Stats Layout */}
-                    <div className="flex gap-8">
+                    <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
                         {/* Garden Display - Main Content */}
-                        <div className="flex-1">
-                            <div className="bg-white rounded-lg shadow p-6" data-garden-display>
+                        <div className="w-full lg:w-3/5 xl:w-1/2">
+                            <div className="bg-white rounded-lg shadow p-4 lg:p-6" data-garden-display>
                                 <h2 className="text-lg font-semibold mb-4">Garden Layout</h2>
                                 <GardenDisplay />
                             </div>
                         </div>
 
                         {/* Stats Display - Right Sidebar */}
-                        <div className="w-120 flex-shrink-0">
+                        <div className="w-full lg:w-2/5 xl:w-1/2">
                             <StatsDisplay />
                         </div>
                     </div>

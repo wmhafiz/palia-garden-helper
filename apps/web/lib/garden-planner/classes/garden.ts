@@ -1,6 +1,11 @@
 import Direction from '../enums/direction'
 import Plot from './plot'
 import Tile from './tile'
+import { parseSave, generateSaveCode, type ParseSaveResult } from '../save-handler'
+import CropCode from '../enums/cropCode'
+import FertiliserCode from '../enums/fertiliserCode'
+import { getCropFromCode, getCodeFromCrop } from '../cropList'
+import { getFertiliserFromCode, getCodeFromFertiliser } from '../fertiliserList'
 
 class Garden {
     private _layout: Plot[][] = []
@@ -101,6 +106,152 @@ class Garden {
 
     getPlotPattern(): boolean[][] {
         return this._layout.map(row => row.map(plot => plot.isActive))
+    }
+
+    /**
+     * Loads a garden layout from a save code with backward compatibility for versions 0.1-0.4
+     * @param saveCode The save code string to load
+     * @returns True if loaded successfully, false otherwise
+     */
+    loadLayout(saveCode: string): boolean {
+        try {
+            const { dimensionInfo, cropInfo, settingsInfo } = parseSave(saveCode)
+
+            // Parse dimensions
+            const dimensions = dimensionInfo.split('-').slice(1)
+            const rows = dimensions.length
+            const columns = dimensions[0]?.length || 0
+
+            // Reinitialize layout with new dimensions
+            this.initializeLayout(rows, columns)
+
+            // Set plot active states
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < columns; j++) {
+                    if (dimensions[i] && dimensions[i]![j]) {
+                        this.setPlotActive(i, j, dimensions[i]![j] === '1')
+                    }
+                }
+            }
+
+            // Parse crop info
+            const crops = cropInfo.split('-').slice(1) // Remove 'CR' prefix
+            let cropIndex = 0
+
+            for (let plotRow = 0; plotRow < rows; plotRow++) {
+                for (let plotCol = 0; plotCol < columns; plotCol++) {
+                    const plot = this.getPlot(plotRow, plotCol)
+                    if (plot && plot.isActive && cropIndex < crops.length) {
+                        const plotCropData = crops[cropIndex]!
+
+                        // Parse each tile in the plot (3x3 = 9 tiles)
+                        let tileIndex = 0
+                        const regex = /([A-Z][a-z]?)(?:\.([A-Z][a-z]?))?/g
+                        let match: RegExpExecArray | null
+
+                        while ((match = regex.exec(plotCropData)) !== null && tileIndex < 9) {
+                            const tileRow = Math.floor(tileIndex / 3)
+                            const tileCol = tileIndex % 3
+                            const tile = plot.getTile(tileRow, tileCol)
+
+                            if (tile) {
+                                // Set crop
+                                const cropCode = match[1] as CropCode
+                                if (cropCode !== CropCode.None) {
+                                    const crop = getCropFromCode(cropCode)
+                                    tile.crop = crop
+                                }
+
+                                // Set fertilizer if present
+                                if (match[2]) {
+                                    const fertCode = match[2] as FertiliserCode
+                                    if (fertCode !== FertiliserCode.None) {
+                                        const fertilizer = getFertiliserFromCode(fertCode)
+                                        tile.fertiliser = fertilizer
+                                    }
+                                }
+                            }
+
+                            tileIndex++
+                        }
+
+                        cropIndex++
+                    }
+                }
+            }
+
+            return true
+        } catch (error) {
+            console.error('Failed to load garden layout:', error)
+            return false
+        }
+    }
+
+    /**
+     * Saves the current garden layout to a save code string
+     * @param settingsCode Optional settings code to include
+     * @returns Save code string in v0.4 format
+     */
+    saveLayout(settingsCode?: string): string {
+        try {
+            // Get plot pattern
+            const layout = this.getPlotPattern()
+
+            // Get crop and fertilizer data
+            const crops: (CropCode | null)[][][] = []
+            const fertilizers: (FertiliserCode | null)[][][] = []
+
+            for (let plotRow = 0; plotRow < this.rows; plotRow++) {
+                crops[plotRow] = []
+                fertilizers[plotRow] = []
+
+                for (let plotCol = 0; plotCol < this.columns; plotCol++) {
+                    const plot = this.getPlot(plotRow, plotCol)
+                    const plotCrops: (CropCode | null)[] = []
+                    const plotFerts: (FertiliserCode | null)[] = []
+
+                    if (plot && plot.isActive) {
+                        // Get data for each tile in the plot (3x3 = 9 tiles)
+                        for (let tileRow = 0; tileRow < 3; tileRow++) {
+                            for (let tileCol = 0; tileCol < 3; tileCol++) {
+                                const tile = plot.getTile(tileRow, tileCol)
+
+                                // Get crop code
+                                const cropCode = tile.crop ? getCodeFromCrop(tile.crop) : CropCode.None
+                                plotCrops.push(cropCode)
+
+                                // Get fertilizer code
+                                const fertCode = tile.fertiliser ? getCodeFromFertiliser(tile.fertiliser) : FertiliserCode.None
+                                plotFerts.push(fertCode)
+                            }
+                        }
+                    } else {
+                        // Inactive plot - fill with None codes
+                        for (let i = 0; i < 9; i++) {
+                            plotCrops.push(CropCode.None)
+                            plotFerts.push(FertiliserCode.None)
+                        }
+                    }
+
+                    crops[plotRow]![plotCol] = plotCrops
+                    fertilizers[plotRow]![plotCol] = plotFerts
+                }
+            }
+
+            return generateSaveCode(layout, crops, fertilizers, settingsCode)
+        } catch (error) {
+            console.error('Failed to save garden layout:', error)
+            return ''
+        }
+    }
+
+    /**
+     * Loads a garden from Vue.js app compatible save code
+     * @param saveCode Save code from the original Vue.js implementation
+     * @returns True if loaded successfully, false otherwise
+     */
+    loadFromVueSave(saveCode: string): boolean {
+        return this.loadLayout(saveCode)
     }
 }
 

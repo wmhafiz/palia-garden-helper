@@ -23,7 +23,7 @@ interface ImportModalProps {
 }
 
 export function ImportModal({ open, onOpenChange }: ImportModalProps) {
-    const { initializeGarden } = useGarden()
+    const { initializeGarden, importFromVueSaveCode } = useGarden()
     const { importGarden } = useSaveLoad()
     const [importData, setImportData] = useState('')
     const [error, setError] = useState<string | null>(null)
@@ -40,6 +40,20 @@ export function ImportModal({ open, onOpenChange }: ImportModalProps) {
         setError(null)
 
         try {
+            // Check if it's a Palia Garden Planner save code first
+            if (vueValidation?.isValid) {
+                const success = importFromVueSaveCode(importData.trim())
+                if (success) {
+                    setImportData('')
+                    onOpenChange(false)
+                    return
+                } else {
+                    setError('Failed to import Palia Garden Planner save code. Please check the format.')
+                    return
+                }
+            }
+
+            // Otherwise try JSON import
             const garden = importGarden(importData.trim())
             if (garden) {
                 // Replace current garden with imported one
@@ -95,7 +109,28 @@ export function ImportModal({ open, onOpenChange }: ImportModalProps) {
         }
     }
 
+    const validateVueSaveCode = (data: string) => {
+        try {
+            // Check if it looks like a Palia Garden Planner save code (starts with v0.1, v0.2, v0.3, or v0.4)
+            const versionMatch = data.match(/^v(0\.[1-4])_/)
+            if (versionMatch) {
+                const parts = data.split('_')
+                const hasRequiredParts = parts.length >= 3 // version, dimension, crops
+                return {
+                    isValid: true,
+                    hasRequiredFields: hasRequiredParts,
+                    version: versionMatch[1],
+                    format: 'Palia Garden Planner Save Code'
+                }
+            }
+            return { isValid: false, hasRequiredFields: false }
+        } catch {
+            return { isValid: false, hasRequiredFields: false }
+        }
+    }
+
     const validation = importData ? validateJSON(importData) : null
+    const vueValidation = importData ? validateVueSaveCode(importData) : null
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -106,7 +141,7 @@ export function ImportModal({ open, onOpenChange }: ImportModalProps) {
                         Import Garden
                     </DialogTitle>
                     <DialogDescription>
-                        Import a garden layout from JSON data or file upload.
+                        Import a garden layout from JSON data, Palia Garden Planner save code, or file upload. Supports backward compatibility with save codes from versions 0.1-0.4.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -118,7 +153,7 @@ export function ImportModal({ open, onOpenChange }: ImportModalProps) {
 
                     <TabsContent value="paste" className="space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="import-data">Garden Data (JSON)</Label>
+                            <Label htmlFor="import-data">Garden Data (JSON or Palia Garden Planner Save Code)</Label>
                             <Textarea
                                 id="import-data"
                                 value={importData}
@@ -127,13 +162,34 @@ export function ImportModal({ open, onOpenChange }: ImportModalProps) {
                                     setError(null)
                                 }}
                                 className="min-h-[200px] font-mono text-sm"
-                                placeholder="Paste your garden JSON data here..."
+                                placeholder="Paste your garden JSON data or Palia Garden Planner save code here..."
                             />
                         </div>
 
-                        {validation && (
+                        {(validation || vueValidation) && (
                             <div className="space-y-2">
-                                {validation.isValid ? (
+                                {vueValidation?.isValid ? (
+                                    <Alert>
+                                        <AlertCircle className="h-4 w-4" />
+                                        <AlertDescription>
+                                            {vueValidation.hasRequiredFields ? (
+                                                <>
+                                                    <strong>Valid Palia Garden Planner save code detected!</strong>
+                                                    <br />
+                                                    Version: v{vueValidation.version} | Format: {vueValidation.format}
+                                                    <br />
+                                                    <span className="text-sm text-gray-600">
+                                                        This save code will be automatically converted to the latest format.
+                                                    </span>
+                                                </>
+                                            ) : (
+                                                <span className="text-amber-600">
+                                                    Palia Garden Planner save code format detected but appears incomplete
+                                                </span>
+                                            )}
+                                        </AlertDescription>
+                                    </Alert>
+                                ) : validation?.isValid ? (
                                     <Alert>
                                         <AlertCircle className="h-4 w-4" />
                                         <AlertDescription>
@@ -154,7 +210,7 @@ export function ImportModal({ open, onOpenChange }: ImportModalProps) {
                                     <Alert variant="destructive">
                                         <AlertCircle className="h-4 w-4" />
                                         <AlertDescription>
-                                            Invalid JSON format. Please check your data.
+                                            Invalid format. Please provide valid JSON garden data or Palia Garden Planner save code.
                                         </AlertDescription>
                                     </Alert>
                                 )}
@@ -235,7 +291,7 @@ export function ImportModal({ open, onOpenChange }: ImportModalProps) {
                     </Button>
                     <Button
                         onClick={handleImport}
-                        disabled={isLoading || !importData.trim() || (validation ? !validation.hasRequiredFields : true)}
+                        disabled={isLoading || !importData.trim() || (vueValidation ? !vueValidation.isValid : true)}
                     >
                         {isLoading ? (
                             <>

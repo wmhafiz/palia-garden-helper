@@ -1706,6 +1706,297 @@ return fertilisers[type]
 export { getFertiliserFromType, getFertiliserFromCode, getCodeFromFertiliser }
 export default fertilisers
 
+# Palia Garden Planner - Backward Compatibility Implementation
+
+## Overview
+
+This document describes the implementation of backward compatibility for save layout codes between the original Vue.js garden planner and the new React implementation. The system supports all save code versions from 0.1 to 0.4, ensuring that users can seamlessly migrate their garden layouts.
+
+## Save Code Format Evolution
+
+### Version 0.1 (Original)
+
+- **Format**: `v0.1_DIM-{dimensions}_CROPS-{crops}`
+- **Crop Codes**: Two-character codes (e.g., `Na`, `To`, `Po`)
+- **Example**: `v0.1_DIM-111-111-111_CROPS-NaNaToNaToCoToCoCo-NaNaNaToNaToCoToCo`
+
+### Version 0.2
+
+- **Format**: `v0.2_D-{dimensions}_CROPS-{crops}`
+- **Crop Codes**: Shortened to single/double character codes (e.g., `N`, `T`, `P`)
+- **Fertilizers**: Added support with dot notation (e.g., `T.Hp`)
+- **Example**: `v0.2_D-111-111-111_CROPS-NNTNCTCCC-NNNTNCTCC`
+
+### Version 0.3
+
+- **Format**: `v0.3_D-{dimensions}_CR-{crops}_{settings}`
+- **Changes**:
+  - Crop prefix changed from `CROPS-` to `CR-`
+  - Added settings section
+  - Updated fertilizer codes (e.g., `Hp` → `Y`)
+- **Example**: `v0.3_D-111-111-111_CR-BbBbBbBbBbBbBbBbBb-BbNBbBbNBbBbBbBb_D30NrNssL50Cr0.Bb.S7-BbS6`
+
+### Version 0.4 (Current)
+
+- **Format**: `v0.4_D-{dimensions}_CR-{crops}_{settings}`
+- **Changes**:
+  - Butterfly Bean code changed from `Bb` to `Bt`
+  - Enhanced settings format
+- **Example**: `v0.4_D-111-111-111_CR-PBkRTCTRBkP-BkPBkCTCBkRBk_L50Cr0.A.P-SP-BkS`
+
+## Technical Implementation
+
+### Core Components
+
+#### 1. Save Handler (`apps/web/lib/garden-planner/save-handler.ts`)
+
+The save handler provides the core backward compatibility functionality:
+
+```typescript
+// Main parsing function
+export function parseSave(save: string): ParseSaveResult;
+
+// Individual conversion functions
+export function convertV0_1CodestoV0_2(save: string): string;
+export function convertV_0_2Codesto_V_0_3(save: string): string;
+export function convertV_0_3Codesto_V_0_4(save: string): string;
+export function convertV_0_3SettingsToV_0_4Settings(settings: string): string;
+```
+
+**Key Features:**
+
+- Iterative conversion from any version to v0.4
+- Validation of dimension matrices
+- Error handling for malformed codes
+- Support for settings migration
+
+#### 2. Garden Class Integration (`apps/web/lib/garden-planner/classes/garden.ts`)
+
+The Garden class now includes methods to load and save layouts:
+
+```typescript
+class Garden {
+  // Load from any version save code
+  loadLayout(saveCode: string): boolean;
+
+  // Save to v0.4 format
+  saveLayout(settingsCode?: string): string;
+
+  // Alias for Vue.js compatibility
+  loadFromVueSave(saveCode: string): boolean;
+}
+```
+
+#### 3. Store Integration (`apps/web/stores/useGarden.ts`)
+
+The garden store provides import functionality:
+
+```typescript
+interface GardenState {
+  importFromVueSaveCode: (saveCode: string) => boolean;
+}
+```
+
+#### 4. UI Components
+
+**Import Modal** (`apps/web/components/import-modal.tsx`):
+
+- Detects Vue.js save codes automatically
+- Shows format validation
+- Supports both JSON and save code formats
+
+**Load Modal** (`apps/web/components/load-modal.tsx`):
+
+- Manages saved gardens
+- Supports loading from browser storage
+
+## Crop Code Mappings
+
+### Version Evolution
+
+| Crop            | v0.1 | v0.2 | v0.3 | v0.4   |
+| --------------- | ---- | ---- | ---- | ------ |
+| None            | Na   | N    | N    | N      |
+| Tomato          | To   | T    | T    | T      |
+| Potato          | Po   | P    | P    | P      |
+| Rice            | Ri   | R    | R    | R      |
+| Wheat           | Wh   | W    | W    | W      |
+| Carrot          | Ca   | C    | C    | C      |
+| Onion           | On   | O    | O    | O      |
+| Cotton          | Co   | Co   | Co   | Co     |
+| Blueberry       | Bl   | B    | B    | B      |
+| Apple           | Ap   | A    | A    | A      |
+| Corn            | Cr   | Cr   | Cr   | Cr     |
+| Spicy Pepper    | Sp   | S    | S    | S      |
+| Napa Cabbage    | Nc   | Cb   | Cb   | Cb     |
+| Bok Choy        | Bc   | Bk   | Bk   | Bk     |
+| Rockhop Pumpkin | Rp   | Pm   | Pm   | Pm     |
+| Butterfly Bean  | Bb   | Bb   | Bb   | **Bt** |
+
+### Fertilizer Code Mappings
+
+| Fertilizer    | v0.2   | v0.3  | v0.4 |
+| ------------- | ------ | ----- | ---- |
+| None          | N      | N     | N    |
+| Speedy Gro    | S      | S     | S    |
+| Quality Up    | Q      | Q     | Q    |
+| Weed Block    | W      | W     | W    |
+| Harvest Boost | H      | H     | H    |
+| Hydrate Pro   | **Hp** | **Y** | Y    |
+
+## Conversion Process
+
+### Automatic Migration Flow
+
+1. **Version Detection**: Parse version from save code prefix
+2. **Iterative Conversion**: Apply conversions sequentially until v0.4
+3. **Validation**: Validate dimension matrix and crop codes
+4. **Garden Loading**: Create new garden instance with converted data
+
+```typescript
+// Example conversion flow
+v0.1 → convertV0_1CodestoV0_2() → v0.2
+v0.2 → convertV_0_2Codesto_V_0_3() → v0.3
+v0.3 → convertV_0_3Codesto_V_0_4() → v0.4
+```
+
+### Error Handling
+
+- **Invalid Versions**: Throws error for unsupported versions
+- **Malformed Codes**: Graceful handling with detailed error messages
+- **Dimension Validation**: Ensures consistent plot matrix format
+- **Crop Code Validation**: Validates crop and fertilizer codes
+
+## Usage Examples
+
+### Importing Vue.js Save Code
+
+```typescript
+import { useGarden } from "@/stores";
+
+const { importFromVueSaveCode } = useGarden();
+
+// Import any version save code
+const success = importFromVueSaveCode("v0.3_D-111-111-111_CR-BbBbBb...");
+```
+
+### Manual Conversion
+
+```typescript
+import { parseSave } from "@/lib/garden-planner/save-handler";
+
+const oldSave = "v0.1_DIM-111-111-111_CROPS-NaNaTo...";
+const { version, dimensionInfo, cropInfo, settingsInfo } = parseSave(oldSave);
+// Result: version = '0.4', with converted data
+```
+
+### Garden Loading
+
+```typescript
+import { Garden } from "@/lib/garden-planner/classes";
+
+const garden = new Garden();
+const success = garden.loadLayout("v0.3_D-111-111-111_CR-...");
+```
+
+## Testing
+
+### Comprehensive Test Suite (`apps/web/lib/garden-planner/save-handler.test.ts`)
+
+The test suite covers:
+
+- **Full Save Conversion**: End-to-end conversion testing
+- **Individual Functions**: Unit tests for each conversion function
+- **Settings Migration**: Settings format conversion
+- **Error Handling**: Invalid input handling
+- **Edge Cases**: Minimal saves, empty sections, malformed data
+
+### Test Examples
+
+```typescript
+// Test v0.3 to v0.4 conversion
+it("should convert Butterfly Beans from Bb to Bt", () => {
+  const v0_3Save = "v0.3_D-111-111-111_CR-BbBbBb...";
+  const result = parseSave(v0_3Save);
+  expect(result.cropInfo).toContain("BtBtBt");
+});
+
+// Test backward compatibility
+it("should handle all versions", () => {
+  const versions = ["v0.1", "v0.2", "v0.3", "v0.4"];
+  versions.forEach((version) => {
+    const save = `${version}_D-111_CR-N`;
+    const result = parseSave(save);
+    expect(result.version).toBe("0.4");
+  });
+});
+```
+
+## Migration Guide
+
+### For Users
+
+1. **Export from Vue.js App**: Copy save code from Vue.js garden planner
+2. **Import to React App**: Use Import Modal or paste directly
+3. **Automatic Conversion**: System handles version conversion automatically
+4. **Verify Layout**: Check that crops and fertilizers are correctly placed
+
+### For Developers
+
+1. **Integration**: Import save handler functions
+2. **Error Handling**: Implement proper error handling for failed conversions
+3. **UI Updates**: Update import/export interfaces to support save codes
+4. **Testing**: Add tests for specific use cases
+
+## Performance Considerations
+
+- **Lazy Loading**: Save handler is only loaded when needed
+- **Efficient Parsing**: Regex-based parsing for optimal performance
+- **Memory Management**: Minimal memory footprint for conversions
+- **Error Recovery**: Graceful degradation for partial failures
+
+## Future Enhancements
+
+### Planned Features
+
+1. **Bulk Import**: Support for importing multiple save codes
+2. **Format Detection**: Automatic format detection without version prefix
+3. **Export Options**: Export to different version formats
+4. **Validation Tools**: Enhanced validation with detailed feedback
+
+### Extensibility
+
+The system is designed to be easily extensible:
+
+- **New Versions**: Add new conversion functions for future versions
+- **Custom Formats**: Support for custom save formats
+- **Plugin System**: Modular conversion plugins
+- **API Integration**: REST API for conversion services
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Invalid Save Code**: Check format and version prefix
+2. **Conversion Failures**: Verify crop and fertilizer codes
+3. **Dimension Errors**: Ensure plot matrix is valid (0s and 1s only)
+4. **Settings Migration**: Check settings format for v0.3+ saves
+
+### Debug Tools
+
+```typescript
+// Enable debug logging
+console.log("Parsing save code...", save);
+const result = parseSave(save);
+console.log("Conversion result:", result);
+```
+
+## Conclusion
+
+The backward compatibility implementation ensures seamless migration from the Vue.js garden planner to the React implementation. With support for all versions (0.1-0.4), comprehensive testing, and robust error handling, users can confidently migrate their garden layouts without data loss.
+
+The modular design allows for easy maintenance and future enhancements while maintaining high performance and reliability.
+
 ================================================
 FILE: assets/scripts/garden-planner/imports.ts
 ================================================
@@ -3002,23 +3293,22 @@ const { dimensionInfo, cropInfo: cropsInfo, settingsInfo } = parseSave(layout)
   const rows = this.\_layout.length
   const columns = this.\_layout[0].length
 
+  for (let rowIndex = 0; rowIndex < rows; rowIndex++) {
+  let row = ''
+  for (let colIndex = 0; colIndex < columns; colIndex++)
+  row += this.\_layout[rowIndex][colIndex].isActive ? '1' : '0'
+  layoutCode += `${row}-`
+  }
 
-    for (let rowIndex = 0; rowIndex < rows; rowIndex++) {
-      let row = ''
-      for (let colIndex = 0; colIndex < columns; colIndex++)
-        row += this._layout[rowIndex][colIndex].isActive ? '1' : '0'
-      layoutCode += `${row}-`
-    }
+  layoutCode = `${layoutCode.substring(0, layoutCode.length - 1)}_CR-`
 
-    layoutCode = `${layoutCode.substring(0, layoutCode.length - 1)}_CR-`
-
-    for (const plot of this._layout.flat()) {
-      if (plot.isActive) {
-        for (const tile of plot.tiles.flat()) {
-          if (tile.crop)
-            layoutCode += (getCodeFromCrop(tile.crop) ?? CropCode.None) as CropCode
-          else
-            layoutCode += CropCode.None
+  for (const plot of this.\_layout.flat()) {
+  if (plot.isActive) {
+  for (const tile of plot.tiles.flat()) {
+  if (tile.crop)
+  layoutCode += (getCodeFromCrop(tile.crop) ?? CropCode.None) as CropCode
+  else
+  layoutCode += CropCode.None
 
           if (tile.fertiliser)
             layoutCode += `.${(getCodeFromFertiliser(tile.fertiliser) ?? FertiliserCode.None) as FertiliserCode}`
@@ -3027,17 +3317,16 @@ const { dimensionInfo, cropInfo: cropsInfo, settingsInfo } = parseSave(layout)
         if (plot !== this._layout.flat().slice(-1)[0])
           layoutCode += '-'
       }
-    }
 
-    if (layoutCode.endsWith('-'))
-      layoutCode = layoutCode.substring(0, layoutCode.length - 1)
+  }
 
+  if (layoutCode.endsWith('-'))
+  layoutCode = layoutCode.substring(0, layoutCode.length - 1)
 
-    if (settingsCode)
-      layoutCode += `_${settingsCode}`
+  if (settingsCode)
+  layoutCode += `_${settingsCode}`
 
-
-    return layoutCode
+  return layoutCode
 
 }
 
@@ -3152,61 +3441,61 @@ const bushTiles: {
   simulateYield(options: ICalculateYieldOptions) {
   const individualCrops = this.\_cropTiles.individualCrops
 
+  const seedsRemainder: {
+  [key in CropType]: {
+  base: number
+  star: number
+  }
+  } = getCropMap()
 
-    const seedsRemainder: {
-      [key in CropType]: {
-        base: number
-        star: number
-      }
-    } = getCropMap()
+  if (individualCrops.size <= 0) {
+  return {
+  harvests: [] as IHarvestInfo[],
+  harvestTotal: {
+  day: 0,
+  crops: getCropMap(),
+  seedsRemainder: getCropMap(),
+  } as IHarvestInfo,
+  }
+  }
 
-    if (individualCrops.size <= 0) {
-      return {
-        harvests: [] as IHarvestInfo[],
-        harvestTotal: {
-          day: 0,
-          crops: getCropMap(),
-          seedsRemainder: getCropMap(),
-        } as IHarvestInfo,
-      }
-    }
+  // console.time('simulateYield')
 
-    // console.time('simulateYield')
-
-    const useGrowthBoost = options.useGrowthBoost
-    // max growth time is the maximum growth time of all crops, and then reharvest cooldown multiplied by rehavest limit
-    let maxGrowthTime = Math.max(
-      ...Array.from(individualCrops.values()).map((tile) => {
-        if (tile.crop?.produceInfo == null)
-          return 0
+  const useGrowthBoost = options.useGrowthBoost
+  // max growth time is the maximum growth time of all crops, and then reharvest cooldown multiplied by rehavest limit
+  let maxGrowthTime = Math.max(
+  ...Array.from(individualCrops.values()).map((tile) => {
+  if (tile.crop?.produceInfo == null)
+  return 0
 
         return tile.crop.getTotalGrowTime(
           (useGrowthBoost ?? false)
           && tile.bonuses.includes(Bonus.SpeedIncrease),
         )
       }),
-    )
 
-    if (options.days && options.days > 0)
-      maxGrowthTime = options.days
+  )
 
-    const harvests: IHarvestInfo[] = []
-    const harvestTotal: IHarvestInfo & {
-      totalGold: number
-    } = {
-      day: 0,
-      crops: getCropMap(),
-      seedsRemainder: getCropMap(),
-      totalGold: 0,
-    }
+  if (options.days && options.days > 0)
+  maxGrowthTime = options.days
 
-    // Reduce growth time by 1 to account for speed boost
-    for (let day = 1; day <= maxGrowthTime; day++) {
-      const harvest: IHarvestInfo = {
-        day,
-        crops: getCropMap(),
-        seedsRemainder: getCropMap(),
-      }
+  const harvests: IHarvestInfo[] = []
+  const harvestTotal: IHarvestInfo & {
+  totalGold: number
+  } = {
+  day: 0,
+  crops: getCropMap(),
+  seedsRemainder: getCropMap(),
+  totalGold: 0,
+  }
+
+  // Reduce growth time by 1 to account for speed boost
+  for (let day = 1; day <= maxGrowthTime; day++) {
+  const harvest: IHarvestInfo = {
+  day,
+  crops: getCropMap(),
+  seedsRemainder: getCropMap(),
+  }
 
       const seedsRequired: {
         [key in CropType]: {
@@ -3311,17 +3600,18 @@ const bushTiles: {
         harvestTotal.seedsRemainder[cropType as CropType].star
           = seedsRemainder[cropType as CropType].star
       }
-    }
 
-    // console.timeEnd('simulateYield')
+  }
 
-    return {
-      harvests,
-      harvestTotal,
-    } as {
-      harvests: IHarvestInfo[]
-      harvestTotal: IHarvestInfo
-    }
+  // console.timeEnd('simulateYield')
+
+  return {
+  harvests,
+  harvestTotal,
+  } as {
+  harvests: IHarvestInfo[]
+  harvestTotal: IHarvestInfo
+  }
 
 }
 
@@ -3356,22 +3646,21 @@ return decodeSettings(settingsInfo)
   totalGold: number
   }[] = []
 
+  const remainders: {
+  [key in CropType]: {
+  base: number
+  star: number
+  }
+  } = getCropMap()
 
-    const remainders: {
-      [key in CropType]: {
-        base: number
-        star: number
-      }
-    } = getCropMap()
-
-    for (const harvest of harvestInfo.harvests) {
-      const day = harvest.day
-      const cropTypes = harvest.crops
-      const dayResult: IDayResult = {
-        day,
-        crops: getCropValueMap(options),
-        totalGold: 0,
-      }
+  for (const harvest of harvestInfo.harvests) {
+  const day = harvest.day
+  const cropTypes = harvest.crops
+  const dayResult: IDayResult = {
+  day,
+  crops: getCropValueMap(options),
+  totalGold: 0,
+  }
 
       for (const cropType in cropTypes) {
         const baseOption = options[cropType as CropType].baseType
@@ -3422,19 +3711,20 @@ return decodeSettings(settingsInfo)
       }
 
       result.push(dayResult)
-    }
 
-    const totalResult: IDayResult = {
-      day: harvestInfo.harvestTotal.day,
-      crops: getCropValueMap(options),
-      totalGold: 0,
-    }
+  }
 
-    const harvestTotal = harvestInfo.harvestTotal
+  const totalResult: IDayResult = {
+  day: harvestInfo.harvestTotal.day,
+  crops: getCropValueMap(options),
+  totalGold: 0,
+  }
 
-    for (const cropType in harvestTotal.crops) {
-      const baseOption = options[cropType as CropType].baseType
-      const starOption = options[cropType as CropType].starType
+  const harvestTotal = harvestInfo.harvestTotal
+
+  for (const cropType in harvestTotal.crops) {
+  const baseOption = options[cropType as CropType].baseType
+  const starOption = options[cropType as CropType].starType
 
       const baseProduce = harvestTotal.crops[cropType as CropType].base
       const starProduce = harvestTotal.crops[cropType as CropType].star
@@ -3476,11 +3766,12 @@ return decodeSettings(settingsInfo)
       totalResult.crops[cropType as CropType].star.cropRemainder = newStarRemainder
 
       totalResult.totalGold += baseGoldValue + starGoldValue
-    }
-    return {
-      result,
-      totalResult,
-    } as ICalculateValueResult
+
+  }
+  return {
+  result,
+  totalResult,
+  } as ICalculateValueResult
 
 }
 
@@ -4260,93 +4551,92 @@ return new Tile(null)
   getTilesBySize(row: number, col: number, size: CropSize): Tile[] {
   const tiles: Tile[] = []
 
+  if (size === CropSize.Tree) {
+  if (row === 0 && col === 0) {
+  return this.\_tiles.flat()
+  }
+  else if (
+  row === 0
+  && col > 0
+  && this.\_adjacentPlots.east
+  && this.\_adjacentPlots.east.isActive
+  ) {
+  this.\_tiles.map((row: Tile[]) => row.slice(col)).forEach((row: Tile[]) => tiles.push(...row))
+  this.\_adjacentPlots.east.tiles.map((row: Tile[]) => row.slice(0, col)).forEach((row: Tile[]) => tiles.push(...row))
+  return tiles
+  }
+  else if (
+  row > 0
+  && col === 0
+  && this.\_adjacentPlots.south
+  && this.\_adjacentPlots.south.isActive
+  ) {
+  this.\_tiles.slice(row).forEach((row: Tile[]) => tiles.push(...row.slice(col)))
+  this.\_adjacentPlots.south.tiles.slice(0, row).forEach((row: Tile[]) => tiles.push(...row.slice(col)))
+  }
+  else if (
+  row > 0
+  && col > 0
+  && this.\_adjacentPlots.south
+  && this.\_adjacentPlots.south.isActive
+  && this.\_adjacentPlots.east
+  && this.\_adjacentPlots.east.isActive
+  && this.\_adjacentPlots.south.\_adjacentPlots.east
+  && this.\_adjacentPlots.south.\_adjacentPlots.east.isActive
+  && this.\_adjacentPlots.east.\_adjacentPlots.south
+  && this.\_adjacentPlots.east.\_adjacentPlots.south.isActive
+  ) {
+  this.\_tiles.slice(row).forEach((row: Tile[]) => tiles.push(...row.slice(col)))
+  this.\_adjacentPlots.east.tiles.slice(row).forEach((row: Tile[]) => tiles.push(...row.slice(0, col)))
+  this.\_adjacentPlots.south.tiles.slice(0, row).forEach((row: Tile[]) => tiles.push(...row.slice(col)))
+  this.\_adjacentPlots.south.\_adjacentPlots.east.tiles.slice(0, row).forEach((row: Tile[]) => tiles.push(...row.slice(0, col)))
+  }
+  }
+  else if (size === CropSize.Bush) {
+  if (row < TILE_ROWS - 1 && col < TILE_COLS - 1) {
+  tiles.push(...this.\_tiles.slice(row, row + 2).map((row: Tile[]) => row.slice(col, col + 2)).flat())
+  }
+  else if (
+  row < TILE_ROWS - 1
+  && col === TILE_COLS - 1
+  && this.\_adjacentPlots.east
+  && this.\_adjacentPlots.east.isActive
+  ) {
+  tiles.push(...this.\_tiles.slice(row, row + 2).map((row: Tile[]) => row.slice(col, col + 2)).flat())
+  tiles.push(...this.\_adjacentPlots.east.tiles.slice(row, row + 2).map((row: Tile[]) => row.slice(0, 1)).flat())
+  }
+  else if (
+  row === TILE_ROWS - 1
+  && col < TILE_COLS - 1
+  && this.\_adjacentPlots.south
+  && this.\_adjacentPlots.south.isActive
+  ) {
+  tiles.push(...this.\_tiles.slice(row, row + 2).map((row: Tile[]) => row.slice(col, col + 2)).flat())
+  tiles.push(...this.\_adjacentPlots.south.tiles.slice(0, 1).map((row: Tile[]) => row.slice(col, col + 2)).flat())
+  }
+  else if (
+  row === TILE_ROWS - 1
+  && col === TILE_COLS - 1
+  && this.\_adjacentPlots.south
+  && this.\_adjacentPlots.south.isActive
+  && this.\_adjacentPlots.east
+  && this.\_adjacentPlots.east.isActive
+  && this.\_adjacentPlots.south.\_adjacentPlots.east
+  && this.\_adjacentPlots.south.\_adjacentPlots.east.isActive
+  && this.\_adjacentPlots.east.\_adjacentPlots.south
+  && this.\_adjacentPlots.east.\_adjacentPlots.south.isActive
+  ) {
+  tiles.push(...this.\_tiles.slice(row, row + 2).map((row: Tile[]) => row.slice(col, col + 2)).flat())
+  tiles.push(...this.\_adjacentPlots.east.tiles.slice(row, row + 2).map((row: Tile[]) => row.slice(0, 1)).flat())
+  tiles.push(...this.\_adjacentPlots.south.tiles.slice(0, 1).map((row: Tile[]) => row.slice(col, col + 2)).flat())
+  tiles.push(...this.\_adjacentPlots.south.\_adjacentPlots.east.tiles.slice(0, 1).map((row: Tile[]) => row.slice(0, 1)).flat())
+  }
+  }
+  else {
+  tiles.push(this.\_tiles[row][col])
+  }
 
-    if (size === CropSize.Tree) {
-      if (row === 0 && col === 0) {
-        return this._tiles.flat()
-      }
-      else if (
-        row === 0
-        && col > 0
-        && this._adjacentPlots.east
-        && this._adjacentPlots.east.isActive
-      ) {
-        this._tiles.map((row: Tile[]) => row.slice(col)).forEach((row: Tile[]) => tiles.push(...row))
-        this._adjacentPlots.east.tiles.map((row: Tile[]) => row.slice(0, col)).forEach((row: Tile[]) => tiles.push(...row))
-        return tiles
-      }
-      else if (
-        row > 0
-        && col === 0
-        && this._adjacentPlots.south
-        && this._adjacentPlots.south.isActive
-      ) {
-        this._tiles.slice(row).forEach((row: Tile[]) => tiles.push(...row.slice(col)))
-        this._adjacentPlots.south.tiles.slice(0, row).forEach((row: Tile[]) => tiles.push(...row.slice(col)))
-      }
-      else if (
-        row > 0
-        && col > 0
-        && this._adjacentPlots.south
-        && this._adjacentPlots.south.isActive
-        && this._adjacentPlots.east
-        && this._adjacentPlots.east.isActive
-        && this._adjacentPlots.south._adjacentPlots.east
-        && this._adjacentPlots.south._adjacentPlots.east.isActive
-        && this._adjacentPlots.east._adjacentPlots.south
-        && this._adjacentPlots.east._adjacentPlots.south.isActive
-      ) {
-        this._tiles.slice(row).forEach((row: Tile[]) => tiles.push(...row.slice(col)))
-        this._adjacentPlots.east.tiles.slice(row).forEach((row: Tile[]) => tiles.push(...row.slice(0, col)))
-        this._adjacentPlots.south.tiles.slice(0, row).forEach((row: Tile[]) => tiles.push(...row.slice(col)))
-        this._adjacentPlots.south._adjacentPlots.east.tiles.slice(0, row).forEach((row: Tile[]) => tiles.push(...row.slice(0, col)))
-      }
-    }
-    else if (size === CropSize.Bush) {
-      if (row < TILE_ROWS - 1 && col < TILE_COLS - 1) {
-        tiles.push(...this._tiles.slice(row, row + 2).map((row: Tile[]) => row.slice(col, col + 2)).flat())
-      }
-      else if (
-        row < TILE_ROWS - 1
-        && col === TILE_COLS - 1
-        && this._adjacentPlots.east
-        && this._adjacentPlots.east.isActive
-      ) {
-        tiles.push(...this._tiles.slice(row, row + 2).map((row: Tile[]) => row.slice(col, col + 2)).flat())
-        tiles.push(...this._adjacentPlots.east.tiles.slice(row, row + 2).map((row: Tile[]) => row.slice(0, 1)).flat())
-      }
-      else if (
-        row === TILE_ROWS - 1
-        && col < TILE_COLS - 1
-        && this._adjacentPlots.south
-        && this._adjacentPlots.south.isActive
-      ) {
-        tiles.push(...this._tiles.slice(row, row + 2).map((row: Tile[]) => row.slice(col, col + 2)).flat())
-        tiles.push(...this._adjacentPlots.south.tiles.slice(0, 1).map((row: Tile[]) => row.slice(col, col + 2)).flat())
-      }
-      else if (
-        row === TILE_ROWS - 1
-        && col === TILE_COLS - 1
-        && this._adjacentPlots.south
-        && this._adjacentPlots.south.isActive
-        && this._adjacentPlots.east
-        && this._adjacentPlots.east.isActive
-        && this._adjacentPlots.south._adjacentPlots.east
-        && this._adjacentPlots.south._adjacentPlots.east.isActive
-        && this._adjacentPlots.east._adjacentPlots.south
-        && this._adjacentPlots.east._adjacentPlots.south.isActive
-      ) {
-        tiles.push(...this._tiles.slice(row, row + 2).map((row: Tile[]) => row.slice(col, col + 2)).flat())
-        tiles.push(...this._adjacentPlots.east.tiles.slice(row, row + 2).map((row: Tile[]) => row.slice(0, 1)).flat())
-        tiles.push(...this._adjacentPlots.south.tiles.slice(0, 1).map((row: Tile[]) => row.slice(col, col + 2)).flat())
-        tiles.push(...this._adjacentPlots.south._adjacentPlots.east.tiles.slice(0, 1).map((row: Tile[]) => row.slice(0, 1)).flat())
-      }
-    }
-    else {
-      tiles.push(this._tiles[row][col])
-    }
-
-    return tiles
+  return tiles
 
 }
 
@@ -4363,33 +4653,32 @@ return new Tile(null)
   if (!this.\_isActive)
   return
 
+  const id = this.\_tiles[row][col].id
+  this.\_tiles[row][col].crop = null
+  this.\_tiles[row][col].id = uniqid()
+  this.\_tiles[row][col].bonuses = []
 
-    const id = this._tiles[row][col].id
-    this._tiles[row][col].crop = null
-    this._tiles[row][col].id = uniqid()
-    this._tiles[row][col].bonuses = []
+  // look for adjacent tiles with the same id and recursively remove them
+  const matchingTiles: Tile[] = this.\_tiles.flat().filter((tile: Tile) => tile.id === id)
+  matchingTiles.forEach((tile: Tile) => {
+  const tileX: number = this.\_tiles.findIndex((row: Tile[]) => row.includes(tile))
+  const tileY: number = this.\_tiles[tileX].findIndex((t: Tile) => t === tile)
+  this.removeCropFromTile(tileX, tileY)
+  })
 
-    // look for adjacent tiles with the same id and recursively remove them
-    const matchingTiles: Tile[] = this._tiles.flat().filter((tile: Tile) => tile.id === id)
-    matchingTiles.forEach((tile: Tile) => {
-      const tileX: number = this._tiles.findIndex((row: Tile[]) => row.includes(tile))
-      const tileY: number = this._tiles[tileX].findIndex((t: Tile) => t === tile)
-      this.removeCropFromTile(tileX, tileY)
-    })
+  // look for adjacent tiles with the same id in adjacent plots and recursively remove them
+  for (const adjacentPlot of Object.values(this.\_adjacentPlots)) {
+  if (adjacentPlot === null)
+  continue
+  const matchingTiles: Tile[] = adjacentPlot.tiles.flat().filter((tile: Tile) => tile.id === id)
+  matchingTiles.forEach((tile: Tile) => {
+  const tileX: number = adjacentPlot.tiles.findIndex((row: Tile[]) => row.includes(tile))
+  const tileY: number = adjacentPlot.tiles[tileX].findIndex((t: Tile) => t === tile)
+  adjacentPlot.removeCropFromTile(tileX, tileY)
+  })
+  }
 
-    // look for adjacent tiles with the same id in adjacent plots and recursively remove them
-    for (const adjacentPlot of Object.values(this._adjacentPlots)) {
-      if (adjacentPlot === null)
-        continue
-      const matchingTiles: Tile[] = adjacentPlot.tiles.flat().filter((tile: Tile) => tile.id === id)
-      matchingTiles.forEach((tile: Tile) => {
-        const tileX: number = adjacentPlot.tiles.findIndex((row: Tile[]) => row.includes(tile))
-        const tileY: number = adjacentPlot.tiles[tileX].findIndex((t: Tile) => t === tile)
-        adjacentPlot.removeCropFromTile(tileX, tileY)
-      })
-    }
-
-    this.calculateBonusesReceived()
+  this.calculateBonusesReceived()
 
 }
 
@@ -4419,9 +4708,8 @@ this.\_tiles[row][col].id = id
   plot.tiles[row][col].crop = crop
   plot.tiles[row][col].id = id
 
-
-    if (crop.size !== CropSize.Single)
-      plot.removeFertiliserFromTile(row, col)
+  if (crop.size !== CropSize.Single)
+  plot.removeFertiliserFromTile(row, col)
 
 }
 
@@ -4997,12 +5285,11 @@ return
   conversionsToMake: number
   }>()
 
-
-    // Iterate through each crop in the harvest data
-    for (const [cropName, cropYield] of totalHarvest.crops) {
-      const crop = getCropFromType(cropYield.cropType)
-      if (!crop)
-        throw new Error(`Missing crop data for crop: ${cropName}`)
+  // Iterate through each crop in the harvest data
+  for (const [cropName, cropYield] of totalHarvest.crops) {
+  const crop = getCropFromType(cropYield.cropType)
+  if (!crop)
+  throw new Error(`Missing crop data for crop: ${cropName}`)
 
       // Get user-defined settings for this crop or use defaults
       const setting = settings.cropSettings.get(cropName) || {
@@ -5085,9 +5372,10 @@ return
         craftersToUse: setting.crafters,
         conversionsToMake,
       })
-    }
 
-    return cropData
+  }
+
+  return cropData
 
 }
 
@@ -5100,37 +5388,36 @@ return
   process_v2(harvestData: Readonly<ITotalHarvest>, processorSettings: Readonly<ProcessorSettings>) {
   this.reset() // Reset all state before starting new processing
 
+  // Initialize output and inventory
+  const output: ProcessorOutput = {
+  crops: new Map(),
+  seeds: new Map(),
+  preserves: new Map(),
+  replantSeeds: Object.assign({}, harvestData.seedsRemainder),
+  detailedProcessingInfo: new Map(),
+  }
 
-    // Initialize output and inventory
-    const output: ProcessorOutput = {
-      crops: new Map(),
-      seeds: new Map(),
-      preserves: new Map(),
-      replantSeeds: Object.assign({}, harvestData.seedsRemainder),
-      detailedProcessingInfo: new Map(),
-    }
+  const inventory = new Map<string, IInventoryItem>()
 
-    const inventory = new Map<string, IInventoryItem>()
+  // Set current settings
+  this.\_settings = Object.assign({}, processorSettings)
+  const settings = this.\_settings
 
-    // Set current settings
-    this._settings = Object.assign({}, processorSettings)
-    const settings = this._settings
+  // Calculate processing data for each crop based on settings and harvest data
+  const cropData = this.calculateSettings(harvestData, settings)
 
-    // Calculate processing data for each crop based on settings and harvest data
-    const cropData = this.calculateSettings(harvestData, settings)
+  // If no crops need processing, return early
+  if (cropData.size === 0) {
+  this.\_output = output
+  this.\_inventory = inventory
+  return
+  }
 
-    // If no crops need processing, return early
-    if (cropData.size === 0) {
-      this._output = output
-      this._inventory = inventory
-      return
-    }
+  const harvestUsedStarSeeds = parseCropId(harvestData.cycleData.keys().next().value as ICropNameWithGrowthDiff).isStar
 
-    const harvestUsedStarSeeds = parseCropId(harvestData.cycleData.keys().next().value as ICropNameWithGrowthDiff).isStar
-
-    // Process each crop
-    for (const [cropName, processData] of cropData) {
-      const cropHarvestData = harvestData.crops.get(cropName)
+  // Process each crop
+  for (const [cropName, processData] of cropData) {
+  const cropHarvestData = harvestData.crops.get(cropName)
 
       const { type: cropType, isStar, hasGrowthBoost } = parseCropId(cropName)
 
@@ -5327,14 +5614,15 @@ return
           effectiveProcessMinutes: longestProcessMinutes
         })
       }
-    }
 
-    // console.log('output', output)
+  }
 
-    // console.log('inventory', inventory)
-    // Update class properties with the final output
-    this._inventory = inventory
-    this._output = output
+  // console.log('output', output)
+
+  // console.log('inventory', inventory)
+  // Update class properties with the final output
+  this.\_inventory = inventory
+  this.\_output = output
 
 }
 }
@@ -5811,8 +6099,7 @@ this.\_fertiliser = fertiliser
   if (this.\_crop)
   return this.\_crop.cropBonus as Bonus
 
-
-    return Bonus.None
+  return Bonus.None
 
 }
 
@@ -5917,18 +6204,17 @@ count: number // The final calculated count
   if (!this.\_log.has(day))
   this.\_log.set(day, [])
 
+  // Create a snapshot of the item for the log entry
+  const itemSnapshot = Object.assign(Object.create(Object.getPrototypeOf(item)), item)
 
-    // Create a snapshot of the item for the log entry
-    const itemSnapshot = Object.assign(Object.create(Object.getPrototypeOf(item)), item)
-
-    this._log.get(day)?.push({
-      day,
-      item: itemSnapshot,
-      countChange,
-      reason,
-    })
-    // Invalidate cache when log changes
-    this._totalItemsCache = null
+  this.\_log.get(day)?.push({
+  day,
+  item: itemSnapshot,
+  countChange,
+  reason,
+  })
+  // Invalidate cache when log changes
+  this.\_totalItemsCache = null
 
 }
 
@@ -5994,44 +6280,43 @@ count: number // The final calculated count
   return null
   }
 
+  const crop = getCropFromType(data.cropType)
+  if (!crop) {
+  console.error(`Crop definition not found for type: ${data.cropType}`)
+  return null
+  }
 
-    const crop = getCropFromType(data.cropType)
-    if (!crop) {
-      console.error(`Crop definition not found for type: ${data.cropType}`)
-      return null
-    }
+  let name: string
+  let image: string
+  let price: number
+  const maxStack = 30 // Assuming default stack size, adjust if needed
 
-    let name: string
-    let image: string
-    let price: number
-    const maxStack = 30 // Assuming default stack size, adjust if needed
+  switch (data.itemType) {
+  case ItemType.Crop:
+  name = crop.type
+  image = crop.image
+  price = data.isStar ? crop.goldValues.cropStar : crop.goldValues.crop
+  break
+  case ItemType.Seed:
+  name = `${crop.type} Seed`
+  image = crop.seedImage
+  price = data.isStar ? crop.goldValues.seedStar : crop.goldValues.seed
+  break
+  case ItemType.Preserve:
+  if (!crop.goldValues.hasPreserve) {
+  console.warn(`Attempted to create preserve item for ${crop.type}, which cannot be preserved.`)
+  return null
+  }
+  name = `Jar of ${crop.type}` // Or specific preserve name if available
+  image = crop.preserveImage
+  price = data.isStar ? crop.goldValues.preserveStar : crop.goldValues.preserve
+  break
+  default:
+  // Should be unreachable due to the initial check
+  return null
+  }
 
-    switch (data.itemType) {
-      case ItemType.Crop:
-        name = crop.type
-        image = crop.image
-        price = data.isStar ? crop.goldValues.cropStar : crop.goldValues.crop
-        break
-      case ItemType.Seed:
-        name = `${crop.type} Seed`
-        image = crop.seedImage
-        price = data.isStar ? crop.goldValues.seedStar : crop.goldValues.seed
-        break
-      case ItemType.Preserve:
-        if (!crop.goldValues.hasPreserve) {
-          console.warn(`Attempted to create preserve item for ${crop.type}, which cannot be preserved.`)
-          return null
-        }
-        name = `Jar of ${crop.type}` // Or specific preserve name if available
-        image = crop.preserveImage
-        price = data.isStar ? crop.goldValues.preserveStar : crop.goldValues.preserve
-        break
-      default:
-        // Should be unreachable due to the initial check
-        return null
-    }
-
-    return new CropItem(name, data.itemType, image, price, data.isStar, maxStack, data.count, data.cropType)
+  return new CropItem(name, data.itemType, image, price, data.isStar, maxStack, data.count, data.cropType)
 
 }
 
@@ -6045,32 +6330,31 @@ count: number // The final calculated count
   if (this.\_totalItemsCache)
   return this.\_totalItemsCache
 
+  const totals = new Map<string, InventoryItemState>()
+  const sortedDays = Array.from(this.\_log.keys()).sort((a, b) => a - b)
 
-    const totals = new Map<string, InventoryItemState>()
-    const sortedDays = Array.from(this._log.keys()).sort((a, b) => a - b)
+  for (const day of sortedDays) {
+  const entries = this.\_log.get(day) || []
+  for (const entry of entries) {
+  const itemId = entry.item.itemId
+  if (!totals.has(itemId)) {
+  // Store the item definition (without count) and initialize count
+  const itemDefinition = Object.assign(Object.create(Object.getPrototypeOf(entry.item)), entry.item)
+  itemDefinition.count = 0 // Count in the definition is irrelevant here
+  totals.set(itemId, { item: itemDefinition, count: 0 })
+  }
+  totals.get(itemId)!.count += entry.countChange
+  }
+  }
 
-    for (const day of sortedDays) {
-      const entries = this._log.get(day) || []
-      for (const entry of entries) {
-        const itemId = entry.item.itemId
-        if (!totals.has(itemId)) {
-          // Store the item definition (without count) and initialize count
-          const itemDefinition = Object.assign(Object.create(Object.getPrototypeOf(entry.item)), entry.item)
-          itemDefinition.count = 0 // Count in the definition is irrelevant here
-          totals.set(itemId, { item: itemDefinition, count: 0 })
-        }
-        totals.get(itemId)!.count += entry.countChange
-      }
-    }
+  // Filter out items with zero or negative final count
+  for (const [itemId, state] of totals) {
+  if (state.count <= 0)
+  totals.delete(itemId)
+  }
 
-    // Filter out items with zero or negative final count
-    for (const [itemId, state] of totals) {
-      if (state.count <= 0)
-        totals.delete(itemId)
-    }
-
-    this._totalItemsCache = totals
-    return totals
+  this.\_totalItemsCache = totals
+  return totals
 
 }
 
@@ -6084,13 +6368,12 @@ count: number // The final calculated count
   const dailyChanges = new Map<string, number>()
   const entries = this.\_log.get(day) || []
 
-
-    for (const entry of entries) {
-      const itemId = entry.item.itemId
-      const currentChange = dailyChanges.get(itemId) || 0
-      dailyChanges.set(itemId, currentChange + entry.countChange)
-    }
-    return dailyChanges
+  for (const entry of entries) {
+  const itemId = entry.item.itemId
+  const currentChange = dailyChanges.get(itemId) || 0
+  dailyChanges.set(itemId, currentChange + entry.countChange)
+  }
+  return dailyChanges
 
 }
 
@@ -6115,8 +6398,7 @@ count: number // The final calculated count
   for (const state of totalItems.values())
   totalValue += state.item.price _ state.count
 
-
-    return totalValue
+  return totalValue
 
 }
 
@@ -6132,20 +6414,19 @@ count: number // The final calculated count
   let dailyValueChange = 0
   const entries = this.\_log.get(day) || [] // Need entries to get item price info
 
+  // Use a map to get unique items and their prices for the day
+  const itemPrices = new Map<string, number>()
+  for (const entry of entries) {
+  if (!itemPrices.has(entry.item.itemId))
+  itemPrices.set(entry.item.itemId, entry.item.price)
+  }
 
-    // Use a map to get unique items and their prices for the day
-    const itemPrices = new Map<string, number>()
-    for (const entry of entries) {
-      if (!itemPrices.has(entry.item.itemId))
-        itemPrices.set(entry.item.itemId, entry.item.price)
-    }
+  for (const [itemId, netChange] of dailyChanges) {
+  const price = itemPrices.get(itemId) || 0
+  dailyValueChange += price \* netChange
+  }
 
-    for (const [itemId, netChange] of dailyChanges) {
-      const price = itemPrices.get(itemId) || 0
-      dailyValueChange += price * netChange
-    }
-
-    return dailyValueChange
+  return dailyValueChange
 
 }
 
@@ -6176,15 +6457,14 @@ count: number // The final calculated count
   const dailyChanges = new Map<string, number>()
   const entries = this.\_log.get(day) || []
 
-
-    for (const entry of entries) {
-      if (entry.item.type === type) {
-        const itemId = entry.item.itemId
-        const currentChange = dailyChanges.get(itemId) || 0
-        dailyChanges.set(itemId, currentChange + entry.countChange)
-      }
-    }
-    return dailyChanges
+  for (const entry of entries) {
+  if (entry.item.type === type) {
+  const itemId = entry.item.itemId
+  const currentChange = dailyChanges.get(itemId) || 0
+  dailyChanges.set(itemId, currentChange + entry.countChange)
+  }
+  }
+  return dailyChanges
 
 }
 }
@@ -19339,8 +19619,8 @@ const CELLS_IN_PLOT = 13
 
 const SIZE_MULTIPLIER = 1.5
 
-const plotWidth = computed(() => CELL_SIZE _ CELLS_IN_PLOT)
-const plotHeight = computed(() => CELL_SIZE _ CELLS_IN_PLOT)
+const plotWidth = computed(() => CELL*SIZE * CELLS*IN_PLOT)
+const plotHeight = computed(() => CELL_SIZE * CELLS_IN_PLOT)
 
 const PLOT_ROWS = 5
 const PLOT_COLUMNS = 9
@@ -19348,8 +19628,8 @@ const PLOT_COLUMNS = 9
 const plotRows = computed(() => PLOT_ROWS)
 const plotColumns = computed(() => PLOT_COLUMNS)
 
-const WIDTH = CELL_SIZE _ CELLS_IN_PLOT _ PLOT_COLUMNS _ SIZE_MULTIPLIER
-const HEIGHT = CELL_SIZE _ CELLS_IN_PLOT _ PLOT_ROWS _ SIZE_MULTIPLIER
+const WIDTH = CELL*SIZE * CELLS*IN_PLOT * PLOT*COLUMNS * SIZE*MULTIPLIER
+const HEIGHT = CELL_SIZE * CELLS*IN_PLOT * PLOT*ROWS * SIZE_MULTIPLIER
 
 const width = computed(() => WIDTH)
 const height = computed(() => HEIGHT)

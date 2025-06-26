@@ -100,11 +100,11 @@ export function TimeDisplay() {
         if (minutesLeft === 2 && !hasShownTwoMinuteWarning.current) {
             hasShownTwoMinuteWarning.current = true
 
-            if (enableNotifications) {
+            if (enableNotifications && notificationManager) {
                 await notificationManager.showHarvestReminder(2)
             }
 
-            if (enableSoundNotifications) {
+            if (enableSoundNotifications && notificationManager) {
                 await notificationManager.playNotificationSound()
             }
         }
@@ -113,11 +113,11 @@ export function TimeDisplay() {
         if (minutesLeft <= 0 && !hasShownHarvestNotification.current) {
             hasShownHarvestNotification.current = true
 
-            if (enableNotifications) {
+            if (enableNotifications && notificationManager) {
                 await notificationManager.showHarvestTime()
             }
 
-            if (enableSoundNotifications) {
+            if (enableSoundNotifications && notificationManager) {
                 await notificationManager.playNotificationSound()
             }
         }
@@ -151,7 +151,7 @@ export function TimeDisplay() {
 
     // Request notification permission on first render if notifications are enabled
     useEffect(() => {
-        if (enableNotifications) {
+        if (enableNotifications && notificationManager) {
             notificationManager.requestPermission()
         }
     }, [enableNotifications])

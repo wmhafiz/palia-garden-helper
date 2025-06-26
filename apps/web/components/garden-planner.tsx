@@ -42,6 +42,9 @@ export function GardenPlanner() {
 
     // Keyboard shortcuts
     useEffect(() => {
+        // Only add event listeners on the client side
+        if (typeof window === 'undefined') return
+
         const handleKeyDown = (event: KeyboardEvent) => {
             // Ignore if user is typing in an input field
             if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {

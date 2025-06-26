@@ -3,8 +3,15 @@
 import { useState } from 'react'
 import { Tile } from '@/lib/garden-planner/classes'
 import { useSelectedItem, useGarden, useToasts, useUISettings } from '@/stores'
-import { CropType, FertiliserType } from '@/lib/garden-planner/enums'
+import { CropType, FertiliserType, Bonus } from '@/lib/garden-planner/enums'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@workspace/ui/components/tooltip'
+import {
+    Zap,
+    Wheat,
+    Star,
+    Droplets,
+    Shield
+} from 'lucide-react'
 
 interface TileComponentProps {
     tile: Tile
@@ -62,7 +69,8 @@ export function TileComponent({
                 })
             }
 
-            // Trigger re-render by forcing a version update
+            // Calculate bonuses and trigger re-render
+            garden.calculateBonuses()
             forceUpdate()
         } catch (error) {
             addToast({
@@ -74,7 +82,21 @@ export function TileComponent({
 
     const getTileBackground = () => {
         if (tile.crop) {
-            return 'bg-green-200'
+            // Return background color based on crop's bonus type
+            switch (tile.crop.cropBonus) {
+                case Bonus.SpeedIncrease:
+                    return 'bg-orange-100' // Speed increase
+                case Bonus.HarvestIncrease:
+                    return 'bg-green-100' // Harvest boost
+                case Bonus.QualityIncrease:
+                    return 'bg-yellow-100' // Quality increase
+                case Bonus.WaterRetain:
+                    return 'bg-blue-100' // Water retain
+                case Bonus.WeedPrevention:
+                    return 'bg-purple-100' // Weed prevention
+                default:
+                    return 'bg-green-200'
+            }
         }
         if (tile.fertiliser) {
             return 'bg-blue-100'
@@ -88,13 +110,36 @@ export function TileComponent({
         return 'border-gray-300 border'
     }
 
-    const getBonusIndicator = () => {
+    const getBonusIndicators = () => {
         if (!showBonusIndicators || !tile.bonuses || tile.bonuses.length === 0) {
             return null
         }
 
+        const getBonusIcon = (bonus: Bonus) => {
+            switch (bonus) {
+                case Bonus.SpeedIncrease:
+                    return <Zap className="w-2 h-2 md:w-3 md:h-3 text-green-600" />
+                case Bonus.HarvestIncrease:
+                    return <Wheat className="w-2 h-2 md:w-3 md:h-3 text-yellow-600" />
+                case Bonus.QualityIncrease:
+                    return <Star className="w-2 h-2 md:w-3 md:h-3 text-purple-600" />
+                case Bonus.WaterRetain:
+                    return <Droplets className="w-2 h-2 md:w-3 md:h-3 text-blue-600" />
+                case Bonus.WeedPrevention:
+                    return <Shield className="w-2 h-2 md:w-3 md:h-3 text-orange-600" />
+                default:
+                    return null
+            }
+        }
+
         return (
-            <div className="absolute top-0 right-0 w-2 h-2 bg-yellow-400 rounded-full"></div>
+            <div className="absolute top-0 left-0 flex gap-0.5 p-0.5 bg-white/80 rounded-br-md">
+                {tile.bonuses.map((bonus, index) => (
+                    <div key={`${bonus}-${index}`} className="flex items-center justify-center">
+                        {getBonusIcon(bonus)}
+                    </div>
+                ))}
+            </div>
         )
     }
 
@@ -102,9 +147,13 @@ export function TileComponent({
         const content = []
         if (tile.crop) {
             content.push(`Crop: ${tile.crop.type}`)
+            content.push(`Provides: ${tile.crop.cropBonus}`)
         }
         if (tile.fertiliser) {
             content.push(`Fertiliser: ${tile.fertiliser.type}`)
+        }
+        if (tile.bonuses && tile.bonuses.length > 0) {
+            content.push(`Active Bonuses: ${tile.bonuses.join(', ')}`)
         }
         if (!tile.crop && !tile.fertiliser) {
             content.push('Empty Tile')
@@ -146,8 +195,8 @@ export function TileComponent({
                 </div>
             )}
 
-            {/* Bonus indicator */}
-            {getBonusIndicator()}
+            {/* Bonus indicators */}
+            {getBonusIndicators()}
         </div>
     )
 

@@ -6,6 +6,9 @@ import CropCode from '../enums/cropCode'
 import FertiliserCode from '../enums/fertiliserCode'
 import { getCropFromCode, getCodeFromCrop } from '../cropList'
 import { getFertiliserFromCode, getCodeFromFertiliser } from '../fertiliserList'
+import Bonus from '../enums/bonus'
+import CropSize from '../enums/crop-size'
+import CropType from '../enums/crops'
 
 class Garden {
     private _layout: Plot[][] = []
@@ -180,6 +183,9 @@ class Garden {
                 }
             }
 
+            // Calculate bonuses after loading layout
+            this.calculateBonuses()
+
             return true
         } catch (error) {
             console.error('Failed to load garden layout:', error)
@@ -252,6 +258,140 @@ class Garden {
      */
     loadFromVueSave(saveCode: string): boolean {
         return this.loadLayout(saveCode)
+    }
+
+    /**
+     * Calculates and assigns bonuses to crops based on adjacent tiles and multi-tile crop requirements
+     */
+    calculateBonuses(): void {
+        const treeTiles: { [key: string]: Tile[] } = {}
+        const bushTiles: { [key: string]: Tile[] } = {}
+
+        const layoutFlat = this._layout.flat()
+
+        // First, calculate bonuses received for all tiles
+        for (const plot of layoutFlat) {
+            if (!plot.isActive) continue
+            plot.calculateBonusesReceived()
+        }
+
+        // Then, calculate final bonuses based on crop size requirements
+        for (const plot of layoutFlat) {
+            if (!plot.isActive) continue
+
+            for (const tile of plot.tiles.flat()) {
+                tile.bonuses = []
+                if (!tile.crop || tile.crop.type === CropType.None) continue
+
+                switch (tile.crop.size) {
+                    case CropSize.Tree:
+                        // Trees (3x3) need at least 3 sources of the same bonus
+                        if (!treeTiles[tile.id]) {
+                            treeTiles[tile.id] = []
+                        }
+                        const tileGroup = treeTiles[tile.id]
+                        if (tileGroup) {
+                            tileGroup.push(tile)
+
+                            if (tileGroup.length === 9) {
+                                const bonusesReceived = tileGroup.flatMap(t => t.bonusesReceived)
+                                const bonusCounts = bonusesReceived.reduce((acc, bonus) => {
+                                    acc[bonus] = (acc[bonus] || 0) + 1
+                                    return acc
+                                }, {} as Record<string, number>)
+
+                                for (const [bonus, count] of Object.entries(bonusCounts)) {
+                                    if (count >= 3) {
+                                        for (const treeTile of tileGroup) {
+                                            treeTile.bonuses.push(bonus as Bonus)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        break
+
+                    case CropSize.Bush:
+                        // Bushes (2x2) need at least 2 sources of the same bonus
+                        if (!bushTiles[tile.id]) {
+                            bushTiles[tile.id] = []
+                        }
+                        const bushGroup = bushTiles[tile.id]
+                        if (bushGroup) {
+                            bushGroup.push(tile)
+
+                            if (bushGroup.length === 4) {
+                                const bonusesReceived = bushGroup.flatMap(t => t.bonusesReceived)
+                                const bonusCounts = bonusesReceived.reduce((acc, bonus) => {
+                                    acc[bonus] = (acc[bonus] || 0) + 1
+                                    return acc
+                                }, {} as Record<string, number>)
+
+                                for (const [bonus, count] of Object.entries(bonusCounts)) {
+                                    if (count >= 2) {
+                                        for (const bushTile of bushGroup) {
+                                            bushTile.bonuses.push(bonus as Bonus)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        break
+
+                    default:
+                        // Single tiles get all bonuses they receive
+                        tile.bonuses = tile.bonusesReceived
+                        break
+                }
+            }
+        }
+    }
+
+    /**
+     * Gets bonus coverage statistics for the garden
+     * @returns Object with bonus coverage counts
+     */
+    getBonusCoverage(): Record<string, number> {
+        const bonusCoverage: Record<string, number> = {
+            [Bonus.SpeedIncrease]: 0,
+            [Bonus.HarvestIncrease]: 0,
+            [Bonus.QualityIncrease]: 0,
+            [Bonus.WaterRetain]: 0,
+            [Bonus.WeedPrevention]: 0,
+        }
+
+        for (const plot of this._layout.flat()) {
+            if (!plot.isActive) continue
+
+            for (const tile of plot.tiles.flat()) {
+                if (!tile.crop || tile.crop.type === CropType.None) continue
+
+                for (const bonus of tile.bonuses) {
+                    if (bonus in bonusCoverage && bonusCoverage[bonus] !== undefined) {
+                        bonusCoverage[bonus]++
+                    }
+                }
+            }
+        }
+
+        return bonusCoverage
+    }
+
+    /**
+     * Gets total number of crops in the garden
+     */
+    getTotalCropCount(): number {
+        let count = 0
+        for (const plot of this._layout.flat()) {
+            if (!plot.isActive) continue
+
+            for (const tile of plot.tiles.flat()) {
+                if (tile.crop && tile.crop.type !== CropType.None) {
+                    count++
+                }
+            }
+        }
+        return count
     }
 }
 

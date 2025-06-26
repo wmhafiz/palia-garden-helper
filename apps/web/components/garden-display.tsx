@@ -1,11 +1,19 @@
 'use client'
 
+import { useEffect } from 'react'
 import { useGarden, useUISettings } from '@/stores'
 import { PlotGrid } from './plot-grid'
 
 export function GardenDisplay() {
-    const { garden } = useGarden()
+    const { garden, version } = useGarden()
     const { showGridLines, showBonusIndicators, showTooltips, updateSetting } = useUISettings()
+
+    // Calculate bonuses whenever garden changes
+    useEffect(() => {
+        if (garden) {
+            garden.calculateBonuses()
+        }
+    }, [garden, version])
 
     if (!garden) {
         return (
@@ -36,6 +44,7 @@ export function GardenDisplay() {
                     plots={garden.plots}
                     showBonusIndicators={showBonusIndicators}
                     showGridLines={showGridLines}
+                    version={version}
                 />
             </div>
 

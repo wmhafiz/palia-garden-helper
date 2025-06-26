@@ -3,6 +3,8 @@ import Direction from '../enums/direction'
 import Tile from './tile'
 import type Crop from './crop'
 import type Fertiliser from './fertiliser'
+import CropType from '../enums/crops'
+import Bonus from '../enums/bonus'
 
 // Grid sizes for a plot
 const TILE_ROWS = 3
@@ -142,6 +144,88 @@ class Plot {
                 return this._adjacentPlots.west
             default:
                 return null
+        }
+    }
+
+    /**
+     * Gets tiles adjacent to a specific tile within this plot and from adjacent plots
+     * @param row - Row index of the tile
+     * @param col - Column index of the tile
+     * @returns Array of adjacent tiles
+     */
+    getAdjacentTiles(row: number, col: number): Tile[] {
+        const adjacentTiles: Tile[] = []
+
+        // Check adjacent tiles within the same plot
+        if (row > 0) {
+            adjacentTiles.push(this._tiles[row - 1]![col]!)
+        }
+        if (row < 2) {
+            adjacentTiles.push(this._tiles[row + 1]![col]!)
+        }
+        if (col > 0) {
+            adjacentTiles.push(this._tiles[row]![col - 1]!)
+        }
+        if (col < 2) {
+            adjacentTiles.push(this._tiles[row]![col + 1]!)
+        }
+
+        // Check adjacent tiles from neighboring plots
+        if (row === 0 && this._adjacentPlots.north) {
+            adjacentTiles.push(this._adjacentPlots.north.getTile(2, col))
+        }
+        if (row === 2 && this._adjacentPlots.south) {
+            adjacentTiles.push(this._adjacentPlots.south.getTile(0, col))
+        }
+        if (col === 0 && this._adjacentPlots.west) {
+            adjacentTiles.push(this._adjacentPlots.west.getTile(row, 2))
+        }
+        if (col === 2 && this._adjacentPlots.east) {
+            adjacentTiles.push(this._adjacentPlots.east.getTile(row, 0))
+        }
+
+        return adjacentTiles.filter(tile => tile !== null)
+    }
+
+    /**
+     * Calculates bonuses received by each tile from adjacent crops and fertilizers
+     */
+    calculateBonusesReceived(): void {
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                const tile = this._tiles[i]![j]!
+                tile.bonusesReceived = []
+
+                // Only calculate bonuses for tiles with crops
+                if (!tile.crop || tile.crop.type === CropType.None) {
+                    continue
+                }
+
+                const adjacentTiles = this.getAdjacentTiles(i, j)
+                const bonuses: Bonus[] = []
+
+                for (const adjacentTile of adjacentTiles) {
+                    // Skip tiles without crops
+                    if (!adjacentTile.crop || adjacentTile.crop.type === CropType.None) {
+                        continue
+                    }
+
+                    // Skip tiles with the same crop type (crops don't give bonuses to themselves)
+                    if (adjacentTile.crop.type === tile.crop.type) {
+                        continue
+                    }
+
+                    // Add the bonus from the adjacent crop
+                    bonuses.push(adjacentTile.crop.cropBonus as Bonus)
+                }
+
+                // Add fertilizer bonus if present
+                if (tile.fertiliser !== null) {
+                    bonuses.push(tile.fertiliser.effect)
+                }
+
+                tile.bonusesReceived = bonuses
+            }
         }
     }
 }

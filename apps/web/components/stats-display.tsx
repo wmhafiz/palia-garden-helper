@@ -1,15 +1,16 @@
 'use client'
 
 import { useMemo } from 'react'
-import { BarChart3, TrendingUp, Coins, Clock } from 'lucide-react'
+import { BarChart3, TrendingUp, Coins, Clock, Zap, Wheat, Star, Droplets, Shield } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card'
 import { Progress } from '@workspace/ui/components/progress'
 import { Badge } from '@workspace/ui/components/badge'
 import { Separator } from '@workspace/ui/components/separator'
 import { useGarden } from '@/stores'
-import { CropType, FertiliserType } from '@/lib/garden-planner'
+import { CropType, FertiliserType, Bonus } from '@/lib/garden-planner'
 import { OutputDisplay } from './output-display'
 import { ScrollArea } from '@workspace/ui/components/scroll-area'
+import { RadialChart } from './radial-chart'
 
 export function StatsDisplay() {
     const { garden, version } = useGarden()
@@ -26,9 +27,19 @@ export function StatsDisplay() {
                 totalCrops: 0,
                 totalFertilisers: 0,
                 plotUtilization: 0,
-                tileUtilization: 0
+                tileUtilization: 0,
+                bonusCoverage: {
+                    [Bonus.SpeedIncrease]: 0,
+                    [Bonus.HarvestIncrease]: 0,
+                    [Bonus.QualityIncrease]: 0,
+                    [Bonus.WaterRetain]: 0,
+                    [Bonus.WeedPrevention]: 0,
+                }
             }
         }
+
+        // Calculate bonuses first
+        garden.calculateBonuses()
 
         const cropCounts: Record<CropType, number> = {} as Record<CropType, number>
         const fertiliserCounts: Record<FertiliserType, number> = {} as Record<FertiliserType, number>
@@ -74,6 +85,7 @@ export function StatsDisplay() {
         const totalTiles = activePlots * 9
         const plotUtilization = totalPlots > 0 ? (activePlots / totalPlots) * 100 : 0
         const tileUtilization = totalTiles > 0 ? (occupiedTiles / totalTiles) * 100 : 0
+        const bonusCoverage = garden.getBonusCoverage()
 
         return {
             totalPlots,
@@ -85,7 +97,8 @@ export function StatsDisplay() {
             totalCrops,
             totalFertilisers,
             plotUtilization,
-            tileUtilization
+            tileUtilization,
+            bonusCoverage
         }
     }, [garden, version])
 
@@ -112,6 +125,55 @@ export function StatsDisplay() {
     return (
         <ScrollArea className="h-[calc(100vh-10rem)] pr-8">
             <div className="space-y-4">
+                {/* Bonus Coverage Statistics */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Star className="w-5 h-5" />
+                            Bonus Coverage
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex gap-4 justify-center flex-wrap">
+                            <RadialChart
+                                totalCrops={stats.totalCrops}
+                                covered={stats.bonusCoverage[Bonus.SpeedIncrease]}
+                                className="text-green-600"
+                                icon={<Zap className="w-4 h-4" />}
+                                title="Growth Boost"
+                            />
+                            <RadialChart
+                                totalCrops={stats.totalCrops}
+                                covered={stats.bonusCoverage[Bonus.HarvestIncrease]}
+                                className="text-yellow-600"
+                                icon={<Wheat className="w-4 h-4" />}
+                                title="Harvest Boost"
+                            />
+                            <RadialChart
+                                totalCrops={stats.totalCrops}
+                                covered={stats.bonusCoverage[Bonus.QualityIncrease]}
+                                className="text-purple-600"
+                                icon={<Star className="w-4 h-4" />}
+                                title="Quality Increase"
+                            />
+                            <RadialChart
+                                totalCrops={stats.totalCrops}
+                                covered={stats.bonusCoverage[Bonus.WaterRetain]}
+                                className="text-blue-600"
+                                icon={<Droplets className="w-4 h-4" />}
+                                title="Water Retain"
+                            />
+                            <RadialChart
+                                totalCrops={stats.totalCrops}
+                                covered={stats.bonusCoverage[Bonus.WeedPrevention]}
+                                className="text-orange-600"
+                                icon={<Shield className="w-4 h-4" />}
+                                title="Weed Prevention"
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
+
                 {/* Overall Stats */}
                 {/* <Card>
                     <CardHeader>

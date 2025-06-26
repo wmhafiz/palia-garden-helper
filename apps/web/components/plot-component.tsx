@@ -24,11 +24,41 @@ export function PlotComponent({
     const [isHovered, setIsHovered] = useState(false)
     const { showTooltips } = useUISettings()
 
+    // If plot is not active, render a gray bordered area with same dimensions as active plots
+    if (!plot.isActive) {
+        const inactivePlotElement = (
+            <div
+                className={`
+                    plot-component m-1 transition-all duration-200
+                    border-2 border-green-50
+                    flex items-center justify-center
+                    ${showGridLines ? 'border-dashed' : ''}
+                `}
+            >
+                {/* Create a 3x3 grid structure to match active plot dimensions */}
+                <div className="tile-grid">
+                    {Array.from({ length: 3 }, (_, rowIdx) => (
+                        <div key={rowIdx} className="flex">
+                            {Array.from({ length: 3 }, (_, colIdx) => (
+                                <div
+                                    key={`${rowIdx}-${colIdx}`}
+                                    className="w-8 h-8 md:w-12 md:h-12 lg:w-18 lg:h-18 m-px"
+                                />
+                            ))}
+                        </div>
+                    ))}
+                </div>
+            </div>
+        )
+
+        return inactivePlotElement
+    }
+
+    // Active plot - render with tiles
     const plotElement = (
         <div
             className={`
-        plot-component m-1 transition-all duration-200
-        ${plot.isActive ? 'bg-white border-2 border-gray-300' : 'bg-gray-200 border-2 border-gray-400'}
+        plot-component m-1 transition-all duration-200 bg-white border-2 border-gray-300
         ${isHovered ? 'shadow-lg scale-105' : 'shadow-sm'}
         ${showGridLines ? 'border-dashed' : ''}
       `}
@@ -56,22 +86,5 @@ export function PlotComponent({
         </div>
     )
 
-    return showTooltips ? (
-        <Tooltip>
-            <TooltipTrigger asChild>
-                {plotElement}
-            </TooltipTrigger>
-            <TooltipContent
-                side="top"
-                sideOffset={8}
-                className="z-50"
-            >
-                <div className="text-xs">
-                    Plot ({rowIndex}, {colIndex})
-                    <br />
-                    Active: {plot.isActive ? 'Yes' : 'No'}
-                </div>
-            </TooltipContent>
-        </Tooltip>
-    ) : plotElement
+    return plotElement
 } 

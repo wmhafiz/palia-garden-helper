@@ -23,7 +23,7 @@ export function TimeDisplay() {
                     {format(currentTime, 'MMM d, yyyy')}
                 </span>
                 <span className="text-xs text-blue-200">
-                    {format(currentTime, 'h:mm:ss a')}
+                    {format(currentTime, 'h:mm a')}
                 </span>
             </div>
         </div>

@@ -140,26 +140,6 @@ export function MenuBar() {
 
                 {/* Right side - External links and time */}
                 <div className="flex items-center space-x-4">
-                    {/* External resource links */}
-                    <div className="hidden lg:flex items-center space-x-3">
-                        <button
-                            onClick={() => handleExternalLink('https://palia.wiki.gg/wiki/Gardening')}
-                            className="flex items-center space-x-2 px-3 py-2 bg-palia-blue rounded-md text-sm text-white hover:bg-blue-600 transition-colors"
-                        >
-                            <BookOpen className="w-4 h-4" />
-                            <span>Shepp Arenvanya's Guide to Gardening</span>
-                            <ExternalLink className="w-3 h-3" />
-                        </button>
-                        <button
-                            onClick={() => handleExternalLink('https://ko-fi.com/your-username')}
-                            className="flex items-center space-x-2 px-3 py-2 bg-orange-600 rounded-md text-sm text-white hover:bg-orange-700 transition-colors"
-                        >
-                            <Coffee className="w-4 h-4" />
-                            <span>Buy me a coffee?</span>
-                            <ExternalLink className="w-3 h-3" />
-                        </button>
-                    </div>
-
                     {/* Time display */}
                     <div className="bg-palia-blue bg-opacity-50 rounded-md">
                         <TimeDisplay />

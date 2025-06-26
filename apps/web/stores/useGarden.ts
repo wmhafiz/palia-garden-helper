@@ -14,6 +14,7 @@ interface GardenState {
     setLoading: (loading: boolean) => void
     setError: (error: string | null) => void
     initializeGarden: (rows: number, cols: number) => void
+    initializeGardenWithPattern: (rows: number, cols: number, plotPattern: boolean[][]) => void
     forceUpdate: () => void // Add method to force updates
 }
 
@@ -42,6 +43,18 @@ export const useGarden = create<GardenState>()(
             } catch (error) {
                 set({
                     error: error instanceof Error ? error.message : 'Failed to initialize garden',
+                    isLoading: false
+                })
+            }
+        },
+        initializeGardenWithPattern: (rows, cols, plotPattern) => {
+            try {
+                set({ isLoading: true, error: null })
+                const newGarden = new Garden(rows, cols, plotPattern)
+                set((state) => ({ garden: newGarden, isLoading: false, version: state.version + 1 }))
+            } catch (error) {
+                set({
+                    error: error instanceof Error ? error.message : 'Failed to initialize garden with pattern',
                     isLoading: false
                 })
             }

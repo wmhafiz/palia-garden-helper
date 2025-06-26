@@ -6,17 +6,19 @@ class Garden {
     private _layout: Plot[][] = []
     private _version: string = '0.4'
 
-    constructor(rows: number = 3, columns: number = 3) {
-        this.initializeLayout(rows, columns)
+    constructor(rows: number = 3, columns: number = 3, plotPattern?: boolean[][]) {
+        this.initializeLayout(rows, columns, plotPattern)
     }
 
-    private initializeLayout(rows: number, columns: number): void {
+    private initializeLayout(rows: number, columns: number, plotPattern?: boolean[][]): void {
         this._layout = []
 
         for (let i = 0; i < rows; i++) {
             this._layout[i] = []
             for (let j = 0; j < columns; j++) {
-                this._layout[i]![j] = new Plot(true)
+                // Use plot pattern if provided, otherwise default to true (active)
+                const isActive = plotPattern ? (plotPattern[i]?.[j] ?? true) : true
+                this._layout[i]![j] = new Plot(isActive)
             }
         }
 
@@ -80,6 +82,25 @@ class Garden {
 
     get version(): string {
         return this._version
+    }
+
+    setPlotActive(row: number, col: number, isActive: boolean): void {
+        const plot = this.getPlot(row, col)
+        if (plot) {
+            plot.isActive = isActive
+        }
+    }
+
+    setPlotPattern(pattern: boolean[][]): void {
+        for (let i = 0; i < this.rows && i < pattern.length; i++) {
+            for (let j = 0; j < this.columns && j < (pattern[i]?.length || 0); j++) {
+                this.setPlotActive(i, j, pattern[i]![j]!)
+            }
+        }
+    }
+
+    getPlotPattern(): boolean[][] {
+        return this._layout.map(row => row.map(plot => plot.isActive))
     }
 }
 

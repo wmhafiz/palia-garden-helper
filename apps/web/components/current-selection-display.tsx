@@ -135,25 +135,27 @@ export function CurrentSelectionDisplay({
 
     // Default variant
     return (
-        <div className={`flex items-center space-x-3 ${className}`}>
-            {showLabel && (
-                <span className="text-sm font-medium text-gray-700">Current selection:</span>
-            )}
-            <div className="flex items-center space-x-2">
-                <div className="w-12 h-12 flex items-center justify-center">
-                    {typeof displayInfo.icon === 'string' ? (
-                        <span className="text-sm">{displayInfo.icon}</span>
-                    ) : (
-                        displayInfo.icon
-                    )}
-                </div>
-                <div className="flex flex-col">
-                    <span className={`text-sm font-medium ${displayInfo.color}`}>
-                        {displayInfo.name}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                        {displayInfo.description}
-                    </span>
+        <div className={`bg-gray-100 border border-gray-300 rounded-lg p-2 sm:p-3 flex-1 min-w-0 ${className}`}>
+            <div className="flex items-center space-x-2 sm:space-x-3">
+                {showLabel && (
+                    <span className="text-xs sm:text-sm font-medium text-gray-700 hidden sm:inline">Current selection:</span>
+                )}
+                <div className="flex items-center space-x-2 min-w-0 flex-1">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center flex-shrink-0">
+                        {typeof displayInfo.icon === 'string' ? (
+                            <span className="text-sm">{displayInfo.icon}</span>
+                        ) : (
+                            displayInfo.icon
+                        )}
+                    </div>
+                    <div className="flex flex-col min-w-0 flex-1">
+                        <span className={`text-xs sm:text-sm font-medium ${displayInfo.color} truncate`}>
+                            {displayInfo.name}
+                        </span>
+                        <span className="text-xs text-gray-500 truncate hidden sm:block">
+                            {displayInfo.description}
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>

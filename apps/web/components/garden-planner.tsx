@@ -132,28 +132,26 @@ export function GardenPlanner() {
             {/* Main Content */}
             <main className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="space-y-6">
-
-                    <div className="flex justify-between gap-4">
+                    {/* Selector Bars - Single Row */}
+                    <div className="flex gap-4">
                         <HorizontalCropSelector />
                         <HorizontalFertilizerSelector />
-                    </div>
-                    <div className="flex  gap-4">
                         <HorizontalToolSelector />
                         <CurrentSelectionDisplay showLabel={false} />
                     </div>
 
                     {/* Garden and Stats Layout */}
-                    <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
+                    <div className="flex flex-col xl:flex-row gap-4 xl:gap-8">
                         {/* Garden Display - Main Content */}
-                        <div className="w-full lg:w-3/5 xl:w-1/2">
-                            <div className="bg-white rounded-lg shadow p-4 lg:p-6" data-garden-display>
-                                <h2 className="text-lg font-semibold mb-4">Garden Layout</h2>
+                        <div className="w-full xl:w-3/5">
+                            <div className="bg-white rounded-lg shadow p-3 sm:p-4 lg:p-6" data-garden-display>
+                                <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Garden Layout</h2>
                                 <GardenDisplay />
                             </div>
                         </div>
 
                         {/* Stats Display - Right Sidebar */}
-                        <div className="w-full lg:w-2/5 xl:w-1/2">
+                        <div className="w-full xl:w-2/5">
                             <StatsDisplay />
                         </div>
                     </div>

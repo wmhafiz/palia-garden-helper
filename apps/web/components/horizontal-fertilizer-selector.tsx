@@ -5,6 +5,7 @@ import fertiliserList from '@/lib/garden-planner/fertiliserList'
 import { FertiliserType } from '@/lib/garden-planner/enums'
 import { Fertiliser } from '@/lib/garden-planner/classes'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@workspace/ui/components/tooltip'
+import { ScrollArea, ScrollBar } from '@workspace/ui/components/scroll-area'
 
 export function HorizontalFertilizerSelector() {
     const { selectedItem, selectedItemType, selectFertiliser } = useSelectedItem()
@@ -26,17 +27,16 @@ export function HorizontalFertilizerSelector() {
     )
 
     return (
-        <div className="bg-palia-accent border border-gray-300 rounded-lg">
+        <div className="bg-palia-accent border border-gray-300 rounded-lg flex-1 min-w-0">
             {/* Header */}
-            <div className="px-4 py-2 bg-gray-100 border-b border-gray-300 rounded-t-lg">
+            <div className="px-3 sm:px-4 py-2 bg-gray-100 border-b border-gray-300 rounded-t-lg">
                 <span className="text-sm font-semibold text-gray-700">Fertilisers per Day</span>
             </div>
 
             {/* Content */}
-            <div className="p-3">
-                <div className="flex items-center space-x-4">
-                    {/* Fertilizer buttons */}
-                    <div className="flex space-x-2">
+            <div className="p-2 sm:p-3">
+                <ScrollArea className="w-full">
+                    <div className="flex space-x-2 pb-2 w-max">
                         {fertilisers.map((fertiliser: Fertiliser) => {
                             const isSelected = isItemSelected(fertiliser)
 
@@ -45,7 +45,7 @@ export function HorizontalFertilizerSelector() {
                                     key={fertiliser.type}
                                     onClick={() => handleFertiliserSelect(fertiliser.type)}
                                     className={`
-                                        relative w-12 h-12 rounded-lg border-2 transition-all duration-200
+                                        relative flex-shrink-0 w-12 h-12 rounded-lg border-2 transition-all duration-200
                                         ${isSelected
                                             ? 'border-palia-blue bg-blue-50 shadow-md'
                                             : 'border-gray-300 bg-white hover:border-palia-blue hover:shadow-sm'
@@ -86,7 +86,8 @@ export function HorizontalFertilizerSelector() {
                             ) : fertilizerButton
                         })}
                     </div>
-                </div>
+                    <ScrollBar orientation="horizontal" />
+                </ScrollArea>
             </div>
         </div>
     )

@@ -124,7 +124,7 @@ export function StatsDisplay() {
     }
 
     return (
-        <ScrollArea className="h-[calc(100vh-4rem)] lg:h-[calc(100vh-4rem)] max-h-[600px] lg:max-h-none pr-4 lg:pr-8">
+        <ScrollArea className="h-[calc(100vh-8rem)] lg:h-[calc(100vh-8rem)] max-h-[600px] lg:max-h-none pr-4 lg:pr-8">
             <div className="space-y-4">
                 {/* Bonus Coverage Statistics */}
                 <Card>

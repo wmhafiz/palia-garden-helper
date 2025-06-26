@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Tile } from '@/lib/garden-planner/classes'
 import { useSelectedItem, useGarden, useToasts, useUISettings } from '@/stores'
-import { CropType, FertiliserType, Bonus } from '@/lib/garden-planner/enums'
+import { CropType, FertiliserType, Bonus, CropSize } from '@/lib/garden-planner/enums'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@workspace/ui/components/tooltip'
 import {
     Zap,
@@ -21,6 +21,9 @@ interface TileComponentProps {
     tileColIndex: number
     showBonusIndicators: boolean
     isPlotHovered: boolean
+    onTileHover?: (tileRow: number, tileCol: number) => void
+    onTileLeave?: () => void
+    previewOrigin?: { row: number, col: number } | null
 }
 
 export function TileComponent({
@@ -30,13 +33,91 @@ export function TileComponent({
     tileRowIndex,
     tileColIndex,
     showBonusIndicators,
-    isPlotHovered
+    isPlotHovered,
+    onTileHover,
+    onTileLeave,
+    previewOrigin
 }: TileComponentProps) {
     const [isHovered, setIsHovered] = useState(false)
     const { selectedItem, selectedItemType, isEraseMode } = useSelectedItem()
     const { garden, forceUpdate } = useGarden()
     const { addToast } = useToasts()
     const { showTooltips } = useUISettings()
+
+    // Helper function to get crop size dimensions
+    const getCropSizeDimensions = (cropSize: CropSize) => {
+        switch (cropSize) {
+            case CropSize.Tree:
+                return { width: 3, height: 3 }
+            case CropSize.Bush:
+                return { width: 2, height: 2 }
+            case CropSize.Single:
+            default:
+                return { width: 1, height: 1 }
+        }
+    }
+
+    // Helper function to check if crop placement is valid
+    const isValidCropPlacement = (startRow: number, startCol: number, cropSize: CropSize) => {
+        if (!garden) return false
+
+        const { width, height } = getCropSizeDimensions(cropSize)
+        const plot = garden.getPlot(plotRowIndex, plotColIndex)
+        if (!plot) return false
+
+        // Check if the crop fits within the current plot
+        if (startRow + height > 3 || startCol + width > 3) {
+            return false
+        }
+
+        // Check if all tiles in the area are empty
+        for (let r = startRow; r < startRow + height; r++) {
+            for (let c = startCol; c < startCol + width; c++) {
+                const checkTile = plot.getTile(r, c)
+                if (checkTile?.crop) {
+                    return false
+                }
+            }
+        }
+
+        return true
+    }
+
+    // Helper function to get preview tiles for multi-size crops
+    const getPreviewTiles = () => {
+        if (!selectedItem || selectedItemType !== 'crop' || !isHovered) return []
+
+        const crop = selectedItem as any // Crop instance
+        if (!crop.size) return []
+
+        const { width, height } = getCropSizeDimensions(crop.size)
+        if (width === 1 && height === 1) return [] // Single crops don't need preview
+
+        const previewTiles = []
+        for (let r = tileRowIndex; r < tileRowIndex + height; r++) {
+            for (let c = tileColIndex; c < tileColIndex + width; c++) {
+                if (r < 3 && c < 3) { // Ensure we stay within plot bounds
+                    previewTiles.push({ row: r, col: c })
+                }
+            }
+        }
+
+        return previewTiles
+    }
+
+    // Check if this tile should show a preview overlay (only for single tile preview)
+    const shouldShowPreview = () => {
+        if (!selectedItem || selectedItemType !== 'crop' || !garden) return false
+
+        const crop = selectedItem as any
+        if (!crop.size) return false
+
+        const { width, height } = getCropSizeDimensions(crop.size)
+        if (width !== 1 || height !== 1) return false // Multi-tile previews are handled by PlotComponent
+
+        // Show preview only if hovering over a valid placement area
+        return isHovered && isValidCropPlacement(tileRowIndex, tileColIndex, crop.size)
+    }
 
     const handleTileClick = () => {
         if (!garden) return
@@ -54,11 +135,41 @@ export function TileComponent({
                     message: 'Tile cleared'
                 })
             } else if (selectedItemType === 'crop' && selectedItem) {
-                // Place crop
-                tile.crop = selectedItem as any // Crop instance
+                const crop = selectedItem as any
+
+                // For multi-size crops, use the preview origin if available
+                if (crop.size && (crop.size === CropSize.Bush || crop.size === CropSize.Tree)) {
+                    const originRow = previewOrigin?.row ?? tileRowIndex
+                    const originCol = previewOrigin?.col ?? tileColIndex
+
+                    if (!isValidCropPlacement(originRow, originCol, crop.size)) {
+                        addToast({
+                            type: 'error',
+                            message: `Cannot place ${crop.size} crop here - not enough space or tiles occupied`
+                        })
+                        return
+                    }
+
+                    // Place crop on all required tiles
+                    const { width, height } = getCropSizeDimensions(crop.size)
+                    for (let r = originRow; r < originRow + height; r++) {
+                        for (let c = originCol; c < originCol + width; c++) {
+                            if (r < 3 && c < 3) {
+                                const targetTile = plot.getTile(r, c)
+                                if (targetTile) {
+                                    targetTile.crop = crop
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    // Single crop placement
+                    tile.crop = crop
+                }
+
                 addToast({
                     type: 'success',
-                    message: `Crop planted`
+                    message: `${crop.type || 'Crop'} planted`
                 })
             } else if (selectedItemType === 'fertiliser' && selectedItem) {
                 // Place fertiliser
@@ -78,6 +189,16 @@ export function TileComponent({
                 message: error instanceof Error ? error.message : 'Failed to update tile'
             })
         }
+    }
+
+    const handleMouseEnter = () => {
+        setIsHovered(true)
+        onTileHover?.(tileRowIndex, tileColIndex)
+    }
+
+    const handleMouseLeave = () => {
+        setIsHovered(false)
+        onTileLeave?.()
     }
 
     const getTileBackground = () => {
@@ -170,8 +291,8 @@ export function TileComponent({
         hover:scale-110 hover:z-10
       `}
             onClick={handleTileClick}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
         >
             {/* Crop display */}
             {tile.crop && (
@@ -180,6 +301,17 @@ export function TileComponent({
                         src={tile.crop.image}
                         alt={tile.crop.type}
                         className="w-6 h-6 md:w-10 md:h-10 lg:w-12 lg:h-12 object-contain"
+                    />
+                </div>
+            )}
+
+            {/* Preview overlay for single crops only (multi-tile previews handled by PlotComponent) */}
+            {shouldShowPreview() && selectedItem && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/20 border-2 border-palia-blue border-dashed rounded">
+                    <img
+                        src={(selectedItem as any).image}
+                        alt={(selectedItem as any).type}
+                        className="w-6 h-6 md:w-10 md:h-10 lg:w-12 lg:h-12 object-contain opacity-70"
                     />
                 </div>
             )}

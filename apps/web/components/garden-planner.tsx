@@ -130,7 +130,7 @@ export function GardenPlanner() {
             <MenuBar />
 
             {/* Main Content */}
-            <main className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <main className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-40">
                 <div className="space-y-6">
                     {/* Selector Bars - Single Row */}
                     <div className="flex gap-4">

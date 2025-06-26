@@ -78,105 +78,32 @@ export function MenuBar() {
     }
 
     return (
-        <div className="bg-palia-blue-dark text-white shadow-lg">
+        <div className="fixed top-0 left-0 right-0 z-40 bg-palia-blue-dark text-white shadow-lg">
             {/* Top navigation bar */}
             <div className="flex items-center justify-between px-6 py-3">
-                {/* Left side - Branding and main navigation */}
-                <div className="flex items-center space-x-6">
-                    {/* Logo and title */}
-                    <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                            <span className="text-palia-blue-dark font-bold text-lg">🌱</span>
-                        </div>
-                        <div>
-                            <h1 className="text-xl font-bold text-white">
-                                Palia Garden Planner
-                            </h1>
-                            <p className="text-xs text-blue-200">
-                                A player-made tool for planning your garden
-                            </p>
-                        </div>
+                {/* Left side - Branding */}
+                <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                        <span className="text-palia-blue-dark font-bold text-lg">🌱</span>
                     </div>
-
-                    {/* Navigation links */}
-                    <nav className="hidden md:flex items-center space-x-4">
-                        <button
-                            onClick={() => handleExternalLink('https://github.com/your-repo/roadmap')}
-                            className="flex items-center space-x-1 px-3 py-1 rounded-md text-sm text-blue-200 hover:text-white hover:bg-palia-blue transition-colors"
-                        >
-                            <MapPin className="w-4 h-4" />
-                            <span>Roadmap</span>
-                        </button>
-                        <button
-                            onClick={() => handleExternalLink('https://github.com/your-repo/releases')}
-                            className="flex items-center space-x-1 px-3 py-1 rounded-md text-sm text-blue-200 hover:text-white hover:bg-palia-blue transition-colors"
-                        >
-                            <FileText className="w-4 h-4" />
-                            <span>Changelogs</span>
-                        </button>
-                        <button
-                            onClick={() => handleExternalLink('https://github.com/your-repo/contributors')}
-                            className="flex items-center space-x-1 px-3 py-1 rounded-md text-sm text-blue-200 hover:text-white hover:bg-palia-blue transition-colors"
-                        >
-                            <Users className="w-4 h-4" />
-                            <span>Credits</span>
-                        </button>
-                        <button
-                            onClick={() => setLayoutModalOpen(true)}
-                            className="flex items-center space-x-1 px-3 py-1 rounded-md text-sm text-blue-200 hover:text-white hover:bg-palia-blue transition-colors"
-                        >
-                            <Grid3x3 className="w-4 h-4" />
-                            <span>Layout Generator</span>
-                        </button>
-                        <button
-                            onClick={() => handleExternalLink('https://github.com/your-repo')}
-                            className="flex items-center space-x-1 px-3 py-1 rounded-md text-sm text-blue-200 hover:text-white hover:bg-palia-blue transition-colors"
-                        >
-                            <ExternalLink className="w-4 h-4" />
-                            <span>External Tools</span>
-                        </button>
-                    </nav>
+                    <div>
+                        <h1 className="text-xl font-bold text-white">
+                            Palia Garden Planner
+                        </h1>
+                        <p className="text-xs text-blue-200">
+                            A player-made tool for planning your garden
+                        </p>
+                    </div>
                 </div>
 
-                {/* Right side - External links and time */}
-                <div className="flex items-center space-x-4">
-                    {/* Time display */}
-                    <div className="bg-palia-blue bg-opacity-50 rounded-md">
-                        <TimeDisplay />
-                    </div>
+                {/* Center - Time Display */}
+                <div className="flex-1 flex justify-center">
+                    <TimeDisplay />
+                </div>
 
-                    {/* Mobile menu */}
-                    <div className="md:hidden">
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="sm" className="bg-palia-blue text-white border-blue-400">
-                                    Menu
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-56">
-                                <DropdownMenuItem onClick={() => handleExternalLink('https://github.com/your-repo/roadmap')}>
-                                    <MapPin className="w-4 h-4 mr-2" />
-                                    Roadmap
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleExternalLink('https://github.com/your-repo/releases')}>
-                                    <FileText className="w-4 h-4 mr-2" />
-                                    Changelogs
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleExternalLink('https://github.com/your-repo/contributors')}>
-                                    <Users className="w-4 h-4 mr-2" />
-                                    Credits
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => setLayoutModalOpen(true)}>
-                                    <Grid3x3 className="w-4 h-4 mr-2" />
-                                    Layout Generator
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleExternalLink('https://github.com/your-repo')}>
-                                    <ExternalLink className="w-4 h-4 mr-2" />
-                                    External Tools
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
+                {/* Right side - Empty for now */}
+                <div className="w-0">
+                    {/* This empty div balances the layout */}
                 </div>
             </div>
 
@@ -251,10 +178,7 @@ export function MenuBar() {
                         </Button>
                     </div>
 
-                    {/* Version info */}
-                    <div className="text-xs text-blue-200">
-                        React Port v0.1
-                    </div>
+
                 </div>
             </div>
 

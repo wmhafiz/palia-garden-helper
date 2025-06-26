@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Clock, ChevronDown, ChevronUp } from 'lucide-react'
+import { Clock } from 'lucide-react'
 import { format } from 'date-fns'
 import { useUISettings } from '@/stores'
 import { notificationManager } from '@/lib/notifications'
@@ -19,7 +19,6 @@ export function TimeDisplay() {
     })
     const [nextHarvestTime, setNextHarvestTime] = useState(new Date())
     const [minutesUntilHarvest, setMinutesUntilHarvest] = useState(0)
-    const [showExpandedClock, setShowExpandedClock] = useState(false)
 
     // Refs to track notification state
     const hasShownTwoMinuteWarning = useRef(false)
@@ -160,13 +159,11 @@ export function TimeDisplay() {
     return (
         <div className="relative">
             {/* Compact Time Display */}
-            <div className="flex items-center gap-4 text-sm text-white px-3 py-2"
-                onClick={() => setShowExpandedClock(!showExpandedClock)}
-            >
+            <div className="flex items-center gap-4 text-white text-sm md:text-lg px-3 py-2 bg-gray-900/50 rounded-lg shadow-2xl border border-blue-200/20">
                 <Clock className="w-4 h-4 text-blue-200" />
 
                 {/* Earth Time */}
-                <div className="flex flex-col leading-tight">
+                <div className="hidden md:flex flex-col leading-tight">
                     <span className="font-medium text-white">
                         {format(currentTime, 'MMM d, yyyy')}
                     </span>
@@ -185,10 +182,19 @@ export function TimeDisplay() {
                     </span>
                 </div>
 
-                {/* Palia Time with Expand Button */}
-                <div className="flex items-center gap-2"
-                >
-                    <div className="flex flex-col leading-tight border-l border-blue-200/30 pl-4">
+                {/* Palia Clock - Fixed to right of menu bar */}
+                <div className="relative border-l border-blue-200/30 pl-4">
+                    <div
+                        className="hidden lg:block fixed top-4 right-4 z-50 w-64 h-64"
+                        style={{
+                            pointerEvents: 'none',
+                        }}
+                    >
+                        <PaliaClock paliaTime={paliaTime} className="w-full h-full" />
+                    </div>
+
+                    {/* Click area for the clock */}
+                    <div className="flex flex-col leading-tight cursor-pointer">
                         <span className={`font-medium text-lg ${paliaTime.isHarvestTime ? 'text-green-400' : 'text-white'}`}>
                             {paliaTime.formatted}
                         </span>
@@ -196,29 +202,8 @@ export function TimeDisplay() {
                             Palian Time
                         </span>
                     </div>
-
-                    {/* Expand/Collapse Button */}
-                    <button
-                        className="text-blue-200 hover:text-white transition-colors p-1 rounded"
-                        aria-label={showExpandedClock ? 'Hide Palia Clock' : 'Show Palia Clock'}
-                    >
-                        {showExpandedClock ? (
-                            <ChevronUp className="w-4 h-4" />
-                        ) : (
-                            <ChevronDown className="w-4 h-4" />
-                        )}
-                    </button>
                 </div>
             </div>
-
-            {/* Expanded Palia Clock */}
-            {showExpandedClock && (
-                <div className="absolute top-full left-0 right-0 z-50 shadow-xl mt-2">
-                    <div className="max-w-sm mx-auto">
-                        <PaliaClock paliaTime={paliaTime} />
-                    </div>
-                </div>
-            )}
         </div>
     )
 } 

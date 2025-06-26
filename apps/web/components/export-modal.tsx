@@ -13,7 +13,7 @@ import { Button } from '@workspace/ui/components/button'
 import { Textarea } from '@workspace/ui/components/textarea'
 import { Label } from '@workspace/ui/components/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@workspace/ui/components/tabs'
-import { useGarden, useSaveLoad } from '@/stores'
+import { useGarden } from '@/stores'
 
 interface ExportModalProps {
     open: boolean
@@ -22,15 +22,14 @@ interface ExportModalProps {
 
 export function ExportModal({ open, onOpenChange }: ExportModalProps) {
     const { garden } = useGarden()
-    const { exportGarden } = useSaveLoad()
     const [copied, setCopied] = useState(false)
 
-    const gardenData = garden ? exportGarden(garden) : ''
+    const saveCode = garden ? garden.saveLayout() : ''
 
     const handleCopyToClipboard = async () => {
-        if (gardenData) {
+        if (saveCode) {
             try {
-                await navigator.clipboard.writeText(gardenData)
+                await navigator.clipboard.writeText(saveCode)
                 setCopied(true)
                 setTimeout(() => setCopied(false), 2000)
             } catch (error) {
@@ -39,13 +38,13 @@ export function ExportModal({ open, onOpenChange }: ExportModalProps) {
         }
     }
 
-    const handleDownloadJSON = () => {
-        if (gardenData) {
-            const blob = new Blob([gardenData], { type: 'application/json' })
+    const handleDownloadSaveCode = () => {
+        if (saveCode) {
+            const blob = new Blob([saveCode], { type: 'text/plain' })
             const url = URL.createObjectURL(blob)
             const link = document.createElement('a')
             link.href = url
-            link.download = `palia-garden-${new Date().toISOString().split('T')[0]}.json`
+            link.download = `palia-garden-save-${new Date().toISOString().split('T')[0]}.txt`
             document.body.appendChild(link)
             link.click()
             document.body.removeChild(link)
@@ -61,6 +60,11 @@ export function ExportModal({ open, onOpenChange }: ExportModalProps) {
             textContent += `Size: ${garden.rows} × ${garden.columns} plots\n`
             textContent += `Active Plots: ${garden.activePlotCount}\n`
             textContent += `Export Date: ${new Date().toLocaleString()}\n\n`
+
+            // Add save code
+            textContent += `Save Code:\n`
+            textContent += `----------\n`
+            textContent += `${saveCode}\n\n`
 
             // Add plot information
             textContent += `Plot Details:\n`
@@ -98,7 +102,7 @@ export function ExportModal({ open, onOpenChange }: ExportModalProps) {
             const url = URL.createObjectURL(blob)
             const link = document.createElement('a')
             link.href = url
-            link.download = `palia-garden-${new Date().toISOString().split('T')[0]}.txt`
+            link.download = `palia-garden-summary-${new Date().toISOString().split('T')[0]}.txt`
             document.body.appendChild(link)
             link.click()
             document.body.removeChild(link)
@@ -115,7 +119,7 @@ export function ExportModal({ open, onOpenChange }: ExportModalProps) {
                         Export Garden
                     </DialogTitle>
                     <DialogDescription>
-                        Export your garden layout in different formats for backup or sharing.
+                        Export your garden layout as a Palia Garden Planner save code or text summary.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -124,23 +128,23 @@ export function ExportModal({ open, onOpenChange }: ExportModalProps) {
                         <p className="text-gray-500">No garden to export.</p>
                     </div>
                 ) : (
-                    <Tabs defaultValue="json" className="w-full">
+                    <Tabs defaultValue="save-code" className="w-full">
                         <TabsList className="grid w-full grid-cols-2">
-                            <TabsTrigger value="json">JSON Format</TabsTrigger>
+                            <TabsTrigger value="save-code">Save Code</TabsTrigger>
                             <TabsTrigger value="text">Text Summary</TabsTrigger>
                         </TabsList>
 
-                        <TabsContent value="json" className="space-y-4">
+                        <TabsContent value="save-code" className="space-y-4">
                             <div className="space-y-2">
-                                <Label>Garden Data (JSON)</Label>
+                                <Label>Palia Garden Planner Save Code</Label>
                                 <Textarea
-                                    value={gardenData}
+                                    value={saveCode}
                                     readOnly
                                     className="min-h-[200px] font-mono text-sm"
-                                    placeholder="Garden data will appear here..."
+                                    placeholder="Save code will appear here..."
                                 />
                                 <p className="text-sm text-gray-500">
-                                    This JSON format can be imported back into the garden planner.
+                                    This save code can be imported back into any Palia Garden Planner (Vue.js or React version).
                                 </p>
                             </div>
 
@@ -158,9 +162,9 @@ export function ExportModal({ open, onOpenChange }: ExportModalProps) {
                                         </>
                                     )}
                                 </Button>
-                                <Button onClick={handleDownloadJSON}>
+                                <Button onClick={handleDownloadSaveCode}>
                                     <Download className="w-4 h-4 mr-2" />
-                                    Download JSON
+                                    Download Save Code
                                 </Button>
                             </div>
                         </TabsContent>
@@ -177,7 +181,7 @@ export function ExportModal({ open, onOpenChange }: ExportModalProps) {
                                     </div>
                                 </div>
                                 <p className="text-sm text-gray-500">
-                                    This text format provides a readable summary of your garden layout.
+                                    This text format provides a readable summary of your garden layout including the save code.
                                 </p>
                             </div>
 

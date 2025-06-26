@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { FolderOpen, Trash2, Edit2, Calendar } from 'lucide-react'
+import { FolderOpen, Edit2, Trash2, Calendar } from 'lucide-react'
 import {
     Dialog,
     DialogContent,
@@ -31,23 +31,18 @@ interface LoadModalProps {
 }
 
 export function LoadModal({ open, onOpenChange }: LoadModalProps) {
-    const { initializeGarden } = useGarden()
-    const { savedGardens, loadGarden, deleteGarden, renameSavedGarden, importGarden, isLoading } = useSaveLoad()
+    const { setGarden } = useGarden()
+    const { savedGardens, loadGarden, deleteGarden, renameSavedGarden, isLoading } = useSaveLoad()
 
     const [editingId, setEditingId] = useState<string | null>(null)
     const [editingName, setEditingName] = useState('')
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
 
     const handleLoad = async (id: string) => {
-        const gardenData = await loadGarden(id)
-        if (gardenData) {
-            const garden = importGarden(gardenData)
-            if (garden) {
-                // Replace current garden with loaded one
-                initializeGarden(garden.rows, garden.columns)
-                // Note: We'll need to implement proper garden replacement in the store
-                onOpenChange(false)
-            }
+        const garden = await loadGarden(id)
+        if (garden) {
+            setGarden(garden)
+            onOpenChange(false)
         }
     }
 

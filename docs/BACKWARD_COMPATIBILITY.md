@@ -1,8 +1,23 @@
-# Palia Garden Planner - Backward Compatibility Implementation
+# Palia Garden Planner - Backward Compatibility
+
+This document outlines the backward compatibility implementation for migrating save layouts from the original Vue.js Palia Garden Planner to the new React implementation.
 
 ## Overview
 
-This document describes the implementation of backward compatibility for save layout codes between the original Vue.js garden planner and the new React implementation. The system supports all save code versions from 0.1 to 0.4, ensuring that users can seamlessly migrate their garden layouts.
+The React implementation provides **complete backward compatibility** with Vue.js save codes from versions 0.1 through 0.4. All import and export functionality is based on Palia Garden Planner save codes, ensuring seamless migration and interoperability between the Vue.js and React versions.
+
+## Supported Features
+
+### Import/Export
+
+- **Import**: Supports Vue.js save codes from versions 0.1-0.4
+- **Export**: Generates v0.4 format save codes compatible with both Vue.js and React versions
+- **Local Storage**: Gardens are saved locally using Vue.js save codes (not JSON)
+- **Automatic Conversion**: Older save codes are automatically converted to v0.4 format
+
+### No JSON Support
+
+The React implementation **does not support JSON import/export**. All functionality is based on Palia Garden Planner save codes to maintain compatibility with the original Vue.js implementation.
 
 ## Save Code Format Evolution
 

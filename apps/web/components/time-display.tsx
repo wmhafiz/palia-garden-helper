@@ -1,11 +1,12 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Clock } from 'lucide-react'
+import { Clock, ChevronDown, ChevronUp } from 'lucide-react'
 import { format } from 'date-fns'
 import { useUISettings } from '@/stores'
 import { notificationManager } from '@/lib/notifications'
 import { useAudioContext } from '@/hooks/useAudioContext'
+import { PaliaClock } from './palia-clock'
 
 export function TimeDisplay() {
     const [currentTime, setCurrentTime] = useState(new Date())
@@ -18,6 +19,7 @@ export function TimeDisplay() {
     })
     const [nextHarvestTime, setNextHarvestTime] = useState(new Date())
     const [minutesUntilHarvest, setMinutesUntilHarvest] = useState(0)
+    const [showExpandedClock, setShowExpandedClock] = useState(false)
 
     // Refs to track notification state
     const hasShownTwoMinuteWarning = useRef(false)
@@ -156,38 +158,67 @@ export function TimeDisplay() {
     }, [enableNotifications])
 
     return (
-        <div className="flex items-center gap-4 text-sm text-white px-3 py-2">
-            <Clock className="w-4 h-4 text-blue-200" />
+        <div className="relative">
+            {/* Compact Time Display */}
+            <div className="flex items-center gap-4 text-sm text-white px-3 py-2"
+                onClick={() => setShowExpandedClock(!showExpandedClock)}
+            >
+                <Clock className="w-4 h-4 text-blue-200" />
 
-            {/* Earth Time */}
-            <div className="flex flex-col leading-tight">
-                <span className="font-medium text-white">
-                    {format(currentTime, 'MMM d, yyyy')}
-                </span>
-                <span className="text-xs text-blue-200">
-                    {format(currentTime, 'h:mm a')} Local
-                </span>
+                {/* Earth Time */}
+                <div className="flex flex-col leading-tight">
+                    <span className="font-medium text-white">
+                        {format(currentTime, 'MMM d, yyyy')}
+                    </span>
+                    <span className="text-xs text-blue-200">
+                        {format(currentTime, 'h:mm a')} Local
+                    </span>
+                </div>
+
+                {/* Next Harvest Time */}
+                <div className="flex flex-col leading-tight border-l border-blue-200/30 pl-4">
+                    <span className={`font-medium ${minutesUntilHarvest <= 2 ? 'text-orange-400 animate-pulse' : 'text-orange-300'}`}>
+                        {format(nextHarvestTime, 'h:mm a')}
+                    </span>
+                    <span className="text-xs text-blue-200">
+                        Next Harvest ({minutesUntilHarvest}m)
+                    </span>
+                </div>
+
+                {/* Palia Time with Expand Button */}
+                <div className="flex items-center gap-2"
+                >
+                    <div className="flex flex-col leading-tight border-l border-blue-200/30 pl-4">
+                        <span className={`font-medium text-lg ${paliaTime.isHarvestTime ? 'text-green-400' : 'text-white'}`}>
+                            {paliaTime.formatted}
+                        </span>
+                        <span className="text-xs text-blue-200">
+                            Palian Time
+                        </span>
+                    </div>
+
+                    {/* Expand/Collapse Button */}
+                    <button
+                        className="text-blue-200 hover:text-white transition-colors p-1 rounded"
+                        aria-label={showExpandedClock ? 'Hide Palia Clock' : 'Show Palia Clock'}
+                    >
+                        {showExpandedClock ? (
+                            <ChevronUp className="w-4 h-4" />
+                        ) : (
+                            <ChevronDown className="w-4 h-4" />
+                        )}
+                    </button>
+                </div>
             </div>
 
-            {/* Next Harvest Time */}
-            <div className="flex flex-col leading-tight border-l border-blue-200/30 pl-4">
-                <span className={`font-medium ${minutesUntilHarvest <= 2 ? 'text-orange-400 animate-pulse' : 'text-orange-300'}`}>
-                    {format(nextHarvestTime, 'h:mm a')}
-                </span>
-                <span className="text-xs text-blue-200">
-                    Next Harvest ({minutesUntilHarvest}m)
-                </span>
-            </div>
-
-            {/* Palia Time */}
-            <div className="flex flex-col leading-tight border-l border-blue-200/30 pl-4">
-                <span className={`font-medium text-lg ${paliaTime.isHarvestTime ? 'text-green-400' : 'text-white'}`}>
-                    {paliaTime.formatted}
-                </span>
-                <span className="text-xs text-blue-200">
-                    Palian Time
-                </span>
-            </div>
+            {/* Expanded Palia Clock */}
+            {showExpandedClock && (
+                <div className="absolute top-full left-0 right-0 z-50 shadow-xl mt-2">
+                    <div className="max-w-sm mx-auto">
+                        <PaliaClock paliaTime={paliaTime} />
+                    </div>
+                </div>
+            )}
         </div>
     )
 } 

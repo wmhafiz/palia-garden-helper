@@ -125,13 +125,13 @@ export function LayoutCreatorModal({ open, onOpenChange }: LayoutCreatorModalPro
     ]
 
     const handlePresetSelect = (preset: PresetLayout) => {
+        setSelectedPreset(preset.name)
         setRows(preset.rows)
         setColumns(preset.columns)
-        setSelectedPreset(preset.name)
 
-        // Initialize pattern if not exists
+        // Create default pattern if not exists
         if (!presetPatterns[preset.name]) {
-            const defaultPattern = preset.defaultPattern || createDefaultPattern(preset.rows, preset.columns)
+            const defaultPattern = createDefaultPattern(preset.rows, preset.columns)
             setPresetPatterns(prev => ({
                 ...prev,
                 [preset.name]: defaultPattern
@@ -150,9 +150,46 @@ export function LayoutCreatorModal({ open, onOpenChange }: LayoutCreatorModalPro
         return Math.max(min, Math.min(max, value + delta))
     }
 
+    // Check if current layout configuration has changed
+    const hasLayoutChanged = () => {
+        if (!garden) return true
+
+        // Check if dimensions changed
+        if (rows !== garden.rows || columns !== garden.columns) {
+            return true
+        }
+
+        // Check if plot pattern changed (for same dimensions)
+        if (selectedPreset && presetPatterns[selectedPreset]) {
+            const currentPattern = garden.getPlotPattern()
+            const newPattern = presetPatterns[selectedPreset]!
+
+            // Compare patterns
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < columns; j++) {
+                    if (currentPattern[i]?.[j] !== newPattern[i]?.[j]) {
+                        return true
+                    }
+                }
+            }
+            return false
+        }
+
+        // For non-preset layouts, if dimensions are same, check if all plots would be active
+        // (which is the default for custom layouts)
+        if (!selectedPreset) {
+            const currentPattern = garden.getPlotPattern()
+            // Check if current pattern has any inactive plots
+            return currentPattern.some(row => row.some(plot => !plot))
+        }
+
+        return false
+    }
+
     const totalPlots = rows * columns
     const isValidSize = rows >= 1 && columns >= 1 && rows <= 10 && columns <= 10
-    const isCurrentSize = garden && rows === garden.rows && columns === garden.columns
+    const isCurrentSize = garden ? (rows === garden.rows && columns === garden.columns) : false
+    const layoutChanged = hasLayoutChanged()
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -323,9 +360,9 @@ export function LayoutCreatorModal({ open, onOpenChange }: LayoutCreatorModalPro
                     </Button>
                     <Button
                         onClick={handleCreateLayout}
-                        disabled={!isValidSize || (isCurrentSize ?? false)}
+                        disabled={!isValidSize || (!layoutChanged && isCurrentSize)}
                     >
-                        {isCurrentSize ? 'Current Layout' : 'Create Layout'}
+                        {(!layoutChanged && isCurrentSize) ? 'Current Layout' : 'Create Layout'}
                     </Button>
                 </DialogFooter>
             </DialogContent>

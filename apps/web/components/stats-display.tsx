@@ -11,6 +11,7 @@ import { FertilizerTipsWidget } from './fertilizer-tips-widget'
 import { HarvestSummaryWidget } from './harvest-summary-widget'
 import { CropBreakdownWidget } from './crop-breakdown-widget'
 import { ProcessingTipsWidget } from './processing-tips-widget'
+import { HarvestScheduleWidget } from './harvest-schedule-widget'
 
 export function StatsDisplay() {
     const stats = useGardenStats()
@@ -58,9 +59,15 @@ export function StatsDisplay() {
                 <ProcessingTipsWidget />
             </div>
 
-            {/* Crop Breakdown */}
-            <CropBreakdownWidget />
+            <div className="flex flex-row gap-4">
+                <div className="flex-1">
+                    {/* Crop Breakdown */}
+                    <CropBreakdownWidget />
+                </div>
 
+                {/* Harvest Schedule */}
+                <HarvestScheduleWidget />
+            </div>
 
             {/* Crop Statistics */}
             <CropStatisticsWidget />

@@ -36,7 +36,7 @@ export function RadialChart({
                     height: size,
                 } as React.CSSProperties}
             >
-                <div className="absolute inset-1 bg-white rounded-full flex flex-col items-center justify-center gap-0 pt-1">
+                <div className="absolute inset-1 bg-card rounded-full flex flex-col items-center justify-center gap-0 pt-1">
                     <div className="flex flex-col items-center justify-center text">
                         {icon}
                     </div>

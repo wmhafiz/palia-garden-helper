@@ -85,9 +85,9 @@ export function LoadModal({ open, onOpenChange }: LoadModalProps) {
 
                     {savedGardens.length === 0 ? (
                         <div className="text-center py-8">
-                            <FolderOpen className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-                            <p className="text-gray-500">No saved gardens found.</p>
-                            <p className="text-sm text-gray-400 mt-1">Save your current garden to see it here.</p>
+                            <FolderOpen className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                            <p className="text-muted-foreground">No saved gardens found.</p>
+                            <p className="text-sm text-muted-foreground mt-1">Save your current garden to see it here.</p>
                         </div>
                     ) : (
                         <ScrollArea className="max-h-96">
@@ -95,7 +95,7 @@ export function LoadModal({ open, onOpenChange }: LoadModalProps) {
                                 {savedGardens.map((garden) => (
                                     <div
                                         key={garden.id}
-                                        className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50"
+                                        className="flex items-center justify-between p-3 border border-border rounded-lg hover:bg-accent"
                                     >
                                         <div className="flex-1">
                                             {editingId === garden.id ? (
@@ -119,8 +119,8 @@ export function LoadModal({ open, onOpenChange }: LoadModalProps) {
                                                 </div>
                                             ) : (
                                                 <>
-                                                    <h3 className="font-medium text-gray-900">{garden.name}</h3>
-                                                    <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
+                                                    <h3 className="font-medium text-foreground">{garden.name}</h3>
+                                                    <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
                                                         <span className="flex items-center gap-1">
                                                             <Calendar className="w-3 h-3" />
                                                             Created: {format(new Date(garden.createdAt), 'MMM d, yyyy')}
@@ -164,7 +164,7 @@ export function LoadModal({ open, onOpenChange }: LoadModalProps) {
                                                     size="sm"
                                                     variant="ghost"
                                                     onClick={() => setDeleteConfirmId(garden.id)}
-                                                    className="text-red-600 hover:text-red-700"
+                                                    className="text-destructive hover:text-destructive/90"
                                                 >
                                                     <Trash2 className="w-3 h-3" />
                                                 </Button>
@@ -191,7 +191,7 @@ export function LoadModal({ open, onOpenChange }: LoadModalProps) {
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={() => deleteConfirmId && handleDeleteConfirm(deleteConfirmId)}
-                            className="bg-red-600 hover:bg-red-700"
+                            className="bg-destructive hover:bg-destructive/90"
                         >
                             Delete
                         </AlertDialogAction>

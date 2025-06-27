@@ -54,12 +54,12 @@ export function UISettingsModal({ open, onOpenChange }: UISettingsModalProps) {
                 <div className="space-y-6">
                     {/* Display Settings */}
                     <div className="space-y-4">
-                        <h3 className="text-sm font-medium text-gray-900">Display Options</h3>
+                        <h3 className="text-sm font-medium text-foreground">Display Options</h3>
 
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
                                 <Label htmlFor="bonus-indicators">Bonus Indicators</Label>
-                                <p className="text-sm text-gray-500">
+                                <p className="text-sm text-muted-foreground">
                                     Show visual indicators for crop bonuses
                                 </p>
                             </div>
@@ -73,7 +73,7 @@ export function UISettingsModal({ open, onOpenChange }: UISettingsModalProps) {
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
                                 <Label htmlFor="grid-lines">Grid Lines</Label>
-                                <p className="text-sm text-gray-500">
+                                <p className="text-sm text-muted-foreground">
                                     Show grid lines between plots and tiles
                                 </p>
                             </div>
@@ -87,7 +87,7 @@ export function UISettingsModal({ open, onOpenChange }: UISettingsModalProps) {
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
                                 <Label htmlFor="tooltips">Tooltips</Label>
-                                <p className="text-sm text-gray-500">
+                                <p className="text-sm text-muted-foreground">
                                     Show helpful tooltips on hover
                                 </p>
                             </div>
@@ -101,7 +101,7 @@ export function UISettingsModal({ open, onOpenChange }: UISettingsModalProps) {
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
                                 <Label htmlFor="compact-mode">Compact Mode</Label>
-                                <p className="text-sm text-gray-500">
+                                <p className="text-sm text-muted-foreground">
                                     Use smaller spacing and elements
                                 </p>
                             </div>
@@ -117,12 +117,12 @@ export function UISettingsModal({ open, onOpenChange }: UISettingsModalProps) {
 
                     {/* Theme Settings */}
                     <div className="space-y-4">
-                        <h3 className="text-sm font-medium text-gray-900">Theme</h3>
+                        <h3 className="text-sm font-medium text-foreground">Theme</h3>
 
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
                                 <Label htmlFor="dark-mode">Dark Mode</Label>
-                                <p className="text-sm text-gray-500">
+                                <p className="text-sm text-muted-foreground">
                                     Use dark color scheme
                                 </p>
                             </div>
@@ -138,12 +138,12 @@ export function UISettingsModal({ open, onOpenChange }: UISettingsModalProps) {
 
                     {/* Notifications Settings */}
                     <div className="space-y-4">
-                        <h3 className="text-sm font-medium text-gray-900">Notifications</h3>
+                        <h3 className="text-sm font-medium text-foreground">Notifications</h3>
 
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
                                 <Label htmlFor="notifications">Browser Notifications</Label>
-                                <p className="text-sm text-gray-500">
+                                <p className="text-sm text-muted-foreground">
                                     Show browser notifications for harvest reminders
                                 </p>
                             </div>
@@ -157,7 +157,7 @@ export function UISettingsModal({ open, onOpenChange }: UISettingsModalProps) {
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
                                 <Label htmlFor="sound-notifications">Sound Notifications</Label>
-                                <p className="text-sm text-gray-500">
+                                <p className="text-sm text-muted-foreground">
                                     Play sound alerts for harvest reminders
                                 </p>
                             </div>
@@ -173,12 +173,12 @@ export function UISettingsModal({ open, onOpenChange }: UISettingsModalProps) {
 
                     {/* Behavior Settings */}
                     <div className="space-y-4">
-                        <h3 className="text-sm font-medium text-gray-900">Behavior</h3>
+                        <h3 className="text-sm font-medium text-foreground">Behavior</h3>
 
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
                                 <Label htmlFor="auto-save">Auto Save</Label>
-                                <p className="text-sm text-gray-500">
+                                <p className="text-sm text-muted-foreground">
                                     Automatically save changes as you make them
                                 </p>
                             </div>

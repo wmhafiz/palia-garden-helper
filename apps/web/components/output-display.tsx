@@ -241,7 +241,7 @@ export function OutputDisplay() {
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <p className="text-gray-500 text-center py-8">
+                    <p className="text-muted-foreground text-center py-8">
                         No garden data available
                     </p>
                 </CardContent>
@@ -262,19 +262,19 @@ export function OutputDisplay() {
                 <CardContent className="space-y-4">
                     <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
-                            <div className="text-gray-500">Total Crops</div>
+                            <div className="text-muted-foreground">Total Crops</div>
                             <div className="font-medium">{harvestData.totalCrops}</div>
                         </div>
                         <div>
-                            <div className="text-gray-500">Expected Yield</div>
+                            <div className="text-muted-foreground">Expected Yield</div>
                             <div className="font-medium">{harvestData.totalYield}</div>
                         </div>
                         <div>
-                            <div className="text-gray-500">Estimated Value</div>
+                            <div className="text-muted-foreground">Estimated Value</div>
                             <div className="font-medium text-green-600">{harvestData.totalValue.toLocaleString()}g</div>
                         </div>
                         <div>
-                            <div className="text-gray-500">Avg. Growth Time</div>
+                            <div className="text-muted-foreground">Avg. Growth Time</div>
                             <div className="font-medium">{Math.round(harvestData.averageGrowthTime)}m</div>
                         </div>
                     </div>
@@ -309,7 +309,7 @@ export function OutputDisplay() {
                         {/* Summary */}
                         <div className="grid grid-cols-2 gap-4 text-sm">
                             <div>
-                                <div className="text-gray-500 flex items-center gap-1">
+                                <div className="text-muted-foreground flex items-center gap-1">
                                     <Droplets className="w-3 h-3" />
                                     Missing Water Retain
                                 </div>
@@ -318,11 +318,11 @@ export function OutputDisplay() {
                                 </div>
                             </div>
                             <div>
-                                <div className="text-gray-500 flex items-center gap-1">
+                                <div className="text-muted-foreground flex items-center gap-1">
                                     <Shield className="w-3 h-3" />
                                     Missing Weed Prevention
                                 </div>
-                                <div className="font-medium text-purple-600">
+                                <div className="font-medium text-chart-4">
                                     {fertilizerAnalysis.summary.weedPrevention} / {fertilizerAnalysis.summary.total}
                                 </div>
                             </div>
@@ -368,7 +368,7 @@ export function OutputDisplay() {
                                 >
                                     Apply {selectedPlayMode.charAt(0).toUpperCase() + selectedPlayMode.slice(1)} Mode Fertilizers
                                 </Button>
-                                <p className="text-xs text-gray-500">
+                                <p className="text-xs text-muted-foreground">
                                     This will apply fertilizers to empty tiles based on your selected optimization mode
                                 </p>
                             </div>
@@ -380,7 +380,7 @@ export function OutputDisplay() {
                                 <h4 className="text-sm font-medium">Recommendations ({fertilizerAnalysis.tiles.length} tiles)</h4>
                                 <div className="max-h-32 overflow-y-auto space-y-1">
                                     {fertilizerAnalysis.tiles.slice(0, 10).map((tile, index) => (
-                                        <div key={index} className="text-xs bg-gray-50 p-2 rounded">
+                                        <div key={index} className="text-xs bg-muted p-2 rounded">
                                             <div className="flex justify-between items-center">
                                                 <span>Plot {tile.plotRow + 1},{tile.plotCol + 1} - {tile.cropType}</span>
                                                 {tile.recommendedFertilizer && (
@@ -391,7 +391,7 @@ export function OutputDisplay() {
                                             </div>
                                             <div className="flex gap-1 mt-1">
                                                 {tile.missingBonuses.map((bonus) => (
-                                                    <span key={bonus} className="text-xs text-gray-500">
+                                                    <span key={bonus} className="text-xs text-muted-foreground">
                                                         Missing: {bonus}
                                                     </span>
                                                 ))}
@@ -399,7 +399,7 @@ export function OutputDisplay() {
                                         </div>
                                     ))}
                                     {fertilizerAnalysis.tiles.length > 10 && (
-                                        <div className="text-xs text-gray-500 text-center">
+                                        <div className="text-xs text-muted-foreground text-center">
                                             ... and {fertilizerAnalysis.tiles.length - 10} more tiles
                                         </div>
                                     )}
@@ -410,7 +410,7 @@ export function OutputDisplay() {
                         {fertilizerAnalysis.tiles.length === 0 && (
                             <div className="text-center py-4">
                                 <div className="text-green-600 font-medium">✓ All crops have optimal fertilizer coverage!</div>
-                                <p className="text-sm text-gray-500 mt-1">Your garden is well-optimized for the current mode.</p>
+                                <p className="text-sm text-muted-foreground mt-1">Your garden is well-optimized for the current mode.</p>
                             </div>
                         )}
                     </CardContent>
@@ -434,7 +434,7 @@ export function OutputDisplay() {
                                         <h4 className="font-medium">{harvest.cropType}</h4>
                                         <Badge variant="outline">{harvest.count}</Badge>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                                    <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
                                         <div>Yield: {harvest.totalYield}</div>
                                         <div>Value: {harvest.totalValue.toLocaleString()}g</div>
                                         <div>Growth: {harvest.growthTime}m</div>

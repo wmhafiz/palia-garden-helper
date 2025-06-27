@@ -65,15 +65,15 @@ export function SaveModal({ open, onOpenChange }: SaveModalProps) {
                                 }
                             }}
                         />
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-muted-foreground">
                             {gardenName.trim() ? `Will be saved as: "${gardenName.trim()}"` : 'Leave empty for auto-generated name'}
                         </p>
                     </div>
 
                     {garden && (
-                        <div className="bg-gray-50 p-3 rounded-lg">
-                            <h4 className="text-sm font-medium text-gray-700 mb-2">Garden Info:</h4>
-                            <div className="text-sm text-gray-600 space-y-1">
+                        <div className="bg-muted p-3 rounded-lg">
+                            <h4 className="text-sm font-medium text-foreground mb-2">Garden Info:</h4>
+                            <div className="text-sm text-muted-foreground space-y-1">
                                 <div>Size: {garden.rows} × {garden.columns} plots</div>
                                 <div>Active Plots: {garden.activePlotCount}</div>
                                 <div>Version: {garden.version}</div>

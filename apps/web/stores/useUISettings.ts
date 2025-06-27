@@ -30,7 +30,7 @@ const defaultSettings: UISettings = {
     showBonusIndicators: true,
     showGridLines: true,
     showTooltips: true,
-    isDarkMode: false,
+    isDarkMode: typeof window !== 'undefined' ? window.matchMedia('(prefers-color-scheme: dark)').matches : false,
     isCompactMode: false,
     autoSave: true,
     enableNotifications: true,

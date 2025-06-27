@@ -34,6 +34,7 @@ import { ImportModal } from './import-modal'
 import { UISettingsModal } from './ui-settings-modal'
 import { LayoutCreatorModal } from './layout-creator-modal'
 import { TimeDisplay } from './time-display'
+import { ThemeSwitcher } from './theme-switcher'
 
 export function MenuBar() {
     const { garden, clearGarden } = useGarden()
@@ -78,7 +79,7 @@ export function MenuBar() {
     }
 
     return (
-        <div className="fixed top-0 left-0 right-0 z-40 bg-palia-blue-dark text-white shadow-lg">
+        <div className="fixed top-0 left-0 right-0 z-40 bg-palia-blue-dark dark:bg-background text-white dark:text-foreground shadow-lg border-b border-border">
             {/* Top navigation bar */}
             <div className="flex items-center justify-between px-6 py-3">
                 {/* Left side - Branding */}
@@ -88,7 +89,7 @@ export function MenuBar() {
                     </div>
                     <div>
                         <h1 className="text-xl font-bold text-white">
-                            Palia Garden Planner
+                            Palia Garden Helper
                         </h1>
                         <p className="text-xs text-blue-200">
                             A player-made tool for planning your garden
@@ -108,13 +109,13 @@ export function MenuBar() {
             </div>
 
             {/* Bottom action bar */}
-            <div className="bg-palia-blue px-6 py-2 border-t border-blue-400 border-opacity-30">
+            <div className="bg-palia-blue dark:bg-muted px-6 py-2 border-t border-blue-400 border-opacity-30 dark:border-border">
                 <div className="flex items-center justify-between">
                     {/* File operations */}
                     <div className="flex items-center space-x-2">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="sm" className="bg-white text-palia-blue-dark border-white hover:bg-gray-100">
+                                <Button variant="outline" size="sm" className="bg-white dark:bg-card text-palia-blue-dark dark:text-foreground border-white dark:border-border hover:bg-gray-100 dark:hover:bg-accent">
                                     <FolderOpen className="w-4 h-4 mr-2" />
                                     File
                                 </Button>
@@ -142,7 +143,7 @@ export function MenuBar() {
 
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="sm" className="bg-white text-palia-blue-dark border-white hover:bg-gray-100">
+                                <Button variant="outline" size="sm" className="bg-white dark:bg-card text-palia-blue-dark dark:text-foreground border-white dark:border-border hover:bg-gray-100 dark:hover:bg-accent">
                                     <Grid3x3 className="w-4 h-4 mr-2" />
                                     Tools
                                 </Button>
@@ -171,11 +172,13 @@ export function MenuBar() {
                             variant="outline"
                             size="sm"
                             onClick={() => setSettingsModalOpen(true)}
-                            className="bg-white text-palia-blue-dark border-white hover:bg-gray-100"
+                            className="bg-white dark:bg-card text-palia-blue-dark dark:text-foreground border-white dark:border-border hover:bg-gray-100 dark:hover:bg-accent"
                         >
                             <Settings className="w-4 h-4 mr-2" />
                             Settings
                         </Button>
+
+                        <ThemeSwitcher />
                     </div>
 
 

@@ -27,10 +27,10 @@ export function HorizontalFertilizerSelector() {
     )
 
     return (
-        <div className="bg-palia-accent border border-gray-300 rounded-lg flex-1 min-w-0">
+        <div className="bg-card border border-border rounded-lg flex-1 min-w-0">
             {/* Header */}
-            <div className="px-3 sm:px-4 py-2 bg-gray-100 border-b border-gray-300 rounded-t-lg">
-                <span className="text-sm font-semibold text-gray-700">Fertilisers per Day</span>
+            <div className="px-3 sm:px-4 py-2 bg-muted border-b border-border rounded-t-lg">
+                <span className="text-sm font-semibold text-foreground">Fertilisers per Day</span>
             </div>
 
             {/* Content */}
@@ -48,7 +48,7 @@ export function HorizontalFertilizerSelector() {
                                         relative flex-shrink-0 w-12 h-12 rounded-lg border-2 transition-all duration-200
                                         ${isSelected
                                             ? 'border-palia-blue bg-blue-50 shadow-md'
-                                            : 'border-gray-300 bg-white hover:border-palia-blue hover:shadow-sm'
+                                            : 'border-border bg-card hover:border-palia-blue hover:shadow-sm'
                                         }
                                     `}
                                 >
@@ -79,7 +79,7 @@ export function HorizontalFertilizerSelector() {
                                     >
                                         <div className="text-xs">
                                             <div className="font-semibold">{fertiliser.type}</div>
-                                            <div className="text-gray-500">Effect: {fertiliser.effect}</div>
+                                            <div className="text-muted-foreground">Effect: {fertiliser.effect}</div>
                                         </div>
                                     </TooltipContent>
                                 </Tooltip>

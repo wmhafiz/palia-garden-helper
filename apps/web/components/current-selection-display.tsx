@@ -40,7 +40,7 @@ export function CurrentSelectionDisplay({
                 name: 'Erase Both',
                 icon: '🗑️',
                 description: 'Clear crops and fertilizers (per tile)',
-                color: 'text-red-600'
+                color: 'text-destructive'
             }
         }
 
@@ -50,7 +50,7 @@ export function CurrentSelectionDisplay({
                 name: 'Erase Crops',
                 icon: '🌱',
                 description: 'Clear crops only (per tile)',
-                color: 'text-red-600'
+                color: 'text-destructive'
             }
         }
 
@@ -60,7 +60,7 @@ export function CurrentSelectionDisplay({
                 name: 'Erase Fertilizers',
                 icon: '🧪',
                 description: 'Clear fertilizers only (per tile)',
-                color: 'text-blue-600'
+                color: 'text-primary'
             }
         }
 
@@ -70,7 +70,7 @@ export function CurrentSelectionDisplay({
                 name: 'Erase Plot',
                 icon: '🧹',
                 description: 'Clear entire plot (all 9 tiles)',
-                color: 'text-purple-600'
+                color: 'text-chart-4'
             }
         }
 
@@ -101,7 +101,7 @@ export function CurrentSelectionDisplay({
             name: 'No selection',
             icon: '✋',
             description: 'Click an item to select',
-            color: 'text-gray-500'
+            color: 'text-muted-foreground'
         }
     }
 
@@ -135,10 +135,10 @@ export function CurrentSelectionDisplay({
 
     // Default variant
     return (
-        <div className={`bg-gray-100 border border-gray-300 rounded-lg p-2 sm:p-3 flex-1 min-w-0 ${className}`}>
+        <div className={`bg-muted border border-border rounded-lg p-2 sm:p-3 flex-1 min-w-0 ${className}`}>
             <div className="flex items-center space-x-2 sm:space-x-3">
                 {showLabel && (
-                    <span className="text-xs sm:text-sm font-medium text-gray-700 hidden sm:inline">Current selection:</span>
+                    <span className="text-xs sm:text-sm font-medium text-foreground hidden sm:inline">Current selection:</span>
                 )}
                 <div className="flex items-center space-x-2 min-w-0 flex-1">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center flex-shrink-0">
@@ -152,7 +152,7 @@ export function CurrentSelectionDisplay({
                         <span className={`text-xs sm:text-sm font-medium ${displayInfo.color} truncate`}>
                             {displayInfo.name}
                         </span>
-                        <span className="text-xs text-gray-500 truncate hidden sm:block">
+                        <span className="text-xs text-muted-foreground truncate hidden sm:block">
                             {displayInfo.description}
                         </span>
                     </div>

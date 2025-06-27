@@ -96,6 +96,10 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.269 0 0);
   --sidebar-ring: oklch(0.439 0 0);
+
+  /* Dark mode Palia colors */
+  --palia-accent: #1a1a1a;
+  --palia-primary: #0a0a0a;
 }
 
 @theme inline {
@@ -170,15 +174,15 @@
 /* Garden Planner specific styles */
 @layer components {
   .garden-tile {
-    @apply relative w-12 h-12 border border-gray-300 bg-white cursor-pointer transition-all duration-200;
+    @apply relative w-12 h-12 border border-border bg-card cursor-pointer transition-all duration-200;
   }
 
   .garden-tile:hover {
-    @apply border-palia-blue bg-palia-accent;
+    @apply border-palia-blue bg-accent;
   }
 
   .garden-plot {
-    @apply grid grid-cols-3 gap-1 p-2 border-2 border-gray-400 rounded-lg bg-gray-50;
+    @apply grid grid-cols-3 gap-1 p-2 border-2 border-border rounded-lg bg-muted/50;
   }
 
   .bonus-indicator {
@@ -194,7 +198,7 @@
   }
 
   .crop-button.selected {
-    @apply border-palia-blue-dark bg-palia-accent;
+    @apply border-palia-blue-dark bg-accent;
   }
 }
 

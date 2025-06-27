@@ -166,7 +166,7 @@ export function PlotComponent({
     const plotElement = (
         <div
             className={`
-        plot-component relative m-1 p-1 bg-white rounded-lg shadow-sm transition-all duration-200
+        plot-component relative m-1 p-1 bg-card rounded-lg shadow-sm transition-all duration-200 border border-border
         ${plotBorder()}
         ${isHovered ? 'shadow-md scale-105' : ''}
         ${plot.isActive ? 'opacity-100' : 'opacity-40'}

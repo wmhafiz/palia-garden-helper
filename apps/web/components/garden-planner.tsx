@@ -9,6 +9,7 @@ import { HorizontalToolSelector } from './horizontal-tool-selector'
 import { MenuBar } from './menu-bar'
 import { StatsDisplay } from './stats-display'
 import { CurrentSelectionDisplay } from './current-selection-display'
+import { ScrollArea } from '@workspace/ui/components/scroll-area'
 
 export function GardenPlanner() {
     const { garden, initializeGarden, isLoading, error } = useGarden()
@@ -35,7 +36,7 @@ export function GardenPlanner() {
             hasShownWelcome.current = true
             addToast({
                 type: 'info',
-                message: 'Welcome to Palia Garden Planner! Your garden has been initialized with a 3x3 layout.'
+                message: 'Welcome to Palia Garden Helper! Your garden has been initialized with a 3x3 layout.'
             })
         }
     }, [garden, addToast])
@@ -104,7 +105,7 @@ export function GardenPlanner() {
             <div className="flex items-center justify-center min-h-screen">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-palia-blue mx-auto mb-4"></div>
-                    <p className="text-gray-600">Loading garden planner...</p>
+                    <p className="text-muted-foreground">Loading Garden Helper...</p>
                 </div>
             </div>
         )
@@ -128,7 +129,7 @@ export function GardenPlanner() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-background">
             {/* Menu Bar */}
             <MenuBar />
 
@@ -144,18 +145,22 @@ export function GardenPlanner() {
                     </div>
 
                     {/* Garden and Stats Layout */}
-                    <div className="flex flex-col xl:flex-row gap-4 xl:gap-8">
+                    <div className="flex flex-col 2xl:flex-row gap-4 2xl:gap-8">
                         {/* Garden Display - Main Content */}
-                        <div className="w-full xl:w-3/5">
-                            <div className="bg-white rounded-lg shadow p-3 sm:p-4 lg:p-6" data-garden-display>
+                        <div className="flex-1">
+                            <div className="bg-card rounded-lg shadow p-3 sm:p-4 lg:p-6 border border-border" data-garden-display>
                                 <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Garden Layout</h2>
-                                <GardenDisplay />
+                                <ScrollArea className="max-h-[65vh] overflow-auto p-4 border rounded-lg">
+                                    <GardenDisplay />
+                                </ScrollArea>
                             </div>
                         </div>
 
                         {/* Stats Display - Right Sidebar */}
-                        <div className="w-full xl:w-2/5">
-                            <StatsDisplay />
+                        <div className="flex-1">
+                            <ScrollArea className="max-h-[70vh] overflow-auto p-4 border rounded-lg pr-4 lg:pr-8">
+                                <StatsDisplay />
+                            </ScrollArea>
                         </div>
                     </div>
                 </div>

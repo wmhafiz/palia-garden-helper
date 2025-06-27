@@ -18,10 +18,10 @@ export function HorizontalToolSelector() {
     } = useSelectedItem()
 
     return (
-        <div className="bg-palia-accent border border-gray-300 rounded-lg flex-1 min-w-0">
+        <div className="bg-card border border-border rounded-lg flex-1 min-w-0">
             {/* Header */}
-            <div className="px-3 sm:px-4 py-2 bg-gray-100 border-b border-gray-300 rounded-t-lg">
-                <span className="text-sm font-semibold text-gray-700">Erase Tools</span>
+            <div className="px-3 sm:px-4 py-2 bg-muted border-b border-border rounded-t-lg">
+                <span className="text-sm font-semibold text-foreground">Erase Tools</span>
             </div>
 
             {/* Content */}
@@ -36,8 +36,8 @@ export function HorizontalToolSelector() {
                                     className={`
                                         relative flex-shrink-0 w-12 h-12 rounded-lg border-2 transition-all duration-200
                                         ${isEraseCropMode
-                                            ? 'border-red-500 bg-red-50 shadow-md'
-                                            : 'border-gray-300 bg-white hover:border-red-400 hover:shadow-sm'
+                                            ? 'border-palia-blue bg-blue-50 shadow-md'
+                                            : 'border-border bg-card hover:border-palia-blue hover:shadow-sm'
                                         }
                                     `}
                                 >
@@ -67,8 +67,8 @@ export function HorizontalToolSelector() {
                                     className={`
                                         relative flex-shrink-0 w-12 h-12 rounded-lg border-2 transition-all duration-200
                                         ${isEraseFertiliserMode
-                                            ? 'border-blue-500 bg-blue-50 shadow-md'
-                                            : 'border-gray-300 bg-white hover:border-blue-400 hover:shadow-sm'
+                                            ? 'border-palia-blue bg-blue-50 shadow-md'
+                                            : 'border-border bg-card hover:border-palia-blue hover:shadow-sm'
                                         }
                                     `}
                                 >
@@ -98,8 +98,8 @@ export function HorizontalToolSelector() {
                                     className={`
                                         relative flex-shrink-0 w-12 h-12 rounded-lg border-2 transition-all duration-200
                                         ${isEraseMode
-                                            ? 'border-red-500 bg-red-50 shadow-md'
-                                            : 'border-gray-300 bg-white hover:border-red-400 hover:shadow-sm'
+                                            ? 'border-palia-blue bg-blue-50 shadow-md'
+                                            : 'border-border bg-card hover:border-palia-blue hover:shadow-sm'
                                         }
                                     `}
                                 >
@@ -129,8 +129,8 @@ export function HorizontalToolSelector() {
                                     className={`
                                         relative flex-shrink-0 w-12 h-12 rounded-lg border-2 transition-all duration-200
                                         ${isErasePlotMode
-                                            ? 'border-purple-500 bg-purple-50 shadow-md'
-                                            : 'border-gray-300 bg-white hover:border-purple-400 hover:shadow-sm'
+                                            ? 'border-palia-blue bg-blue-50 shadow-md'
+                                            : 'border-border bg-card hover:border-palia-blue hover:shadow-sm'
                                         }
                                     `}
                                 >
@@ -160,7 +160,7 @@ export function HorizontalToolSelector() {
                             <TooltipTrigger asChild>
                                 <button
                                     onClick={clearSelection}
-                                    className="relative flex-shrink-0 w-12 h-12 rounded-lg border-2 border-gray-300 bg-white hover:border-gray-400 hover:shadow-sm transition-all duration-200"
+                                    className="relative flex-shrink-0 w-12 h-12 rounded-lg border-2 border-border bg-card hover:border-palia-blue hover:shadow-sm transition-all duration-200"
                                 >
                                     <div className="w-full h-full flex items-center justify-center text-lg">
                                         ✋

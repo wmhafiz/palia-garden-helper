@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useGarden, useToasts, useSelectedItem, useUISettings } from '@/stores'
 import { useUndoRedoIntegration } from '@/hooks/useUndoRedoIntegration'
+import { useScheduleIntegration } from '@/hooks/useScheduleIntegration'
 import { GardenDisplay } from './garden/garden-display'
 import { HorizontalCropSelector } from './tools/horizontal-crop-selector'
 import { HorizontalFertilizerSelector } from './tools/horizontal-fertilizer-selector'
@@ -29,6 +30,9 @@ export function GardenPlanner() {
 
     // Initialize undo/redo functionality
     useUndoRedoIntegration()
+
+    // Initialize schedule integration
+    useScheduleIntegration()
 
     // Garden initialization is now handled in the page component
 

@@ -1,3 +1,4 @@
+import uniqid from 'uniqid'
 import Direction from '../enums/direction'
 import Plot from './plot'
 import Tile from './tile'
@@ -176,11 +177,33 @@ class Garden {
             // Reinitialize layout with new dimensions
             this.initializeLayout(rows, columns)
 
-            // Set plot active states
+            // Set plot active states and adjacent connections
             for (let i = 0; i < rows; i++) {
                 for (let j = 0; j < columns; j++) {
                     if (dimensions[i] && dimensions[i]![j]) {
                         this.setPlotActive(i, j, dimensions[i]![j] === '1')
+                    }
+                }
+            }
+
+            // Set up adjacent plot connections
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < columns; j++) {
+                    const plot = this.getPlot(i, j)
+                    if (plot) {
+                        // Set adjacent plots
+                        if (i > 0) {
+                            plot.setPlotAdjacent(Direction.North, this.getPlot(i - 1, j))
+                        }
+                        if (i < rows - 1) {
+                            plot.setPlotAdjacent(Direction.South, this.getPlot(i + 1, j))
+                        }
+                        if (j > 0) {
+                            plot.setPlotAdjacent(Direction.West, this.getPlot(i, j - 1))
+                        }
+                        if (j < columns - 1) {
+                            plot.setPlotAdjacent(Direction.East, this.getPlot(i, j + 1))
+                        }
                     }
                 }
             }
@@ -210,7 +233,9 @@ class Garden {
                                 const cropCode = match[1] as CropCode
                                 if (cropCode !== CropCode.None) {
                                     const crop = getCropFromCode(cropCode)
-                                    tile.crop = crop
+                                    if (crop) {
+                                        tile.crop = crop
+                                    }
                                 }
 
                                 // Set fertilizer if present
@@ -231,9 +256,15 @@ class Garden {
                 }
             }
 
+            // Group multi-tile crops after loading
+            console.log('🔧 Garden.loadLayout: Calling groupMultiTileCrops()')
+            this.groupMultiTileCrops()
+
             // Calculate bonuses after loading layout
+            console.log('🔧 Garden.loadLayout: Calling calculateBonuses()')
             this.calculateBonuses()
 
+            console.log('🔧 Garden.loadLayout: Load completed successfully')
             return true
         } catch (error) {
             console.error('Failed to load garden layout:', error)
@@ -309,11 +340,207 @@ class Garden {
     }
 
     /**
+     * Groups multi-tile crops (trees and bushes) by assigning the same ID to connected tiles of the same crop type
+     * This method should be called after loading a layout to ensure proper bonus calculations
+     */
+    private groupMultiTileCrops(): void {
+        console.log('🔧 groupMultiTileCrops: Starting multi-tile crop grouping')
+        // Track processed tiles globally to avoid duplicate processing across plots
+        const processedTiles = new Set<string>()
+
+        for (let plotRow = 0; plotRow < this.rows; plotRow++) {
+            for (let plotCol = 0; plotCol < this.columns; plotCol++) {
+                const plot = this.getPlot(plotRow, plotCol)
+                if (!plot || !plot.isActive) continue
+
+                for (let tileRow = 0; tileRow < 3; tileRow++) {
+                    for (let tileCol = 0; tileCol < 3; tileCol++) {
+                        const tile = plot.getTile(tileRow, tileCol)
+                        const globalTileKey = `${plotRow}-${plotCol}-${tileRow}-${tileCol}`
+
+                        if (!tile || !tile.crop || processedTiles.has(globalTileKey)) continue
+
+                        if (tile.crop.size === CropSize.Tree) {
+                            // Find all connected tree tiles (3x3 groups) - can span across plots
+                            const treeGroup = this.findConnectedTreeTiles(plotRow, plotCol, tileRow, tileCol, tile.crop.type)
+                            if (treeGroup.length === 9) {
+                                const groupId = uniqid()
+                                treeGroup.forEach(({ plotRow: pRow, plotCol: pCol, tileRow: tRow, tileCol: tCol }) => {
+                                    const targetPlot = this.getPlot(pRow, pCol)
+                                    const groupTile = targetPlot?.getTile(tRow, tCol)
+                                    if (groupTile) {
+                                        groupTile.id = groupId
+                                        processedTiles.add(`${pRow}-${pCol}-${tRow}-${tCol}`)
+                                    }
+                                })
+                            }
+                        } else if (tile.crop.size === CropSize.Bush) {
+                            // Find all connected bush tiles (2x2 groups) - can span across plots
+                            const bushGroup = this.findConnectedBushTiles(plotRow, plotCol, tileRow, tileCol, tile.crop.type)
+                            if (bushGroup.length === 4) {
+                                const groupId = uniqid()
+                                console.log(`🌿 Creating bush group with ID: ${groupId} (4 tiles)`)
+                                bushGroup.forEach(({ plotRow: pRow, plotCol: pCol, tileRow: tRow, tileCol: tCol }) => {
+                                    const targetPlot = this.getPlot(pRow, pCol)
+                                    const groupTile = targetPlot?.getTile(tRow, tCol)
+                                    if (groupTile) {
+                                        groupTile.id = groupId
+                                        processedTiles.add(`${pRow}-${pCol}-${tRow}-${tCol}`)
+                                    }
+                                })
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        console.log('🔧 groupMultiTileCrops: Multi-tile crop grouping completed')
+    }
+
+    /**
+     * Finds connected tree tiles (3x3) that can span across plots
+     * @param plotRow Starting plot row
+     * @param plotCol Starting plot column
+     * @param tileRow Starting tile row within plot
+     * @param tileCol Starting tile column within plot
+     * @param cropType The crop type to match
+     * @returns Array of connected tree tile positions
+     */
+    private findConnectedTreeTiles(plotRow: number, plotCol: number, tileRow: number, tileCol: number, cropType: CropType): Array<{plotRow: number, plotCol: number, tileRow: number, tileCol: number}> {
+        const result: Array<{plotRow: number, plotCol: number, tileRow: number, tileCol: number}> = []
+
+        // Calculate the global position of the tile
+        const globalRow = plotRow * 3 + tileRow
+        const globalCol = plotCol * 3 + tileCol
+
+        // Find the top-left corner of the 3x3 tree
+        const topLeftGlobalRow = Math.floor(globalRow / 3) * 3
+        const topLeftGlobalCol = Math.floor(globalCol / 3) * 3
+
+        // Check all 9 tiles in the 3x3 pattern
+        for (let r = 0; r < 3; r++) {
+            for (let c = 0; c < 3; c++) {
+                const checkGlobalRow = topLeftGlobalRow + r
+                const checkGlobalCol = topLeftGlobalCol + c
+
+                // Convert back to plot and tile coordinates
+                const checkPlotRow = Math.floor(checkGlobalRow / 3)
+                const checkPlotCol = Math.floor(checkGlobalCol / 3)
+                const checkTileRow = checkGlobalRow % 3
+                const checkTileCol = checkGlobalCol % 3
+
+                const plot = this.getPlot(checkPlotRow, checkPlotCol)
+                if (plot && plot.isActive) {
+                    const tile = plot.getTile(checkTileRow, checkTileCol)
+                    if (tile && tile.crop && tile.crop.type === cropType) {
+                        result.push({ plotRow: checkPlotRow, plotCol: checkPlotCol, tileRow: checkTileRow, tileCol: checkTileCol })
+                    }
+                }
+            }
+        }
+
+        return result
+    }
+
+    /**
+     * Finds connected bush tiles (2x2) that can span across plots
+     * @param plotRow Starting plot row
+     * @param plotCol Starting plot column
+     * @param tileRow Starting tile row within plot
+     * @param tileCol Starting tile column within plot
+     * @param cropType The crop type to match
+     * @returns Array of connected bush tile positions
+     */
+    private findConnectedBushTiles(plotRow: number, plotCol: number, tileRow: number, tileCol: number, cropType: CropType): Array<{plotRow: number, plotCol: number, tileRow: number, tileCol: number}> {
+        const result: Array<{plotRow: number, plotCol: number, tileRow: number, tileCol: number}> = []
+
+        // For bushes, we need to check all possible 2x2 patterns that include this tile
+        // A tile can be part of up to 4 different 2x2 patterns (top-left, top-right, bottom-left, bottom-right)
+        
+        const possiblePatterns = [
+            // Current tile is top-left of 2x2
+            { offsetRow: 0, offsetCol: 0 },
+            // Current tile is top-right of 2x2  
+            { offsetRow: 0, offsetCol: -1 },
+            // Current tile is bottom-left of 2x2
+            { offsetRow: -1, offsetCol: 0 },
+            // Current tile is bottom-right of 2x2
+            { offsetRow: -1, offsetCol: -1 }
+        ]
+
+        console.log(`    🔍 findConnectedBushTiles: Starting from plot[${plotRow},${plotCol}] tile[${tileRow},${tileCol}]`)
+
+        for (const pattern of possiblePatterns) {
+            const patternTiles: Array<{plotRow: number, plotCol: number, tileRow: number, tileCol: number}> = []
+            let validPattern = true
+
+            // Check if this 2x2 pattern is complete
+            for (let r = 0; r < 2; r++) {
+                for (let c = 0; c < 2; c++) {
+                    const checkTileRow = tileRow + pattern.offsetRow + r
+                    const checkTileCol = tileCol + pattern.offsetCol + c
+                    
+                    // Handle cross-plot boundaries
+                    let checkPlotRow = plotRow
+                    let checkPlotCol = plotCol
+                    let adjustedTileRow = checkTileRow
+                    let adjustedTileCol = checkTileCol
+
+                    // Adjust for row overflow/underflow
+                    if (adjustedTileRow < 0) {
+                        checkPlotRow--
+                        adjustedTileRow += 3
+                    } else if (adjustedTileRow >= 3) {
+                        checkPlotRow++
+                        adjustedTileRow -= 3
+                    }
+
+                    // Adjust for column overflow/underflow
+                    if (adjustedTileCol < 0) {
+                        checkPlotCol--
+                        adjustedTileCol += 3
+                    } else if (adjustedTileCol >= 3) {
+                        checkPlotCol++
+                        adjustedTileCol -= 3
+                    }
+
+                    const plot = this.getPlot(checkPlotRow, checkPlotCol)
+                    if (plot && plot.isActive) {
+                        const tile = plot.getTile(adjustedTileRow, adjustedTileCol)
+                        if (tile && tile.crop && tile.crop.type === cropType) {
+                            patternTiles.push({ plotRow: checkPlotRow, plotCol: checkPlotCol, tileRow: adjustedTileRow, tileCol: adjustedTileCol })
+                        } else {
+                            validPattern = false
+                            break
+                        }
+                    } else {
+                        validPattern = false
+                        break
+                    }
+                }
+                if (!validPattern) break
+            }
+
+            // If we found a complete 2x2 pattern, return it
+            if (validPattern && patternTiles.length === 4) {
+                console.log(`    🔍 findConnectedBushTiles: Found complete 2x2 pattern with ${patternTiles.length} tiles`)
+                return patternTiles
+            }
+        }
+
+        console.log(`    🔍 findConnectedBushTiles: No complete 2x2 pattern found, returning single tile`)
+        // If no complete pattern found, return just this tile
+        return [{ plotRow, plotCol, tileRow, tileCol }]
+    }
+
+    /**
      * Calculates and assigns bonuses to crops based on adjacent tiles and multi-tile crop requirements
      */
     calculateBonuses(): void {
+        console.log('🎯 calculateBonuses: Starting bonus calculation')
         const treeTiles: { [key: string]: Tile[] } = {}
         const bushTiles: { [key: string]: Tile[] } = {}
+        const processedTiles = new Set<Tile>()
 
         const layoutFlat = this._layout.flat()
 
@@ -323,76 +550,114 @@ class Garden {
             plot.calculateBonusesReceived()
         }
 
-        // Then, calculate final bonuses based on crop size requirements
+        // Clear all bonuses first
+        for (const plot of layoutFlat) {
+            if (!plot.isActive) continue
+            for (const tile of plot.tiles.flat()) {
+                tile.bonuses = []
+            }
+        }
+
+        // Collect all multi-tile crops into groups
         for (const plot of layoutFlat) {
             if (!plot.isActive) continue
 
             for (const tile of plot.tiles.flat()) {
-                tile.bonuses = []
                 if (!tile.crop || tile.crop.type === CropType.None) continue
 
-                switch (tile.crop.size) {
-                    case CropSize.Tree:
-                        // Trees (3x3) need at least 3 sources of the same bonus
-                        if (!treeTiles[tile.id]) {
-                            treeTiles[tile.id] = []
-                        }
-                        const tileGroup = treeTiles[tile.id]
-                        if (tileGroup) {
-                            tileGroup.push(tile)
-
-                            if (tileGroup.length === 9) {
-                                const bonusesReceived = tileGroup.flatMap(t => t.bonusesReceived)
-                                const bonusCounts = bonusesReceived.reduce((acc, bonus) => {
-                                    acc[bonus] = (acc[bonus] || 0) + 1
-                                    return acc
-                                }, {} as Record<string, number>)
-
-                                for (const [bonus, count] of Object.entries(bonusCounts)) {
-                                    if (count >= 3) {
-                                        for (const treeTile of tileGroup) {
-                                            treeTile.bonuses.push(bonus as Bonus)
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        break
-
-                    case CropSize.Bush:
-                        // Bushes (2x2) need at least 2 sources of the same bonus
-                        if (!bushTiles[tile.id]) {
-                            bushTiles[tile.id] = []
-                        }
-                        const bushGroup = bushTiles[tile.id]
-                        if (bushGroup) {
-                            bushGroup.push(tile)
-
-                            if (bushGroup.length === 4) {
-                                const bonusesReceived = bushGroup.flatMap(t => t.bonusesReceived)
-                                const bonusCounts = bonusesReceived.reduce((acc, bonus) => {
-                                    acc[bonus] = (acc[bonus] || 0) + 1
-                                    return acc
-                                }, {} as Record<string, number>)
-
-                                for (const [bonus, count] of Object.entries(bonusCounts)) {
-                                    if (count >= 2) {
-                                        for (const bushTile of bushGroup) {
-                                            bushTile.bonuses.push(bonus as Bonus)
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        break
-
-                    default:
-                        // Single tiles get all bonuses they receive
-                        tile.bonuses = tile.bonusesReceived
-                        break
+                if (tile.crop.size === CropSize.Tree) {
+                    if (!treeTiles[tile.id]) {
+                        treeTiles[tile.id] = []
+                    }
+                    treeTiles[tile.id]!.push(tile)
+                } else if (tile.crop.size === CropSize.Bush) {
+                    if (!bushTiles[tile.id]) {
+                        bushTiles[tile.id] = []
+                    }
+                    bushTiles[tile.id]!.push(tile)
                 }
             }
         }
+
+        // Process complete tree groups (3x3, need 9 tiles)
+        for (const [tileId, tileGroup] of Object.entries(treeTiles)) {
+            if (tileGroup.length === 9) {
+                // For trees, collect all unique bonus types received by any tile in the group
+                const allBonusTypes = new Set<string>()
+                
+                // Collect all unique bonus types received by any tile in the group
+                for (const tile of tileGroup) {
+                    for (const bonus of tile.bonusesReceived) {
+                        allBonusTypes.add(bonus)
+                    }
+                }
+                
+                // Apply all collected bonus types to every tile in the group
+                for (const bonus of allBonusTypes) {
+                    for (const treeTile of tileGroup) {
+                        treeTile.bonuses.push(bonus as Bonus)
+                        processedTiles.add(treeTile)
+                    }
+                }
+            }
+        }
+
+        // Process complete bush groups (2x2, need 4 tiles)
+        console.log(`🌿 calculateBonuses: Processing ${Object.keys(bushTiles).length} bush groups`)
+        for (const [tileId, tileGroup] of Object.entries(bushTiles)) {
+            console.log(`🌿 Bush group ${tileId}: ${tileGroup.length} tiles`)
+            if (tileGroup.length === 4) {
+                // For bushes, each tile gets bonuses from its own adjacent tiles
+                // But if multiple tiles in the group receive the same bonus type,
+                // all tiles in the group get that bonus
+                const allBonusTypes = new Set<string>()
+                
+                // Collect all unique bonus types received by any tile in the group
+                for (const tile of tileGroup) {
+                    console.log(`  Tile bonusesReceived: [${tile.bonusesReceived.join(', ')}]`)
+                    for (const bonus of tile.bonusesReceived) {
+                        allBonusTypes.add(bonus)
+                    }
+                }
+                
+                console.log(`  All bonus types for group: [${Array.from(allBonusTypes).join(', ')}]`)
+                
+                // Apply all collected bonus types to every tile in the group
+                for (const bonus of allBonusTypes) {
+                    for (const bushTile of tileGroup) {
+                        bushTile.bonuses.push(bonus as Bonus)
+                        processedTiles.add(bushTile)
+                    }
+                }
+                
+                console.log(`  Applied bonuses to all ${tileGroup.length} tiles in group`)
+            }
+        }
+
+        // Process all remaining tiles (singles and incomplete multi-tile groups)
+        for (const plot of layoutFlat) {
+            if (!plot.isActive) continue
+
+            for (const tile of plot.tiles.flat()) {
+                if (!tile.crop || tile.crop.type === CropType.None) continue
+                
+                // Skip tiles that were already processed as part of complete multi-tile groups
+                if (processedTiles.has(tile)) continue
+
+                // Single tiles and incomplete multi-tile groups get all bonuses they receive
+                tile.bonuses = [...tile.bonusesReceived]
+            }
+        }
+
+        // Debug: Log final bonus coverage
+        const coverage = this.getBonusCoverage()
+        const totalCrops = this.getTotalCropCount()
+        console.log('🎯 calculateBonuses: Final bonus coverage:')
+        Object.entries(coverage).forEach(([bonus, count]) => {
+            const percentage = totalCrops > 0 ? Math.round((count / totalCrops) * 100) : 0
+            console.log(`  ${bonus}: ${count}/${totalCrops} = ${percentage}%`)
+        })
+        console.log('🎯 calculateBonuses: Bonus calculation completed')
     }
 
     /**

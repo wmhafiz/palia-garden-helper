@@ -224,22 +224,55 @@ export function OutputDisplay() {
         if (!garden) return
 
         let appliedCount = 0
-        const relevantTiles = fertilizerAnalysis.tiles.filter(tile => {
-            const hasRelevantMissing = mode === 'afk'
-                ? tile.missingBonuses.includes(Bonus.WaterRetain) || tile.missingBonuses.includes(Bonus.WeedPrevention)
-                : tile.recommendedFertilizer !== undefined
-            return hasRelevantMissing && !tile.currentFertilizer
+        const relevantTiles = fertilizerAnalysis.tiles.filter((tileAnalysis, index) => {
+            const hasRelevantMissing = tileAnalysis.recommendedFertilizer !== undefined
+
+            // Check if the actual tile has no fertilizer
+            const plot = garden.getPlot(tileAnalysis.plotRow, tileAnalysis.plotCol)
+            const tile = plot?.getTile(tileAnalysis.tileRow, tileAnalysis.tileCol)
+            const hasNoFertilizer = !tile?.fertiliser
+
+            // Debug logging for first few tiles
+            if (index < 5) {
+                console.log(`Tile ${index + 1} at plot ${tileAnalysis.plotRow},${tileAnalysis.plotCol} tile ${tileAnalysis.tileRow},${tileAnalysis.tileCol}:`)
+                console.log(`- Mode: ${mode}`)
+                console.log(`- Missing bonuses: [${tileAnalysis.missingBonuses.join(', ')}]`)
+                console.log(`- Has WaterRetain missing: ${tileAnalysis.missingBonuses.includes(Bonus.WaterRetain)}`)
+                console.log(`- Has WeedPrevention missing: ${tileAnalysis.missingBonuses.includes(Bonus.WeedPrevention)}`)
+                console.log(`- hasRelevantMissing: ${hasRelevantMissing}`)
+                console.log(`- Plot exists: ${!!plot}`)
+                console.log(`- Tile exists: ${!!tile}`)
+                console.log(`- Tile fertiliser: ${tile?.fertiliser?.type || 'none'}`)
+                console.log(`- hasNoFertilizer: ${hasNoFertilizer}`)
+                console.log(`- Recommended fertilizer: ${tileAnalysis.recommendedFertilizer}`)
+                console.log(`- Final result: ${hasRelevantMissing && hasNoFertilizer}`)
+                console.log('---')
+            }
+
+            return hasRelevantMissing && hasNoFertilizer
         })
+
+        console.log(`Attempting to apply fertilizers for ${mode} mode:`)
+        console.log(`Total tiles with missing bonuses: ${fertilizerAnalysis.tiles.length}`)
+        console.log(`Relevant tiles after filtering: ${relevantTiles.length}`)
 
         for (const tileAnalysis of relevantTiles) {
             const plot = garden.getPlot(tileAnalysis.plotRow, tileAnalysis.plotCol)
             const tile = plot?.getTile(tileAnalysis.tileRow, tileAnalysis.tileCol)
 
+            console.log(`Processing tile at plot ${tileAnalysis.plotRow},${tileAnalysis.plotCol} tile ${tileAnalysis.tileRow},${tileAnalysis.tileCol}:`)
+            console.log(`- Has tile: ${!!tile}`)
+            console.log(`- Current fertilizer: ${tile?.fertiliser?.type || 'none'}`)
+            console.log(`- Recommended fertilizer: ${tileAnalysis.recommendedFertilizer}`)
+            console.log(`- Missing bonuses: ${tileAnalysis.missingBonuses.join(', ')}`)
+
             if (tile && !tile.fertiliser && tileAnalysis.recommendedFertilizer) {
                 const fertilizer = getFertiliserFromType(tileAnalysis.recommendedFertilizer)
+                console.log(`- Fertilizer object: ${!!fertilizer}`)
                 if (fertilizer) {
                     tile.fertiliser = fertilizer
                     appliedCount++
+                    console.log(`- Applied ${fertilizer.type}!`)
                 }
             }
         }
@@ -254,7 +287,7 @@ export function OutputDisplay() {
         } else {
             addToast({
                 type: 'info',
-                message: 'No fertilizers could be applied (tiles may already have fertilizers)'
+                message: `No fertilizers could be applied. Found ${relevantTiles.length} relevant tiles out of ${fertilizerAnalysis.tiles.length} total tiles with missing bonuses.`
             })
         }
     }
@@ -418,7 +451,6 @@ export function OutputDisplay() {
                             <div className="space-y-2">
                                 <Button
                                     onClick={() => applyFertilizerRecommendations(selectedPlayMode)}
-                                    className="w-full"
                                     variant="default"
                                 >
                                     Apply {selectedPlayMode.charAt(0).toUpperCase() + selectedPlayMode.slice(1)} Mode Fertilizers
@@ -598,9 +630,9 @@ function getRecommendedFertilizer(missingBonuses: Bonus[], mode: PlayMode, activ
 
     const priorityList = priorities[mode]
 
-    // Find the highest priority bonus that is missing and not already active
+    // Find the highest priority bonus that is missing
     for (const bonus of priorityList) {
-        if (missingBonuses.includes(bonus) || !activeBonuses.includes(bonus)) {
+        if (missingBonuses.includes(bonus)) {
             switch (bonus) {
                 case Bonus.WaterRetain:
                     return FertiliserType.HydratePro

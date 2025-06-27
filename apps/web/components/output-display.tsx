@@ -224,7 +224,7 @@ export function OutputDisplay() {
         if (!garden) return
 
         let appliedCount = 0
-        const relevantTiles = fertilizerAnalysis.tiles.filter((tileAnalysis, index) => {
+        const relevantTiles = fertilizerAnalysis.tiles.filter(tileAnalysis => {
             const hasRelevantMissing = tileAnalysis.recommendedFertilizer !== undefined
 
             // Check if the actual tile has no fertilizer
@@ -232,47 +232,18 @@ export function OutputDisplay() {
             const tile = plot?.getTile(tileAnalysis.tileRow, tileAnalysis.tileCol)
             const hasNoFertilizer = !tile?.fertiliser
 
-            // Debug logging for first few tiles
-            if (index < 5) {
-                console.log(`Tile ${index + 1} at plot ${tileAnalysis.plotRow},${tileAnalysis.plotCol} tile ${tileAnalysis.tileRow},${tileAnalysis.tileCol}:`)
-                console.log(`- Mode: ${mode}`)
-                console.log(`- Missing bonuses: [${tileAnalysis.missingBonuses.join(', ')}]`)
-                console.log(`- Has WaterRetain missing: ${tileAnalysis.missingBonuses.includes(Bonus.WaterRetain)}`)
-                console.log(`- Has WeedPrevention missing: ${tileAnalysis.missingBonuses.includes(Bonus.WeedPrevention)}`)
-                console.log(`- hasRelevantMissing: ${hasRelevantMissing}`)
-                console.log(`- Plot exists: ${!!plot}`)
-                console.log(`- Tile exists: ${!!tile}`)
-                console.log(`- Tile fertiliser: ${tile?.fertiliser?.type || 'none'}`)
-                console.log(`- hasNoFertilizer: ${hasNoFertilizer}`)
-                console.log(`- Recommended fertilizer: ${tileAnalysis.recommendedFertilizer}`)
-                console.log(`- Final result: ${hasRelevantMissing && hasNoFertilizer}`)
-                console.log('---')
-            }
-
             return hasRelevantMissing && hasNoFertilizer
         })
-
-        console.log(`Attempting to apply fertilizers for ${mode} mode:`)
-        console.log(`Total tiles with missing bonuses: ${fertilizerAnalysis.tiles.length}`)
-        console.log(`Relevant tiles after filtering: ${relevantTiles.length}`)
 
         for (const tileAnalysis of relevantTiles) {
             const plot = garden.getPlot(tileAnalysis.plotRow, tileAnalysis.plotCol)
             const tile = plot?.getTile(tileAnalysis.tileRow, tileAnalysis.tileCol)
 
-            console.log(`Processing tile at plot ${tileAnalysis.plotRow},${tileAnalysis.plotCol} tile ${tileAnalysis.tileRow},${tileAnalysis.tileCol}:`)
-            console.log(`- Has tile: ${!!tile}`)
-            console.log(`- Current fertilizer: ${tile?.fertiliser?.type || 'none'}`)
-            console.log(`- Recommended fertilizer: ${tileAnalysis.recommendedFertilizer}`)
-            console.log(`- Missing bonuses: ${tileAnalysis.missingBonuses.join(', ')}`)
-
             if (tile && !tile.fertiliser && tileAnalysis.recommendedFertilizer) {
                 const fertilizer = getFertiliserFromType(tileAnalysis.recommendedFertilizer)
-                console.log(`- Fertilizer object: ${!!fertilizer}`)
                 if (fertilizer) {
                     tile.fertiliser = fertilizer
                     appliedCount++
-                    console.log(`- Applied ${fertilizer.type}!`)
                 }
             }
         }
@@ -312,50 +283,6 @@ export function OutputDisplay() {
 
     return (
         <div className="space-y-4">
-            {/* Harvest Summary */}
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <Calculator className="w-5 h-5" />
-                        Harvest Summary
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                            <div className="text-muted-foreground">Total Crops</div>
-                            <div className="font-medium">{harvestData.totalCrops}</div>
-                        </div>
-                        <div>
-                            <div className="text-muted-foreground">Expected Yield</div>
-                            <div className="font-medium">{harvestData.totalYield}</div>
-                        </div>
-                        <div>
-                            <div className="text-muted-foreground">Estimated Value</div>
-                            <div className="font-medium text-green-600">{harvestData.totalValue.toLocaleString()}g</div>
-                        </div>
-                        <div>
-                            <div className="text-muted-foreground">Avg. Growth Time</div>
-                            <div className="font-medium">{Math.round(harvestData.averageGrowthTime)}m</div>
-                        </div>
-                    </div>
-
-                    {harvestData.totalValue > 0 && (
-                        <div className="space-y-2">
-                            <div className="flex justify-between text-sm">
-                                <span>Profitability</span>
-                                <span className={harvestData.totalValue > 1000 ? 'text-green-600' : harvestData.totalValue > 500 ? 'text-yellow-600' : 'text-red-600'}>
-                                    {harvestData.totalValue > 1000 ? 'Excellent' : harvestData.totalValue > 500 ? 'Good' : 'Poor'}
-                                </span>
-                            </div>
-                            <Progress
-                                value={Math.min(100, (harvestData.totalValue / 1000) * 100)}
-                                className="h-2"
-                            />
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
 
             {/* Fertilizer Tips */}
             {fertilizerAnalysis.summary.total > 0 && (
@@ -503,6 +430,51 @@ export function OutputDisplay() {
                     </CardContent>
                 </Card>
             )}
+
+            {/* Harvest Summary */}
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <Calculator className="w-5 h-5" />
+                        Harvest Summary
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <div className="text-muted-foreground">Total Crops</div>
+                            <div className="font-medium">{harvestData.totalCrops}</div>
+                        </div>
+                        <div>
+                            <div className="text-muted-foreground">Expected Yield</div>
+                            <div className="font-medium">{harvestData.totalYield}</div>
+                        </div>
+                        <div>
+                            <div className="text-muted-foreground">Estimated Value</div>
+                            <div className="font-medium text-green-600">{harvestData.totalValue.toLocaleString()}g</div>
+                        </div>
+                        <div>
+                            <div className="text-muted-foreground">Avg. Growth Time</div>
+                            <div className="font-medium">{Math.round(harvestData.averageGrowthTime)}m</div>
+                        </div>
+                    </div>
+
+                    {harvestData.totalValue > 0 && (
+                        <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                                <span>Profitability</span>
+                                <span className={harvestData.totalValue > 1000 ? 'text-green-600' : harvestData.totalValue > 500 ? 'text-yellow-600' : 'text-red-600'}>
+                                    {harvestData.totalValue > 1000 ? 'Excellent' : harvestData.totalValue > 500 ? 'Good' : 'Poor'}
+                                </span>
+                            </div>
+                            <Progress
+                                value={Math.min(100, (harvestData.totalValue / 1000) * 100)}
+                                className="h-2"
+                            />
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
 
             {/* Crop Breakdown */}
             {harvestData.cropHarvests.length > 0 && (

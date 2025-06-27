@@ -3,7 +3,7 @@
 import { useMemo } from 'react'
 import { useSelectedItem, useUISettings, useGarden } from '@/stores'
 import fertiliserList from '@/lib/garden-planner/fertiliserList'
-import { FertiliserType } from '@/lib/garden-planner/enums'
+import { FertiliserType, CropSize } from '@/lib/garden-planner/enums'
 import { Fertiliser } from '@/lib/garden-planner/classes'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@workspace/ui/components/tooltip'
 import { ScrollArea, ScrollBar } from '@workspace/ui/components/scroll-area'
@@ -29,9 +29,9 @@ export function HorizontalFertilizerSelector() {
         if (!garden) return {} as Record<FertiliserType, number>
 
         const counts: Record<FertiliserType, number> = {} as Record<FertiliserType, number>
-        const uniqueFertilizers = new Map<string, { type: FertiliserType, id: string }>()
+        const processedFertilizerIds = new Set<string>()
 
-        // Count unique fertilizer applications
+        // Count fertilizer applications
         for (let i = 0; i < garden.rows; i++) {
             for (let j = 0; j < garden.columns; j++) {
                 const plot = garden.getPlot(i, j)
@@ -40,23 +40,26 @@ export function HorizontalFertilizerSelector() {
                         for (let tj = 0; tj < 3; tj++) {
                             const tile = plot.getTile(ti, tj)
                             if (tile?.fertiliser && tile.fertiliser.type !== FertiliserType.None) {
-                                // For multi-size crops, fertilizers share the same ID across all tiles
-                                // For single crops, each fertilizer has its own unique ID
-                                const fertilizerKey = tile.fertiliser.id || `${i}-${j}-${ti}-${tj}`
-                                uniqueFertilizers.set(fertilizerKey, {
-                                    type: tile.fertiliser.type,
-                                    id: tile.fertiliser.id
-                                })
+                                // For multi-tile crops (trees/bushes), only count once per shared fertilizer ID
+                                // For single-tile crops, count each tile separately
+                                const crop = tile.crop
+                                const isMultiTileCrop = crop?.size === CropSize.Tree || crop?.size === CropSize.Bush
+
+                                if (isMultiTileCrop && tile.fertiliser.id) {
+                                    // Multi-tile crop: only count once per fertilizer ID
+                                    if (!processedFertilizerIds.has(tile.fertiliser.id)) {
+                                        processedFertilizerIds.add(tile.fertiliser.id)
+                                        counts[tile.fertiliser.type] = (counts[tile.fertiliser.type] || 0) + 1
+                                    }
+                                } else {
+                                    // Single-tile crop: count each tile separately
+                                    counts[tile.fertiliser.type] = (counts[tile.fertiliser.type] || 0) + 1
+                                }
                             }
                         }
                     }
                 }
             }
-        }
-
-        // Count each unique fertilizer application
-        for (const { type } of uniqueFertilizers.values()) {
-            counts[type] = (counts[type] || 0) + 1
         }
 
         return counts

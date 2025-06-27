@@ -173,8 +173,11 @@ export function StatsDisplay() {
                 </CardContent>
             </Card>
 
+            {/* Output Display - Harvest Calculations */}
+            <OutputDisplay />
+
             {/* Overall Stats */}
-            <Card>
+            {/* <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <BarChart3 className="w-5 h-5" />
@@ -217,7 +220,7 @@ export function StatsDisplay() {
                         <Progress value={stats.tileUtilization} className="h-2" />
                     </div>
                 </CardContent>
-            </Card>
+            </Card> */}
 
             {/* Crop Statistics */}
             <Card>
@@ -351,8 +354,7 @@ export function StatsDisplay() {
                 </CardContent>
             </Card>
 
-            {/* Output Display - Harvest Calculations */}
-            <OutputDisplay />
+
         </div>
     )
 } 

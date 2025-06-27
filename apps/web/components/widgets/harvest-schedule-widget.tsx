@@ -6,6 +6,7 @@ import { Badge } from '@workspace/ui/components/badge'
 import { useGarden } from '@/stores'
 import { getCropFromType } from '@/lib/garden-planner'
 import { useMemo } from 'react'
+import { ScrollArea } from '@workspace/ui/components/scroll-area'
 
 interface CropHarvest {
     cropType: string
@@ -89,60 +90,50 @@ export function HarvestScheduleWidget() {
     }
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <Calendar className="w-5 h-5" />
-                    Harvest Schedule
-                </CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className="space-y-4">
-                    {harvestSchedule.map((dayHarvest: DayHarvest) => (
-                        <div key={dayHarvest.day} className="border rounded-lg p-3">
-                            <div className="flex items-center gap-2 mb-3">
-                                <Badge variant="outline" className="font-medium">
-                                    Day {dayHarvest.day}
-                                </Badge>
-                            </div>
 
-                            <div className="flex flex-wrap gap-2">
-                                {dayHarvest.crops.map((crop: CropHarvest, index: number) => (
-                                    <div key={`${crop.cropType}-${index}`} className="flex flex-col items-center">
-                                        <div className="relative">
-                                            {crop.image ? (
-                                                <img
-                                                    src={crop.image}
-                                                    alt={crop.cropType}
-                                                    className="w-12 h-12 rounded border bg-gray-50"
-                                                />
-                                            ) : (
-                                                <div className="w-12 h-12 rounded border bg-gray-100 flex items-center justify-center text-xs font-medium">
-                                                    {crop.cropType.slice(0, 2).toUpperCase()}
-                                                </div>
-                                            )}
+        <ScrollArea className="space-y-4 max-h-160 overflow-y-auto">                    {harvestSchedule.map((dayHarvest: DayHarvest) => (
+            <div key={dayHarvest.day} className="border rounded-lg p-3">
+                <div className="flex items-center gap-2 mb-3">
+                    <Badge variant="outline" className="font-medium">
+                        Day {dayHarvest.day}
+                    </Badge>
+                </div>
 
-                                            {crop.isStar && (
-                                                <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center">
-                                                    <span className="text-xs text-white">★</span>
-                                                </div>
-                                            )}
-
-                                            <div className="absolute -bottom-1 -right-1 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
-                                                {crop.count}
-                                            </div>
-                                        </div>
-
-                                        <span className="text-xs text-center mt-1 text-muted-foreground max-w-16 truncate">
-                                            {crop.cropType}
-                                        </span>
+                <div className="flex flex-wrap gap-2">
+                    {dayHarvest.crops.map((crop: CropHarvest, index: number) => (
+                        <div key={`${crop.cropType}-${index}`} className="flex flex-col items-center">
+                            <div className="relative">
+                                {crop.image ? (
+                                    <img
+                                        src={crop.image}
+                                        alt={crop.cropType}
+                                        className="w-12 h-12 rounded border bg-gray-50"
+                                    />
+                                ) : (
+                                    <div className="w-12 h-12 rounded border bg-gray-100 flex items-center justify-center text-xs font-medium">
+                                        {crop.cropType.slice(0, 2).toUpperCase()}
                                     </div>
-                                ))}
+                                )}
+
+                                {crop.isStar && (
+                                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center">
+                                        <span className="text-xs text-white">★</span>
+                                    </div>
+                                )}
+
+                                <div className="absolute -bottom-1 -right-1 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
+                                    {crop.count}
+                                </div>
                             </div>
+
+                            <span className="text-xs text-center mt-1 text-muted-foreground max-w-16 truncate">
+                                {crop.cropType}
+                            </span>
                         </div>
                     ))}
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+        ))}
+        </ScrollArea>
     )
 } 

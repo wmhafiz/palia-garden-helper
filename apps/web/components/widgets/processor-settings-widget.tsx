@@ -11,6 +11,7 @@ import { useOutputData } from '@/hooks/useOutputData'
 import { useProcessor } from '@/stores'
 import { getCropFromType } from '@/lib/garden-planner'
 import { useProcessorSimulation } from '@/hooks/useProcessorSimulation'
+import { ScrollArea } from '@workspace/ui/components/scroll-area'
 
 export function ProcessorSettingsWidget() {
     const { harvestData } = useOutputData()
@@ -219,83 +220,62 @@ export function ProcessorSettingsWidget() {
 
     return (
         <TooltipProvider>
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <Settings className="w-5 h-5" />
-                        Processor Settings
-                    </CardTitle>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-2">
-                            <Wrench className="w-4 h-4" />
-                            <span>Total Crafters: {totalCrafters}/30</span>
-                            {totalCrafters > 30 && (
-                                <Badge variant="destructive" className="text-xs">
-                                    Over Limit
-                                </Badge>
-                            )}
-                        </div>
-                    </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    {/* Crop Processing Settings */}
-                    <div className="space-y-3">
-                        <Label>Crop Processing Settings</Label>
-                        <div className="space-y-4 max-h-96 overflow-y-auto">
-                            {availableCrops.map((harvest) => {
-                                const crop = getCropFromType(harvest.cropType as any)
+            {/* Crop Processing Settings */}
+            <div className="space-y-3">
+                <Label>Crop Processing Settings ({totalCrafters} crafters)</Label>
+                <ScrollArea className="space-y-4 max-h-160 overflow-y-auto">
+                    {availableCrops.map((harvest) => {
+                        const crop = getCropFromType(harvest.cropType as any)
 
-                                // Calculate star and base yields
-                                const starYield = Math.round(harvest.totalYield * finalStarChance)
-                                const baseYield = harvest.totalYield - starYield
+                        // Calculate star and base yields
+                        const starYield = Math.round(harvest.totalYield * finalStarChance)
+                        const baseYield = harvest.totalYield - starYield
 
-                                const canMakeSeeds = crop?.conversionInfo?.seedProcessMinutes && crop.conversionInfo.seedProcessMinutes > 0
-                                const canMakePreserves = crop?.conversionInfo?.preserveProcessMinutes && crop.conversionInfo.preserveProcessMinutes > 0 && crop.conversionInfo.cropsPerPreserve > 0
+                        const canMakeSeeds = crop?.conversionInfo?.seedProcessMinutes && crop.conversionInfo.seedProcessMinutes > 0
+                        const canMakePreserves = crop?.conversionInfo?.preserveProcessMinutes && crop.conversionInfo.preserveProcessMinutes > 0 && crop.conversionInfo.cropsPerPreserve > 0
 
-                                return (
-                                    <div key={harvest.cropType} className="border rounded-lg p-4 space-y-4">
-                                        {/* Header with crop info */}
-                                        <div className="flex items-center gap-3">
-                                            <img
-                                                src={`/crops/${harvest.cropType.toLowerCase().replace(/\s+/g, '-')}.webp`}
-                                                alt={harvest.cropType}
-                                                className="w-10 h-10 object-contain"
-                                            />
-                                            <div>
-                                                <h4 className="font-medium capitalize">{harvest.cropType}</h4>
-                                                <p className="text-sm text-muted-foreground">
-                                                    {harvest.totalYield} total ({starYield} ⭐ + {baseYield} base)
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        {/* Star Crop Settings */}
-                                        {starYield > 0 && (
-                                            <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg">
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <Star className="w-4 h-4 text-yellow-500" />
-                                                    <span className="text-sm font-medium">Star {harvest.cropType} ({starYield})</span>
-                                                </div>
-                                                {renderCropProcessingOptions(`${harvest.cropType}-star`, harvest.cropType, starYield, true, !!canMakeSeeds, !!canMakePreserves, crop)}
-                                            </div>
-                                        )}
-
-                                        {/* Base Crop Settings */}
-                                        {baseYield > 0 && (
-                                            <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg">
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <span className="text-sm font-medium">Base {harvest.cropType} ({baseYield})</span>
-                                                </div>
-                                                {renderCropProcessingOptions(`${harvest.cropType}-base`, harvest.cropType, baseYield, false, !!canMakeSeeds, !!canMakePreserves, crop)}
-                                            </div>
-                                        )}
+                        return (
+                            <div key={harvest.cropType} className="border rounded-lg p-4 space-y-4">
+                                {/* Header with crop info */}
+                                <div className="flex items-center gap-3">
+                                    <img
+                                        src={`/crops/${harvest.cropType.toLowerCase().replace(/\s+/g, '-')}.webp`}
+                                        alt={harvest.cropType}
+                                        className="w-10 h-10 object-contain"
+                                    />
+                                    <div>
+                                        <h4 className="font-medium capitalize">{harvest.cropType}</h4>
+                                        <p className="text-sm text-muted-foreground">
+                                            {harvest.totalYield} total ({starYield} ⭐ + {baseYield} base)
+                                        </p>
                                     </div>
-                                )
-                            })}
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
+                                </div>
+
+                                {/* Star Crop Settings */}
+                                {starYield > 0 && (
+                                    <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <Star className="w-4 h-4 text-yellow-500" />
+                                            <span className="text-sm font-medium">Star {harvest.cropType} ({starYield})</span>
+                                        </div>
+                                        {renderCropProcessingOptions(`${harvest.cropType}-star`, harvest.cropType, starYield, true, !!canMakeSeeds, !!canMakePreserves, crop)}
+                                    </div>
+                                )}
+
+                                {/* Base Crop Settings */}
+                                {baseYield > 0 && (
+                                    <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <span className="text-sm font-medium">Base {harvest.cropType} ({baseYield})</span>
+                                        </div>
+                                        {renderCropProcessingOptions(`${harvest.cropType}-base`, harvest.cropType, baseYield, false, !!canMakeSeeds, !!canMakePreserves, crop)}
+                                    </div>
+                                )}
+                            </div>
+                        )
+                    })}
+                </ScrollArea>
+            </div>
         </TooltipProvider>
     )
 } 

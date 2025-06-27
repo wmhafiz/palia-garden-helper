@@ -45,8 +45,7 @@ export function StatsDisplay() {
     return (
         <div className="space-y-4">
 
-
-            <Accordion type="multiple" defaultValue={['item-1']}>
+            <Accordion type="multiple">
                 {stats.totalCrops > 0 && (
                     <AccordionItem value="item-1">
                         <AccordionTrigger>Outputs</AccordionTrigger>
@@ -86,8 +85,10 @@ export function StatsDisplay() {
                                     {/* Harvest Summary */}
                                     <FertilizerTipsWidget />
                                 </div>
-                                {/* Bonus Coverage Statistics */}
-                                <ProcessingTipsWidget />
+                                <div className="flex-1">
+                                    {/* Bonus Coverage Statistics */}
+                                    <ProcessingTipsWidget />
+                                </div>
                             </div>
                         </AccordionContent>
                     </AccordionItem>

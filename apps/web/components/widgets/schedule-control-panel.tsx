@@ -7,8 +7,6 @@ import { Badge } from '@workspace/ui/components/badge'
 import { useWateringSchedule } from '@/stores'
 import { useGardenStats } from '@/hooks/useGardenStats'
 import { formatDuration, calculateMinutesUntilNextHarvest } from '@/lib/utils/palia-time'
-import { format } from 'date-fns'
-import { Bonus } from '@/lib/garden-planner'
 import { ScheduleCalendarWidget } from './schedule-calendar-widget'
 
 export interface ScheduleControlPanelProps {
@@ -19,7 +17,6 @@ export function ScheduleControlPanel({ className }: ScheduleControlPanelProps) {
     const {
         isActive,
         isPaused,
-        startTime,
         schedule,
         startSchedule,
         stopSchedule,
@@ -27,15 +24,9 @@ export function ScheduleControlPanel({ className }: ScheduleControlPanelProps) {
         resumeSchedule,
         regenerateSchedule,
         getNextActionTime,
-        getTodaysActions
     } = useWateringSchedule()
 
-    const { totalCrops, bonusCoverage } = useGardenStats()
-    const waterRetentionPercentage = totalCrops > 0 ? Math.round((bonusCoverage[Bonus.WaterRetain] || 0) / totalCrops * 100) : 0
-
     const nextActionTime = getNextActionTime()
-    const todaysActions = getTodaysActions()
-    const minutesUntilNextHarvest = calculateMinutesUntilNextHarvest()
 
     const getStatusBadge = () => {
         if (!isActive) {
@@ -57,23 +48,6 @@ export function ScheduleControlPanel({ className }: ScheduleControlPanelProps) {
 
         return <Badge variant="outline">Active</Badge>
     }
-
-    const getNextActionInfo = () => {
-        if (!nextActionTime) return null
-
-        const minutesUntilAction = Math.ceil((nextActionTime.getTime() - Date.now()) / (1000 * 60))
-        const actionType = schedule.find(entry =>
-            entry.earthTime.getTime() === nextActionTime.getTime()
-        )?.actions[0]?.type
-
-        return {
-            time: nextActionTime,
-            duration: formatDuration(minutesUntilAction),
-            type: actionType || 'unknown'
-        }
-    }
-
-    const nextAction = getNextActionInfo()
 
     return (
         <Card className={className}>

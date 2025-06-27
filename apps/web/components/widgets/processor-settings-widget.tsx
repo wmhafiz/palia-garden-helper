@@ -214,15 +214,10 @@ export function ProcessorSettingsWidget() {
         )
     }
 
-    const totalCrafters = Array.from(settings.cropSettings.values())
-        .filter(setting => setting.isActive && setting.processAs !== 'crop')
-        .reduce((sum, setting) => sum + setting.crafters, 0)
-
     return (
         <TooltipProvider>
             {/* Crop Processing Settings */}
             <div className="space-y-3">
-                <Label>Crop Processing Settings ({totalCrafters} crafters)</Label>
                 <ScrollArea className="space-y-4 max-h-160 overflow-y-auto">
                     {availableCrops.map((harvest) => {
                         const crop = getCropFromType(harvest.cropType as any)

@@ -10,11 +10,9 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger
 } from '@workspace/ui/components/dropdown-menu'
-import { useUISettings } from '@/stores'
 
 export function ThemeSwitcher() {
     const { theme, setTheme } = useTheme()
-    const { updateSetting } = useUISettings()
     const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
@@ -50,26 +48,15 @@ export function ThemeSwitcher() {
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => {
-                    setTheme('light')
-                    updateSetting('isDarkMode', false)
-                }}>
+                <DropdownMenuItem onClick={() => setTheme('light')}>
                     <Sun className="mr-2 h-4 w-4" />
                     Light
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => {
-                    setTheme('dark')
-                    updateSetting('isDarkMode', true)
-                }}>
+                <DropdownMenuItem onClick={() => setTheme('dark')}>
                     <Moon className="mr-2 h-4 w-4" />
                     Dark
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => {
-                    setTheme('system')
-                    // For system theme, update based on current system preference
-                    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-                    updateSetting('isDarkMode', systemPrefersDark)
-                }}>
+                <DropdownMenuItem onClick={() => setTheme('system')}>
                     <Monitor className="mr-2 h-4 w-4" />
                     System
                 </DropdownMenuItem>

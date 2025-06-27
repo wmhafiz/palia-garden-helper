@@ -5,7 +5,6 @@ interface UISettings {
     showBonusIndicators: boolean
     showGridLines: boolean
     showTooltips: boolean
-    isDarkMode: boolean
     isCompactMode: boolean
     autoSave: boolean
     enableNotifications: boolean
@@ -19,7 +18,6 @@ interface UISettingsState extends UISettings {
     toggleBonusIndicators: () => void
     toggleGridLines: () => void
     toggleTooltips: () => void
-    toggleDarkMode: () => void
     toggleCompactMode: () => void
     toggleAutoSave: () => void
     toggleNotifications: () => void
@@ -30,7 +28,6 @@ const defaultSettings: UISettings = {
     showBonusIndicators: true,
     showGridLines: true,
     showTooltips: true,
-    isDarkMode: typeof window !== 'undefined' ? window.matchMedia('(prefers-color-scheme: dark)').matches : false,
     isCompactMode: false,
     autoSave: true,
     enableNotifications: true,
@@ -62,11 +59,6 @@ export const useUISettings = create<UISettingsState>()(
             toggleTooltips: () => set((state) => ({
                 ...state,
                 showTooltips: !state.showTooltips,
-            })),
-
-            toggleDarkMode: () => set((state) => ({
-                ...state,
-                isDarkMode: !state.isDarkMode,
             })),
 
             toggleCompactMode: () => set((state) => ({

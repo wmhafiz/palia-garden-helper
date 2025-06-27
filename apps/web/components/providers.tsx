@@ -4,7 +4,6 @@ import * as React from "react"
 import { ThemeProvider as NextThemesProvider } from "next-themes"
 import { TooltipProvider } from "@workspace/ui/components/tooltip"
 import { Toaster } from "@workspace/ui/components/sonner"
-import { ThemeSync } from "./theme-sync"
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -12,11 +11,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
       attribute="class"
       defaultTheme="system"
       enableSystem
-      disableTransitionOnChange
+      disableTransitionOnChange={false}
       enableColorScheme
+      storageKey="palia-garden-planner-theme"
     >
       <TooltipProvider delayDuration={300}>
-        <ThemeSync />
         {children}
         <Toaster />
       </TooltipProvider>

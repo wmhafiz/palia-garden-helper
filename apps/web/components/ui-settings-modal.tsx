@@ -1,6 +1,7 @@
 'use client'
 
 import { Settings } from 'lucide-react'
+import { useTheme } from 'next-themes'
 import {
     Dialog,
     DialogContent,
@@ -19,11 +20,11 @@ interface UISettingsModalProps {
 }
 
 export function UISettingsModal({ open, onOpenChange }: UISettingsModalProps) {
+    const { theme, setTheme } = useTheme()
     const {
         showBonusIndicators,
         showGridLines,
         showTooltips,
-        isDarkMode,
         isCompactMode,
         autoSave,
         enableNotifications,
@@ -31,12 +32,18 @@ export function UISettingsModal({ open, onOpenChange }: UISettingsModalProps) {
         toggleBonusIndicators,
         toggleGridLines,
         toggleTooltips,
-        toggleDarkMode,
         toggleCompactMode,
         toggleAutoSave,
         toggleNotifications,
         toggleSoundNotifications
     } = useUISettings()
+
+    // Determine if dark mode is active based on next-themes
+    const isDarkMode = theme === 'dark'
+
+    const handleDarkModeToggle = (checked: boolean) => {
+        setTheme(checked ? 'dark' : 'light')
+    }
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -129,7 +136,7 @@ export function UISettingsModal({ open, onOpenChange }: UISettingsModalProps) {
                             <Switch
                                 id="dark-mode"
                                 checked={isDarkMode}
-                                onCheckedChange={toggleDarkMode}
+                                onCheckedChange={handleDarkModeToggle}
                             />
                         </div>
                     </div>

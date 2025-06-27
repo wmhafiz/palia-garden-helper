@@ -3,10 +3,11 @@
 import { useEffect } from 'react'
 import { useGarden, useUISettings } from '@/stores'
 import { PlotGrid } from './plot-grid'
+import { BonusCoverageWidget } from '../widgets/bonus-coverage-widget'
 
 export function GardenDisplay() {
     const { garden, version } = useGarden()
-    const { showGridLines, showBonusIndicators, showTooltips, updateSetting } = useUISettings()
+    const { showGridLines, showBonusIndicators } = useUISettings()
 
     // Calculate bonuses whenever garden changes
     useEffect(() => {
@@ -25,15 +26,6 @@ export function GardenDisplay() {
 
     return (
         <div className="garden-display">
-            <div className="mb-4 flex items-center justify-between">
-                <div className="text-sm text-gray-600">
-                    Garden Size: {garden.rows} × {garden.columns}
-                </div>
-                <div className="text-sm text-gray-600">
-                    Active Plots: {garden.activePlotCount}
-                </div>
-            </div>
-
             <div
                 className={`
           garden-grid w-full flex justify-center p-1 rounded-lg 
@@ -47,37 +39,8 @@ export function GardenDisplay() {
                     version={version}
                 />
             </div>
-
-            {/* Garden controls */}
-            <div className="mt-4 flex flex-wrap items-center gap-4 text-sm">
-                <label className="flex items-center space-x-2">
-                    <input
-                        type="checkbox"
-                        checked={showGridLines}
-                        onChange={(e) => updateSetting('showGridLines', e.target.checked)}
-                        className="rounded border-gray-300"
-                    />
-                    <span>Show Grid Lines</span>
-                </label>
-                <label className="flex items-center space-x-2">
-                    <input
-                        type="checkbox"
-                        checked={showBonusIndicators}
-                        onChange={(e) => updateSetting('showBonusIndicators', e.target.checked)}
-                        className="rounded border-gray-300"
-                    />
-                    <span>Show Bonus Indicators</span>
-                </label>
-                <label className="flex items-center space-x-2">
-                    <input
-                        type="checkbox"
-                        checked={showTooltips}
-                        onChange={(e) => updateSetting('showTooltips', e.target.checked)}
-                        className="rounded border-gray-300"
-                    />
-                    <span>Show Tooltips</span>
-                </label>
-            </div>
+            {/* Bonus Coverage Statistics */}
+            <BonusCoverageWidget />
         </div>
     )
 } 

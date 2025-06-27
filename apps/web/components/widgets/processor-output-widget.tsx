@@ -1,249 +1,199 @@
 'use client'
 
-import { TrendingUp, Clock, Package, Coins } from 'lucide-react'
+import { Package, Clock, Star, Coins } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card'
 import { Badge } from '@workspace/ui/components/badge'
-import { useOutputData } from '@/hooks/useOutputData'
+import { Separator } from '@workspace/ui/components/separator'
 import { useProcessor } from '@/stores'
-import { getCropFromType } from '@/lib/garden-planner'
-import { useEffect } from 'react'
+import { useProcessorSimulation } from '@/hooks/useProcessorSimulation'
+
+interface ProcessOutputDisplayProps {
+    title: string
+    icon: React.ReactNode
+    items: Map<string, any>
+    crafterImage?: string
+    crafterCount?: number
+}
+
+function ProcessOutputDisplay({ title, icon, items, crafterImage, crafterCount }: ProcessOutputDisplayProps) {
+    if (items.size === 0) return null
+
+    // Sort items by star status (star items first) then by crop type
+    const sortedItems = Array.from(items.entries()).sort(([aKey, aValue], [bKey, bValue]) => {
+        // Star items first
+        if (aValue.isStar && !bValue.isStar) return -1
+        if (!aValue.isStar && bValue.isStar) return 1
+
+        // Then sort by crop type
+        return aValue.cropType.localeCompare(bValue.cropType)
+    })
+
+    return (
+        <div className="space-y-3">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    {icon}
+                    <h3 className="font-medium">{title}</h3>
+                    <Badge variant="secondary" className="text-xs">
+                        {items.size} types
+                    </Badge>
+                </div>
+                {crafterCount && crafterCount > 0 && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        {crafterImage && (
+                            <img
+                                src={crafterImage}
+                                alt="Crafter"
+                                className="w-5 h-5 object-contain"
+                            />
+                        )}
+                        <span>{crafterCount} crafters</span>
+                    </div>
+                )}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {sortedItems.map(([itemId, info]) => (
+                    <div key={itemId} className={`border rounded-lg p-3 space-y-2 ${info.isStar ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-gray-50 dark:bg-gray-900/20'
+                        }`}>
+                        <div className="flex items-center gap-2">
+                            <img
+                                src={info.itemType === 'preserve'
+                                    ? `/jars/${info.cropType.toLowerCase().replace(/\s+/g, '-')}.webp`
+                                    : `/${info.itemType}s/${info.cropType.toLowerCase().replace(/\s+/g, '-')}.webp`
+                                }
+                                alt={`${info.cropType} ${info.itemType}`}
+                                className="w-8 h-8 object-contain"
+                            />
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1">
+                                    {info.isStar && <Star className="w-3 h-3 text-yellow-500 fill-current" />}
+                                    <span className="text-sm font-medium capitalize truncate">
+                                        {info.cropType} {info.itemType}
+                                    </span>
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                    {info.count} items
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-1 text-xs">
+                            <div className="flex items-center justify-between">
+                                <span className="text-muted-foreground">Gold Value:</span>
+                                <div className="flex items-center gap-1">
+                                    <Coins className="w-3 h-3 text-yellow-500" />
+                                    <span className="font-medium">{Math.round(info.goldValue).toLocaleString()}</span>
+                                </div>
+                            </div>
+
+                            {info.minutesProcessedTotal > 0 && (
+                                <>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-muted-foreground">Process Time:</span>
+                                        <div className="flex items-center gap-1">
+                                            <Clock className="w-3 h-3" />
+                                            <span>{Math.round(info.minutesProcessedEffective)}m</span>
+                                        </div>
+                                    </div>
+                                    {info.crafterCount > 0 && (
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-muted-foreground">Crafters:</span>
+                                            <span>{info.crafterCount}</span>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    )
+}
 
 export function ProcessorOutputWidget() {
-    const { harvestData } = useOutputData()
-    const { output, settings, simulateProcessing } = useProcessor()
+    const { output, settings } = useProcessor()
 
-    // Simulate processing when harvest data or settings change
-    useEffect(() => {
-        simulateProcessing(harvestData)
-    }, [harvestData, settings, simulateProcessing])
+    // Automatically trigger processor simulation when data changes
+    useProcessorSimulation()
 
-    const formatTime = (minutes: number) => {
-        if (minutes < 60) return `${Math.round(minutes)}m`
-        const hours = Math.floor(minutes / 60)
-        const mins = Math.round(minutes % 60)
-        return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`
+    const hasAnyOutput = output.crops.size > 0 || output.seeds.size > 0 || output.preserves.size > 0
+
+    if (!hasAnyOutput) {
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <Package className="w-5 h-5" />
+                        Processor Output
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                        No processing output available. Configure processor settings to see results.
+                    </p>
+                </CardContent>
+            </Card>
+        )
     }
-
-    const formatGold = (value: number) => {
-        return value.toLocaleString()
-    }
-
-    // Calculate total items produced
-    const totalItems = {
-        crops: Array.from(output.crops.values()).reduce((sum, item) => sum + item.count, 0),
-        seeds: Array.from(output.seeds.values()).reduce((sum, item) => sum + item.count, 0),
-        preserves: Array.from(output.preserves.values()).reduce((sum, item) => sum + item.count, 0)
-    }
-
-    const totalProduced = totalItems.crops + totalItems.seeds + totalItems.preserves
-
-    // Calculate processing efficiency
-    const totalProcessingTime = Math.max(
-        ...Array.from(output.seeds.values()).map(item => item.minutesProcessedEffective),
-        ...Array.from(output.preserves.values()).map(item => item.minutesProcessedEffective),
-        0
-    )
-
-    const hasProcessingData = output.seedCollectorsCount > 0 || output.preserveJarsCount > 0
 
     return (
         <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5" />
+                    <Package className="w-5 h-5" />
                     Processor Output
                 </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
+
                 {/* Summary Stats */}
-                <div className="grid grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                            <Coins className="w-4 h-4 text-yellow-500" />
-                            <span className="text-sm font-medium">Total Gold</span>
-                        </div>
-                        <div className="text-2xl font-bold text-yellow-600">
-                            {formatGold(output.totalGoldValue)}
-                        </div>
-                        {hasProcessingData && settings.goldAverageSetting === 'crafterTime' && (
-                            <div className="text-xs text-muted-foreground">
-                                ~{formatGold(Math.round(output.averageGoldPerHour))}/hour
-                            </div>
-                        )}
+                <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                        <Coins className="w-4 h-4 text-yellow-500" />
+                        <span>Total: {Math.round(output.totalGoldValue).toLocaleString()} gold</span>
                     </div>
-
-                    <div className="space-y-2">
+                    {output.averageGoldPerHour > 0 && (
                         <div className="flex items-center gap-2">
-                            <Package className="w-4 h-4 text-blue-500" />
-                            <span className="text-sm font-medium">Total Items</span>
-                        </div>
-                        <div className="text-2xl font-bold text-blue-600">
-                            {totalProduced.toLocaleString()}
-                        </div>
-                        {hasProcessingData && (
-                            <div className="text-xs text-muted-foreground">
-                                {totalItems.crops > 0 && `${totalItems.crops} crops`}
-                                {totalItems.seeds > 0 && ` ${totalItems.seeds} seeds`}
-                                {totalItems.preserves > 0 && ` ${totalItems.preserves} preserves`}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Processing Time */}
-                    {hasProcessingData && (
-                        <div className="space-y-2">
-                            <div className="flex items-center gap-2">
-                                <Clock className="w-4 h-4 text-green-500" />
-                                <span className="text-sm font-medium">Processing Time</span>
-                            </div>
-                            <div className="text-lg font-semibold text-green-600">
-                                {formatTime(totalProcessingTime)}
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                                Total time with current crafter allocation
-                            </div>
+                            <Clock className="w-4 h-4" />
+                            <span>{Math.round(output.averageGoldPerHour).toLocaleString()} gold/{settings.goldAverageSetting === 'crafterTime' ? 'hour' : 'day'}</span>
                         </div>
                     )}
                 </div>
+            </CardHeader>
 
-                {/* Equipment Summary */}
-                {hasProcessingData && (
-                    <div className="space-y-3">
-                        <h4 className="text-sm font-medium">Equipment Required</h4>
-                        <div className="flex gap-2">
-                            {output.seedCollectorsCount > 0 && (
-                                <Badge variant="secondary" className="flex items-center gap-1">
-                                    <img src={output.seedCollectorImage} alt="Seed Collector" className="w-4 h-4" />
-                                    {output.seedCollectorsCount} Seed Collectors
-                                </Badge>
-                            )}
-                            {output.preserveJarsCount > 0 && (
-                                <Badge variant="secondary" className="flex items-center gap-1">
-                                    <img src={output.preserveJarImage} alt="Preserve Jar" className="w-4 h-4" />
-                                    {output.preserveJarsCount} Preserve Jars
-                                </Badge>
-                            )}
-                        </div>
-                    </div>
+            <CardContent className="space-y-6">
+                {/* Raw Crops */}
+                <ProcessOutputDisplay
+                    title="Raw Crops"
+                    icon={<Package className="w-4 h-4 text-green-600" />}
+                    items={output.crops}
+                />
+
+                {output.crops.size > 0 && (output.seeds.size > 0 || output.preserves.size > 0) && (
+                    <Separator />
                 )}
 
-                {/* Detailed Output */}
-                {hasProcessingData && (
-                    <div className="space-y-3">
-                        <h4 className="text-sm font-medium">Processing Details</h4>
-                        <div className="space-y-2 max-h-64 overflow-y-auto">
-                            {/* Seeds */}
-                            {Array.from(output.seeds.entries()).map(([cropType, info]) => {
-                                const crop = getCropFromType(cropType as any)
-                                return (
-                                    <div key={`seed-${cropType}`} className="flex items-center justify-between p-2 bg-muted/50 rounded">
-                                        <div className="flex items-center gap-2">
-                                            <img
-                                                src={crop?.seedImage || '/seeds/placeholder.webp'}
-                                                alt={`${cropType} seed`}
-                                                className="w-6 h-6 object-contain"
-                                            />
-                                            <div>
-                                                <div className="text-sm font-medium capitalize">{cropType} Seeds</div>
-                                                <div className="text-xs text-muted-foreground">
-                                                    {info.crafterCount} crafters • {formatTime(info.minutesProcessedEffective)}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <div className="text-sm font-medium">{info.count}</div>
-                                            <div className="text-xs text-yellow-600">{formatGold(info.goldValue)} gold</div>
-                                        </div>
-                                    </div>
-                                )
-                            })}
+                {/* Seeds */}
+                <ProcessOutputDisplay
+                    title="Seeds"
+                    icon={<img src="/crafters/seeder.webp" alt="Seed Collector" className="w-4 h-4" />}
+                    items={output.seeds}
+                    crafterImage={output.seedCollectorImage}
+                    crafterCount={output.seedCollectorsCount}
+                />
 
-                            {/* Preserves */}
-                            {Array.from(output.preserves.entries()).map(([cropType, info]) => {
-                                const crop = getCropFromType(cropType as any)
-                                return (
-                                    <div key={`preserve-${cropType}`} className="flex items-center justify-between p-2 bg-muted/50 rounded">
-                                        <div className="flex items-center gap-2">
-                                            <img
-                                                src={crop?.preserveImage || '/jars/placeholder.webp'}
-                                                alt={`${cropType} preserve`}
-                                                className="w-6 h-6 object-contain"
-                                            />
-                                            <div>
-                                                <div className="text-sm font-medium capitalize">{cropType} Preserves</div>
-                                                <div className="text-xs text-muted-foreground">
-                                                    {info.crafterCount} crafters • {formatTime(info.minutesProcessedEffective)}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <div className="text-sm font-medium">{info.count}</div>
-                                            <div className="text-xs text-yellow-600">{formatGold(info.goldValue)} gold</div>
-                                        </div>
-                                    </div>
-                                )
-                            })}
-
-                            {/* Unprocessed Crops */}
-                            {Array.from(output.crops.entries()).map(([cropType, info]) => {
-                                const crop = getCropFromType(cropType as any)
-                                return (
-                                    <div key={`crop-${cropType}`} className="flex items-center justify-between p-2 bg-muted/50 rounded">
-                                        <div className="flex items-center gap-2">
-                                            <img
-                                                src={crop?.image || '/crops/placeholder.webp'}
-                                                alt={cropType}
-                                                className="w-6 h-6 object-contain"
-                                            />
-                                            <div>
-                                                <div className="text-sm font-medium capitalize">{cropType}</div>
-                                                <div className="text-xs text-muted-foreground">Unprocessed</div>
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <div className="text-sm font-medium">{info.count}</div>
-                                            <div className="text-xs text-yellow-600">{formatGold(info.goldValue)} gold</div>
-                                        </div>
-                                    </div>
-                                )
-                            })}
-                        </div>
-                    </div>
+                {output.seeds.size > 0 && output.preserves.size > 0 && (
+                    <Separator />
                 )}
 
-                {!hasProcessingData && (
-                    <div className="space-y-3">
-                        <h4 className="text-sm font-medium">Crop Harvest (No Processing)</h4>
-                        <div className="space-y-2 max-h-64 overflow-y-auto">
-                            {harvestData.cropHarvests.map((harvest) => {
-                                const crop = getCropFromType(harvest.cropType as any)
-                                return (
-                                    <div key={`unprocessed-${harvest.cropType}`} className="flex items-center justify-between p-2 bg-muted/50 rounded">
-                                        <div className="flex items-center gap-2">
-                                            <img
-                                                src={`/crops/${harvest.cropType.toLowerCase().replace(/\s+/g, '-')}.webp`}
-                                                alt={harvest.cropType}
-                                                className="w-6 h-6 object-contain"
-                                            />
-                                            <div>
-                                                <div className="text-sm font-medium capitalize">{harvest.cropType}</div>
-                                                <div className="text-xs text-muted-foreground">Raw crops</div>
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <div className="text-sm font-medium">{harvest.totalYield}</div>
-                                            <div className="text-xs text-yellow-600">{formatGold(harvest.totalValue)} gold</div>
-                                        </div>
-                                    </div>
-                                )
-                            })}
-                        </div>
-                        <div className="text-center py-4 text-muted-foreground border-t">
-                            <Package className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                            <p className="text-xs">Configure processor settings to see processing calculations</p>
-                        </div>
-                    </div>
-                )}
+                {/* Preserves */}
+                <ProcessOutputDisplay
+                    title="Preserves"
+                    icon={<img src="/crafters/preserve-jar.webp" alt="Preserve Jar" className="w-4 h-4" />}
+                    items={output.preserves}
+                    crafterImage={output.preserveJarImage}
+                    crafterCount={output.preserveJarsCount}
+                />
             </CardContent>
         </Card>
     )

@@ -120,6 +120,21 @@ export const useGarden = create<GardenState>()(
                 const success = newGarden.loadLayout(saveCode)
                 if (success) {
                     set((state) => ({ garden: newGarden, isLoading: false, version: state.version + 1 }))
+                    
+                    // Also load processor settings if available
+                    try {
+                        const { parseSave } = require('@/lib/garden-planner/save-handler')
+                        const { settingsInfo } = parseSave(saveCode)
+                        if (settingsInfo) {
+                            // Import processor settings
+                            const { useProcessor } = require('@/stores/useProcessor')
+                            useProcessor.getState().loadSettingsFromSaveCode(settingsInfo)
+                        }
+                    } catch (settingsError) {
+                        console.warn('Failed to load processor settings:', settingsError)
+                        // Don't fail the whole import for settings issues
+                    }
+                    
                     return true
                 } else {
                     set({ error: 'Failed to import Vue.js save code', isLoading: false })

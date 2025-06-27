@@ -9,6 +9,7 @@ interface UISettings {
     autoSave: boolean
     enableNotifications: boolean
     enableSoundNotifications: boolean
+    showToolbar: boolean
 }
 
 interface UISettingsState extends UISettings {
@@ -22,6 +23,7 @@ interface UISettingsState extends UISettings {
     toggleAutoSave: () => void
     toggleNotifications: () => void
     toggleSoundNotifications: () => void
+    toggleToolbar: () => void
 }
 
 const defaultSettings: UISettings = {
@@ -32,6 +34,7 @@ const defaultSettings: UISettings = {
     autoSave: true,
     enableNotifications: true,
     enableSoundNotifications: true,
+    showToolbar: true,
 }
 
 export const useUISettings = create<UISettingsState>()(
@@ -79,6 +82,11 @@ export const useUISettings = create<UISettingsState>()(
             toggleSoundNotifications: () => set((state) => ({
                 ...state,
                 enableSoundNotifications: !state.enableSoundNotifications,
+            })),
+
+            toggleToolbar: () => set((state) => ({
+                ...state,
+                showToolbar: !state.showToolbar,
             })),
         }),
         {

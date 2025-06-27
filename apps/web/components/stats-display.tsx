@@ -42,21 +42,37 @@ export function StatsDisplay() {
     return (
         <div className="space-y-4">
             <Accordion type="multiple" defaultValue={['item-1']}>
-                <AccordionItem value="item-1">
-                    <AccordionTrigger>Overview</AccordionTrigger>
-                    <AccordionContent>
-                        <div className="flex flex-row gap-4">
-                            {/* Bonus Coverage Statistics */}
-                            <BonusCoverageWidget />
-                            <div className="flex-1">
-                                {/* Harvest Summary */}
-                                <HarvestSummaryWidget />
-                            </div>
-                        </div>
-                    </AccordionContent>
-                </AccordionItem>
+                {stats.totalCrops > 0 && (
+                    <AccordionItem value="item-1">
+                        <AccordionTrigger>Outputs</AccordionTrigger>
+                        <AccordionContent>
+                            <ProcessorOutputWidget />
+                        </AccordionContent>
+                    </AccordionItem>
+                )}
+
                 {stats.totalCrops > 0 && (
                     <AccordionItem value="item-2">
+                        <AccordionTrigger>Details</AccordionTrigger>
+                        <AccordionContent>
+                            <div className="flex flex-row gap-4">
+                                <div className="flex-1">
+                                    {/* Harvest Schedule */}
+                                    <HarvestScheduleWidget />
+                                </div>
+
+                                <div className="flex-2">
+                                    {/* Processor Settings */}
+                                    <ProcessorSettingsWidget />
+                                </div>
+                            </div>
+
+                        </AccordionContent>
+                    </AccordionItem>
+                )}
+
+                {stats.totalCrops > 0 && (
+                    <AccordionItem value="item-3">
                         <AccordionTrigger>Tips</AccordionTrigger>
                         <AccordionContent>
                             <div className="flex flex-row gap-4">
@@ -71,44 +87,8 @@ export function StatsDisplay() {
                     </AccordionItem>
                 )}
 
-                {stats.totalCrops > 0 && (
-                    <AccordionItem value="item-3">
-                        <AccordionTrigger>Crops</AccordionTrigger>
-                        <AccordionContent>
-                            <div className="flex flex-row gap-4">
-                                <div className="flex-3">
-                                    {/* Crop Breakdown */}
-                                    <CropBreakdownWidget />
-                                </div>
 
-                                <div className="flex-2">
-                                    {/* Harvest Schedule */}
-                                    <HarvestScheduleWidget />
-                                </div>
-                            </div>
-                        </AccordionContent>
-                    </AccordionItem>
-                )}
-
-                {stats.totalCrops > 0 && (
-                    <AccordionItem value="item-4">
-                        <AccordionTrigger>Processors</AccordionTrigger>
-                        <AccordionContent>
-                            <div className="flex flex-row gap-4">
-                                <div className="flex-2">
-                                    {/* Harvest Schedule */}
-                                    <ProcessorOutputWidget />
-                                </div>
-
-                                <div className="flex-3">
-                                    {/* Crop Breakdown */}
-                                    <ProcessorSettingsWidget />
-                                </div>
-                            </div>
-                        </AccordionContent>
-                    </AccordionItem>
-                )}
             </Accordion>
-        </div>
+        </div >
     )
 } 

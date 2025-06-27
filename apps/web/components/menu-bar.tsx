@@ -27,13 +27,13 @@ import {
     DropdownMenuTrigger
 } from '@workspace/ui/components/dropdown-menu'
 import { useGarden, useSaveLoad } from '@/stores'
-import { SaveModal } from './save-modal'
-import { LoadModal } from './load-modal'
-import { ExportModal } from './export-modal'
-import { ImportModal } from './import-modal'
-import { UISettingsModal } from './ui-settings-modal'
-import { LayoutCreatorModal } from './layout-creator-modal'
-import { TimeDisplay } from './time-display'
+import { SaveModal } from './modals/save-modal'
+import { LoadModal } from './modals/load-modal'
+import { ExportModal } from './modals/export-modal'
+import { ImportModal } from './modals/import-modal'
+import { UISettingsModal } from './modals/ui-settings-modal'
+import { LayoutCreatorModal } from './modals/layout-creator-modal'
+import { TimeDisplay } from './clock/time-display'
 import { ThemeSwitcher } from './theme-switcher'
 
 export function MenuBar() {

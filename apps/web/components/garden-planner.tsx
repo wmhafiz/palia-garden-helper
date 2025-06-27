@@ -2,13 +2,13 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useGarden, useToasts, useSelectedItem } from '@/stores'
-import { GardenDisplay } from './garden-display'
-import { HorizontalCropSelector } from './horizontal-crop-selector'
-import { HorizontalFertilizerSelector } from './horizontal-fertilizer-selector'
-import { HorizontalToolSelector } from './horizontal-tool-selector'
+import { GardenDisplay } from './garden/garden-display'
+import { HorizontalCropSelector } from './tools/horizontal-crop-selector'
+import { HorizontalFertilizerSelector } from './tools/horizontal-fertilizer-selector'
+import { HorizontalToolSelector } from './tools/horizontal-tool-selector'
 import { MenuBar } from './menu-bar'
 import { StatsDisplay } from './stats-display'
-import { CurrentSelectionDisplay } from './current-selection-display'
+import { CurrentSelectionDisplay } from './tools/current-selection-display'
 import { ScrollArea } from '@workspace/ui/components/scroll-area'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@workspace/ui/components/collapsible'
 

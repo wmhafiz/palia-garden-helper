@@ -4,7 +4,7 @@ import { Star, Zap, Wheat, Droplets, Shield } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card'
 import { Bonus } from '@/lib/garden-planner'
 import { useGardenStats } from '@/hooks/useGardenStats'
-import { RadialChart } from './radial-chart'
+import { RadialChart } from '../radial-chart'
 
 export function BonusCoverageWidget() {
     const { totalCrops, bonusCoverage } = useGardenStats()

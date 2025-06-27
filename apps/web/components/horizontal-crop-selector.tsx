@@ -1,6 +1,7 @@
 'use client'
 
-import { useSelectedItem, useUISettings } from '@/stores'
+import { useMemo } from 'react'
+import { useSelectedItem, useUISettings, useGarden } from '@/stores'
 import cropList from '@/lib/garden-planner/cropList'
 import { CropType } from '@/lib/garden-planner/enums'
 import { Crop } from '@/lib/garden-planner/classes'
@@ -10,6 +11,7 @@ import { ScrollArea, ScrollBar } from '@workspace/ui/components/scroll-area'
 export function HorizontalCropSelector() {
     const { selectedItem, selectedItemType, selectCrop } = useSelectedItem()
     const { showTooltips } = useUISettings()
+    const { garden, version } = useGarden()
 
     const handleCropSelect = (cropType: CropType) => {
         const crop = cropList[cropType]
@@ -22,25 +24,41 @@ export function HorizontalCropSelector() {
         return selectedItemType === 'crop' && selectedItem?.type === crop.type
     }
 
-    // Get crop count for quantity indicators (placeholder - would come from garden state)
-    const getCropCount = (cropType: CropType): number => {
-        // This would be calculated from the garden state
-        // For now, return placeholder values matching the original design
-        const counts: Record<string, number> = {
-            'Tomato': 6,
-            'Potato': 10,
-            'Rice': 6,
-            'Wheat': 4,
-            'Carrot': 4,
-            'Onion': 1,
-            'Cotton': 1,
-            'Blueberry': 4,
-            'Apple': 1,
-            'Corn': 5,
-            'Spicy Pepper': 12,
-            'Sweet Leaf': 5
+    // Calculate actual crop counts from the garden state
+    const cropCounts = useMemo(() => {
+        if (!garden) return {} as Record<CropType, number>
+
+        const counts: Record<CropType, number> = {} as Record<CropType, number>
+        const uniqueCrops = new Map<string, { type: CropType, tile: any }>()
+
+        // Count unique crops by their tile ID (multi-size crops share the same ID)
+        for (let i = 0; i < garden.rows; i++) {
+            for (let j = 0; j < garden.columns; j++) {
+                const plot = garden.getPlot(i, j)
+                if (plot && plot.isActive) {
+                    for (let ti = 0; ti < 3; ti++) {
+                        for (let tj = 0; tj < 3; tj++) {
+                            const tile = plot.getTile(ti, tj)
+                            if (tile?.crop && tile.crop.type !== CropType.None) {
+                                // Use tile ID to ensure multi-size crops are only counted once
+                                uniqueCrops.set(tile.id, { type: tile.crop.type, tile })
+                            }
+                        }
+                    }
+                }
+            }
         }
-        return counts[cropType] || 0
+
+        // Count each unique crop
+        for (const { type } of uniqueCrops.values()) {
+            counts[type] = (counts[type] || 0) + 1
+        }
+
+        return counts
+    }, [garden, version])
+
+    const getCropCount = (cropType: CropType): number => {
+        return cropCounts[cropType] || 0
     }
 
     const crops = Object.values(cropList).filter((crop: Crop) => crop.type !== CropType.None)
@@ -65,32 +83,30 @@ export function HorizontalCropSelector() {
                                     key={crop.type}
                                     onClick={() => handleCropSelect(crop.type)}
                                     className={`
-                                        relative flex-shrink-0 w-12 h-12 rounded-lg border-2 transition-all duration-200
+                                        relative flex-shrink-0 w-16 h-16 rounded-lg border-2 transition-all duration-200 hover:scale-105
                                         ${isSelected
-                                            ? 'border-palia-blue bg-blue-50 shadow-md'
-                                            : 'border-border bg-card hover:border-palia-blue hover:shadow-sm'
+                                            ? 'border-green-500 bg-green-500/20 shadow-lg ring-2 ring-green-500/30 z-10'
+                                            : 'border-border bg-card hover:border-palia-blue hover:shadow-sm z-0'
                                         }
                                     `}
+                                    style={{
+                                        zIndex: isSelected ? 10 : 1
+                                    }}
                                 >
                                     {/* Crop image */}
                                     <div className="w-full h-full flex items-center justify-center overflow-hidden rounded-md">
                                         <img
                                             src={crop.image}
                                             alt={crop.type}
-                                            className="w-10 h-10 object-contain"
+                                            className="w-12 h-12 object-contain"
                                         />
                                     </div>
 
-                                    {/* Quantity indicator */}
+                                    {/* Quantity indicator - overlapping the icon */}
                                     {count > 0 && (
-                                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-palia-blue text-white text-xs font-bold rounded-full flex items-center justify-center">
+                                        <div className="absolute bottom-0 left-0 min-w-[28px] h-7 bg-red-500 text-white text-sm font-bold rounded-full flex items-center justify-center px-2 shadow-lg border-2 border-white z-20">
                                             {count}
                                         </div>
-                                    )}
-
-                                    {/* Selection indicator */}
-                                    {isSelected && (
-                                        <div className="absolute inset-0 rounded-lg border-4 border-palia-blue"></div>
                                     )}
                                 </button>
                             )
@@ -108,6 +124,9 @@ export function HorizontalCropSelector() {
                                         <div className="text-xs">
                                             <div className="font-semibold">{crop.type}</div>
                                             <div className="text-gray-500">Growth: {crop.produceInfo.growthTime}d</div>
+                                            {count > 0 && (
+                                                <div className="text-palia-blue font-semibold">Planted: {count}</div>
+                                            )}
                                             {crop.cropTooltip && (
                                                 <div className="mt-1 whitespace-pre-line">{crop.cropTooltip}</div>
                                             )}

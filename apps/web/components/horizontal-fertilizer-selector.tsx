@@ -1,6 +1,7 @@
 'use client'
 
-import { useSelectedItem, useUISettings } from '@/stores'
+import { useMemo } from 'react'
+import { useSelectedItem, useUISettings, useGarden } from '@/stores'
 import fertiliserList from '@/lib/garden-planner/fertiliserList'
 import { FertiliserType } from '@/lib/garden-planner/enums'
 import { Fertiliser } from '@/lib/garden-planner/classes'
@@ -10,6 +11,7 @@ import { ScrollArea, ScrollBar } from '@workspace/ui/components/scroll-area'
 export function HorizontalFertilizerSelector() {
     const { selectedItem, selectedItemType, selectFertiliser } = useSelectedItem()
     const { showTooltips } = useUISettings()
+    const { garden, version } = useGarden()
 
     const handleFertiliserSelect = (fertiliserType: FertiliserType) => {
         const fertiliser = fertiliserList[fertiliserType as keyof typeof fertiliserList]
@@ -20,6 +22,48 @@ export function HorizontalFertilizerSelector() {
 
     const isItemSelected = (fertiliser: Fertiliser) => {
         return selectedItemType === 'fertiliser' && selectedItem?.type === fertiliser.type
+    }
+
+    // Calculate actual fertilizer counts from the garden state
+    const fertilizerCounts = useMemo(() => {
+        if (!garden) return {} as Record<FertiliserType, number>
+
+        const counts: Record<FertiliserType, number> = {} as Record<FertiliserType, number>
+        const uniqueFertilizers = new Map<string, { type: FertiliserType, id: string }>()
+
+        // Count unique fertilizer applications
+        for (let i = 0; i < garden.rows; i++) {
+            for (let j = 0; j < garden.columns; j++) {
+                const plot = garden.getPlot(i, j)
+                if (plot && plot.isActive) {
+                    for (let ti = 0; ti < 3; ti++) {
+                        for (let tj = 0; tj < 3; tj++) {
+                            const tile = plot.getTile(ti, tj)
+                            if (tile?.fertiliser && tile.fertiliser.type !== FertiliserType.None) {
+                                // For multi-size crops, fertilizers share the same ID across all tiles
+                                // For single crops, each fertilizer has its own unique ID
+                                const fertilizerKey = tile.fertiliser.id || `${i}-${j}-${ti}-${tj}`
+                                uniqueFertilizers.set(fertilizerKey, {
+                                    type: tile.fertiliser.type,
+                                    id: tile.fertiliser.id
+                                })
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Count each unique fertilizer application
+        for (const { type } of uniqueFertilizers.values()) {
+            counts[type] = (counts[type] || 0) + 1
+        }
+
+        return counts
+    }, [garden, version])
+
+    const getFertilizerCount = (fertiliserType: FertiliserType): number => {
+        return fertilizerCounts[fertiliserType] || 0
     }
 
     const fertilisers = Object.values(fertiliserList).filter(
@@ -39,30 +83,36 @@ export function HorizontalFertilizerSelector() {
                     <div className="flex space-x-2 pb-2 w-max">
                         {fertilisers.map((fertiliser: Fertiliser) => {
                             const isSelected = isItemSelected(fertiliser)
+                            const count = getFertilizerCount(fertiliser.type)
 
                             const fertilizerButton = (
                                 <button
                                     key={fertiliser.type}
                                     onClick={() => handleFertiliserSelect(fertiliser.type)}
                                     className={`
-                                        relative flex-shrink-0 w-12 h-12 rounded-lg border-2 transition-all duration-200
+                                        relative flex-shrink-0 w-16 h-16 rounded-lg border-2 transition-all duration-200 hover:scale-105
                                         ${isSelected
-                                            ? 'border-palia-blue bg-blue-50 shadow-md'
-                                            : 'border-border bg-card hover:border-palia-blue hover:shadow-sm'
+                                            ? 'border-purple-500 bg-purple-500/20 shadow-lg ring-2 ring-purple-500/30 z-10'
+                                            : 'border-border bg-card hover:border-palia-blue hover:shadow-sm z-0'
                                         }
                                     `}
+                                    style={{
+                                        zIndex: isSelected ? 10 : 1
+                                    }}
                                 >
                                     <div className="w-full h-full flex items-center justify-center overflow-hidden rounded-md">
                                         <img
                                             src={fertiliser.image}
                                             alt={fertiliser.type}
-                                            className="w-8 h-8 object-contain"
+                                            className="w-12 h-12 object-contain"
                                         />
                                     </div>
 
-                                    {/* Selection indicator */}
-                                    {isSelected && (
-                                        <div className="absolute inset-0 rounded-lg border-4 border-palia-blue"></div>
+                                    {/* Quantity indicator - overlapping the icon */}
+                                    {count > 0 && (
+                                        <div className="absolute bottom-0 left-0 min-w-[28px] h-7 bg-orange-500 text-white text-sm font-bold rounded-full flex items-center justify-center px-2 shadow-lg border-2 border-white z-20">
+                                            {count}
+                                        </div>
                                     )}
                                 </button>
                             )
@@ -80,6 +130,9 @@ export function HorizontalFertilizerSelector() {
                                         <div className="text-xs">
                                             <div className="font-semibold">{fertiliser.type}</div>
                                             <div className="text-muted-foreground">Effect: {fertiliser.effect}</div>
+                                            {count > 0 && (
+                                                <div className="text-palia-blue font-semibold">Applied: {count}</div>
+                                            )}
                                         </div>
                                     </TooltipContent>
                                 </Tooltip>

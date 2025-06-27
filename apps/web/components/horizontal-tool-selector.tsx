@@ -34,21 +34,19 @@ export function HorizontalToolSelector() {
                                 <button
                                     onClick={setEraseCropMode}
                                     className={`
-                                        relative flex-shrink-0 w-12 h-12 rounded-lg border-2 transition-all duration-200
+                                        relative flex-shrink-0 w-16 h-16 rounded-lg border-2 transition-all duration-200 hover:scale-105
                                         ${isEraseCropMode
-                                            ? 'border-palia-blue bg-blue-50 shadow-md'
-                                            : 'border-border bg-card hover:border-palia-blue hover:shadow-sm'
+                                            ? 'border-red-500 bg-red-500/20 shadow-lg ring-2 ring-red-500/30 z-10'
+                                            : 'border-border bg-card hover:border-palia-blue hover:shadow-sm z-0'
                                         }
                                     `}
+                                    style={{
+                                        zIndex: isEraseCropMode ? 10 : 1
+                                    }}
                                 >
-                                    <div className="w-full h-full flex items-center justify-center text-lg">
+                                    <div className="w-full h-full flex items-center justify-center text-2xl">
                                         🌱
                                     </div>
-
-                                    {/* Selection indicator */}
-                                    {isEraseCropMode && (
-                                        <div className="absolute inset-0 rounded-lg border-4 border-red-500"></div>
-                                    )}
                                 </button>
                             </TooltipTrigger>
                             <TooltipContent side="bottom" sideOffset={8}>
@@ -65,21 +63,19 @@ export function HorizontalToolSelector() {
                                 <button
                                     onClick={setEraseFertiliserMode}
                                     className={`
-                                        relative flex-shrink-0 w-12 h-12 rounded-lg border-2 transition-all duration-200
+                                        relative flex-shrink-0 w-16 h-16 rounded-lg border-2 transition-all duration-200 hover:scale-105
                                         ${isEraseFertiliserMode
-                                            ? 'border-palia-blue bg-blue-50 shadow-md'
-                                            : 'border-border bg-card hover:border-palia-blue hover:shadow-sm'
+                                            ? 'border-blue-500 bg-blue-500/20 shadow-lg ring-2 ring-blue-500/30 z-10'
+                                            : 'border-border bg-card hover:border-palia-blue hover:shadow-sm z-0'
                                         }
                                     `}
+                                    style={{
+                                        zIndex: isEraseFertiliserMode ? 10 : 1
+                                    }}
                                 >
-                                    <div className="w-full h-full flex items-center justify-center text-lg">
+                                    <div className="w-full h-full flex items-center justify-center text-2xl">
                                         🧪
                                     </div>
-
-                                    {/* Selection indicator */}
-                                    {isEraseFertiliserMode && (
-                                        <div className="absolute inset-0 rounded-lg border-4 border-blue-500"></div>
-                                    )}
                                 </button>
                             </TooltipTrigger>
                             <TooltipContent side="bottom" sideOffset={8}>
@@ -96,21 +92,19 @@ export function HorizontalToolSelector() {
                                 <button
                                     onClick={setEraseMode}
                                     className={`
-                                        relative flex-shrink-0 w-12 h-12 rounded-lg border-2 transition-all duration-200
+                                        relative flex-shrink-0 w-16 h-16 rounded-lg border-2 transition-all duration-200 hover:scale-105
                                         ${isEraseMode
-                                            ? 'border-palia-blue bg-blue-50 shadow-md'
-                                            : 'border-border bg-card hover:border-palia-blue hover:shadow-sm'
+                                            ? 'border-orange-500 bg-orange-500/20 shadow-lg ring-2 ring-orange-500/30 z-10'
+                                            : 'border-border bg-card hover:border-palia-blue hover:shadow-sm z-0'
                                         }
                                     `}
+                                    style={{
+                                        zIndex: isEraseMode ? 10 : 1
+                                    }}
                                 >
-                                    <div className="w-full h-full flex items-center justify-center text-lg">
+                                    <div className="w-full h-full flex items-center justify-center text-2xl">
                                         🗑️
                                     </div>
-
-                                    {/* Selection indicator */}
-                                    {isEraseMode && (
-                                        <div className="absolute inset-0 rounded-lg border-4 border-red-500"></div>
-                                    )}
                                 </button>
                             </TooltipTrigger>
                             <TooltipContent side="bottom" sideOffset={8}>
@@ -127,21 +121,19 @@ export function HorizontalToolSelector() {
                                 <button
                                     onClick={setErasePlotMode}
                                     className={`
-                                        relative flex-shrink-0 w-12 h-12 rounded-lg border-2 transition-all duration-200
+                                        relative flex-shrink-0 w-16 h-16 rounded-lg border-2 transition-all duration-200 hover:scale-105
                                         ${isErasePlotMode
-                                            ? 'border-palia-blue bg-blue-50 shadow-md'
-                                            : 'border-border bg-card hover:border-palia-blue hover:shadow-sm'
+                                            ? 'border-purple-500 bg-purple-500/20 shadow-lg ring-2 ring-purple-500/30 z-10'
+                                            : 'border-border bg-card hover:border-palia-blue hover:shadow-sm z-0'
                                         }
                                     `}
+                                    style={{
+                                        zIndex: isErasePlotMode ? 10 : 1
+                                    }}
                                 >
-                                    <div className="w-full h-full flex items-center justify-center text-lg">
+                                    <div className="w-full h-full flex items-center justify-center text-2xl">
                                         🧹
                                     </div>
-
-                                    {/* Selection indicator */}
-                                    {isErasePlotMode && (
-                                        <div className="absolute inset-0 rounded-lg border-4 border-purple-500"></div>
-                                    )}
                                 </button>
                             </TooltipTrigger>
                             <TooltipContent side="bottom" sideOffset={8}>
@@ -160,9 +152,9 @@ export function HorizontalToolSelector() {
                             <TooltipTrigger asChild>
                                 <button
                                     onClick={clearSelection}
-                                    className="relative flex-shrink-0 w-12 h-12 rounded-lg border-2 border-border bg-card hover:border-palia-blue hover:shadow-sm transition-all duration-200"
+                                    className="relative flex-shrink-0 w-16 h-16 rounded-lg border-2 border-border bg-card hover:border-palia-blue hover:shadow-sm hover:scale-105 transition-all duration-200"
                                 >
-                                    <div className="w-full h-full flex items-center justify-center text-lg">
+                                    <div className="w-full h-full flex items-center justify-center text-2xl">
                                         ✋
                                     </div>
                                 </button>

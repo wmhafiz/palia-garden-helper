@@ -344,7 +344,7 @@ class Garden {
      * This method should be called after loading a layout to ensure proper bonus calculations
      */
     private groupMultiTileCrops(): void {
-        console.log('🔧 groupMultiTileCrops: Starting multi-tile crop grouping')
+        // console.log('🔧 groupMultiTileCrops: Starting multi-tile crop grouping')
         // Track processed tiles globally to avoid duplicate processing across plots
         const processedTiles = new Set<string>()
 
@@ -379,7 +379,7 @@ class Garden {
                             const bushGroup = this.findConnectedBushTiles(plotRow, plotCol, tileRow, tileCol, tile.crop.type)
                             if (bushGroup.length === 4) {
                                 const groupId = uniqid()
-                                console.log(`🌿 Creating bush group with ID: ${groupId} (4 tiles)`)
+                                // console.log(`🌿 Creating bush group with ID: ${groupId} (4 tiles)`)
                                 bushGroup.forEach(({ plotRow: pRow, plotCol: pCol, tileRow: tRow, tileCol: tCol }) => {
                                     const targetPlot = this.getPlot(pRow, pCol)
                                     const groupTile = targetPlot?.getTile(tRow, tCol)
@@ -394,7 +394,7 @@ class Garden {
                 }
             }
         }
-        console.log('🔧 groupMultiTileCrops: Multi-tile crop grouping completed')
+        // console.log('🔧 groupMultiTileCrops: Multi-tile crop grouping completed')
     }
 
     /**
@@ -468,7 +468,7 @@ class Garden {
             { offsetRow: -1, offsetCol: -1 }
         ]
 
-        console.log(`    🔍 findConnectedBushTiles: Starting from plot[${plotRow},${plotCol}] tile[${tileRow},${tileCol}]`)
+        // console.log(`    🔍 findConnectedBushTiles: Starting from plot[${plotRow},${plotCol}] tile[${tileRow},${tileCol}]`)
 
         for (const pattern of possiblePatterns) {
             const patternTiles: Array<{plotRow: number, plotCol: number, tileRow: number, tileCol: number}> = []
@@ -523,12 +523,12 @@ class Garden {
 
             // If we found a complete 2x2 pattern, return it
             if (validPattern && patternTiles.length === 4) {
-                console.log(`    🔍 findConnectedBushTiles: Found complete 2x2 pattern with ${patternTiles.length} tiles`)
+                // console.log(`    🔍 findConnectedBushTiles: Found complete 2x2 pattern with ${patternTiles.length} tiles`)
                 return patternTiles
             }
         }
 
-        console.log(`    🔍 findConnectedBushTiles: No complete 2x2 pattern found, returning single tile`)
+        // console.log(`    🔍 findConnectedBushTiles: No complete 2x2 pattern found, returning single tile`)
         // If no complete pattern found, return just this tile
         return [{ plotRow, plotCol, tileRow, tileCol }]
     }
@@ -537,7 +537,7 @@ class Garden {
      * Calculates and assigns bonuses to crops based on adjacent tiles and multi-tile crop requirements
      */
     calculateBonuses(): void {
-        console.log('🎯 calculateBonuses: Starting bonus calculation')
+        // console.log('🎯 calculateBonuses: Starting bonus calculation')
         const treeTiles: { [key: string]: Tile[] } = {}
         const bushTiles: { [key: string]: Tile[] } = {}
         const processedTiles = new Set<Tile>()
@@ -603,9 +603,9 @@ class Garden {
         }
 
         // Process complete bush groups (2x2, need 4 tiles)
-        console.log(`🌿 calculateBonuses: Processing ${Object.keys(bushTiles).length} bush groups`)
+        // console.log(`🌿 calculateBonuses: Processing ${Object.keys(bushTiles).length} bush groups`)
         for (const [tileId, tileGroup] of Object.entries(bushTiles)) {
-            console.log(`🌿 Bush group ${tileId}: ${tileGroup.length} tiles`)
+            // console.log(`🌿 Bush group ${tileId}: ${tileGroup.length} tiles`)
             if (tileGroup.length === 4) {
                 // For bushes, each tile gets bonuses from its own adjacent tiles
                 // But if multiple tiles in the group receive the same bonus type,
@@ -614,13 +614,13 @@ class Garden {
                 
                 // Collect all unique bonus types received by any tile in the group
                 for (const tile of tileGroup) {
-                    console.log(`  Tile bonusesReceived: [${tile.bonusesReceived.join(', ')}]`)
+                    // console.log(`  Tile bonusesReceived: [${tile.bonusesReceived.join(', ')}]`)
                     for (const bonus of tile.bonusesReceived) {
                         allBonusTypes.add(bonus)
                     }
                 }
                 
-                console.log(`  All bonus types for group: [${Array.from(allBonusTypes).join(', ')}]`)
+                // console.log(`  All bonus types for group: [${Array.from(allBonusTypes).join(', ')}]`)
                 
                 // Apply all collected bonus types to every tile in the group
                 for (const bonus of allBonusTypes) {
@@ -630,7 +630,7 @@ class Garden {
                     }
                 }
                 
-                console.log(`  Applied bonuses to all ${tileGroup.length} tiles in group`)
+                // console.log(`  Applied bonuses to all ${tileGroup.length} tiles in group`)
             }
         }
 
@@ -650,14 +650,14 @@ class Garden {
         }
 
         // Debug: Log final bonus coverage
-        const coverage = this.getBonusCoverage()
-        const totalCrops = this.getTotalCropCount()
-        console.log('🎯 calculateBonuses: Final bonus coverage:')
-        Object.entries(coverage).forEach(([bonus, count]) => {
-            const percentage = totalCrops > 0 ? Math.round((count / totalCrops) * 100) : 0
-            console.log(`  ${bonus}: ${count}/${totalCrops} = ${percentage}%`)
-        })
-        console.log('🎯 calculateBonuses: Bonus calculation completed')
+        // const coverage = this.getBonusCoverage()
+        // const totalCrops = this.getTotalCropCount()
+        // console.log('🎯 calculateBonuses: Final bonus coverage:')
+        // Object.entries(coverage).forEach(([bonus, count]) => {
+        //     const percentage = totalCrops > 0 ? Math.round((count / totalCrops) * 100) : 0
+        //     console.log(`  ${bonus}: ${count}/${totalCrops} = ${percentage}%`)
+        // })
+        // console.log('🎯 calculateBonuses: Bonus calculation completed')
     }
 
     /**

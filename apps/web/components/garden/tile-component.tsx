@@ -137,20 +137,105 @@ export function TileComponent({
 
         try {
             if (isEraseMode) {
-                // Erase mode - clear both crop and fertilizer from tile
-                tile.crop = null
-                tile.fertiliser = null
-                addToast({
-                    type: 'info',
-                    message: 'Tile cleared (both crop and fertilizer)'
-                })
+                // Erase mode - clear both crop and fertilizer from tile or entire multi-tile group
+                if (tile.crop) {
+                    const cropType = tile.crop.type
+                    const cropSize = tile.crop.size
+
+                    if (cropSize === CropSize.Tree || cropSize === CropSize.Bush) {
+                        // For multi-tile crops, erase the entire group
+                        const tileId = tile.id
+                        let erasedCount = 0
+
+                        // Find and erase all tiles with the same ID across all plots
+                        for (let plotRow = 0; plotRow < garden.rows; plotRow++) {
+                            for (let plotCol = 0; plotCol < garden.columns; plotCol++) {
+                                const targetPlot = garden.getPlot(plotRow, plotCol)
+                                if (targetPlot && targetPlot.isActive) {
+                                    for (let tileRow = 0; tileRow < 3; tileRow++) {
+                                        for (let tileCol = 0; tileCol < 3; tileCol++) {
+                                            const targetTile = targetPlot.getTile(tileRow, tileCol)
+                                            if (targetTile && targetTile.id === tileId && targetTile.crop) {
+                                                targetTile.crop = null
+                                                targetTile.fertiliser = null
+                                                erasedCount++
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        addToast({
+                            type: 'info',
+                            message: `${cropType} (${erasedCount} tiles) and fertilizers cleared`
+                        })
+
+                        // Recalculate bonuses after erasing multi-tile crop
+                        garden.calculateBonuses()
+                        forceUpdate()
+                    } else {
+                        // Single tile crop
+                        tile.crop = null
+                        tile.fertiliser = null
+                        addToast({
+                            type: 'info',
+                            message: 'Tile cleared (both crop and fertilizer)'
+                        })
+                    }
+                } else {
+                    // No crop, just clear fertilizer
+                    tile.fertiliser = null
+                    addToast({
+                        type: 'info',
+                        message: 'Fertilizer cleared from tile'
+                    })
+                }
             } else if (isEraseCropMode) {
-                // Erase crop mode - clear only crop from tile
-                tile.crop = null
-                addToast({
-                    type: 'info',
-                    message: 'Crop cleared from tile'
-                })
+                // Erase crop mode - clear crop from tile or entire multi-tile group
+                if (tile.crop) {
+                    const cropType = tile.crop.type
+                    const cropSize = tile.crop.size
+
+                    if (cropSize === CropSize.Tree || cropSize === CropSize.Bush) {
+                        // For multi-tile crops, erase the entire group
+                        const tileId = tile.id
+                        let erasedCount = 0
+
+                        // Find and erase all tiles with the same ID across all plots
+                        for (let plotRow = 0; plotRow < garden.rows; plotRow++) {
+                            for (let plotCol = 0; plotCol < garden.columns; plotCol++) {
+                                const targetPlot = garden.getPlot(plotRow, plotCol)
+                                if (targetPlot && targetPlot.isActive) {
+                                    for (let tileRow = 0; tileRow < 3; tileRow++) {
+                                        for (let tileCol = 0; tileCol < 3; tileCol++) {
+                                            const targetTile = targetPlot.getTile(tileRow, tileCol)
+                                            if (targetTile && targetTile.id === tileId && targetTile.crop) {
+                                                targetTile.crop = null
+                                                erasedCount++
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        addToast({
+                            type: 'info',
+                            message: `${cropType} (${erasedCount} tiles) cleared`
+                        })
+
+                        // Recalculate bonuses after erasing multi-tile crop
+                        garden.calculateBonuses()
+                    } else {
+                        // Single tile crop
+                        tile.crop = null
+                        addToast({
+                            type: 'info',
+                            message: 'Crop cleared from tile'
+                        })
+                    }
+                }
             } else if (isEraseFertiliserMode) {
                 // Erase fertilizer mode - clear only fertilizer from tile
                 tile.fertiliser = null

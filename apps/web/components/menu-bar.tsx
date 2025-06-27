@@ -27,6 +27,7 @@ import {
     DropdownMenuTrigger
 } from '@workspace/ui/components/dropdown-menu'
 import { useGarden, useSaveLoad } from '@/stores'
+import { UndoRedoToolbar } from './tools/undo-redo-toolbar'
 import { SaveModal } from './modals/save-modal'
 import { LoadModal } from './modals/load-modal'
 import { ExportModal } from './modals/export-modal'
@@ -46,7 +47,7 @@ export function MenuBar() {
     const [layoutModalOpen, setLayoutModalOpen] = useState(false)
 
     const handleClearGarden = () => {
-        if (garden && window.confirm('Are you sure you want to clear the entire garden? This action cannot be undone.')) {
+        if (garden && window.confirm('Are you sure you want to clear the entire garden? You can undo this action with Ctrl+Z.')) {
             clearGarden()
         }
     }
@@ -179,9 +180,8 @@ export function MenuBar() {
                         </Button>
 
                         <ThemeSwitcher />
+                        <UndoRedoToolbar />
                     </div>
-
-
                 </div>
             </div>
 

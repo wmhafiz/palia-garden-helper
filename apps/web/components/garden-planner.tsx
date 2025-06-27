@@ -2,10 +2,12 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useGarden, useToasts, useSelectedItem, useUISettings } from '@/stores'
+import { useUndoRedoIntegration } from '@/hooks/useUndoRedoIntegration'
 import { GardenDisplay } from './garden/garden-display'
 import { HorizontalCropSelector } from './tools/horizontal-crop-selector'
 import { HorizontalFertilizerSelector } from './tools/horizontal-fertilizer-selector'
 import { HorizontalToolSelector } from './tools/horizontal-tool-selector'
+
 import { MenuBar } from './menu-bar'
 import { StatsDisplay } from './stats-display'
 import { CurrentSelectionDisplay } from './tools/current-selection-display'
@@ -24,6 +26,9 @@ export function GardenPlanner() {
     } = useSelectedItem()
     const { showToolbar, toggleToolbar } = useUISettings()
     const hasShownWelcome = useRef(false)
+
+    // Initialize undo/redo functionality
+    useUndoRedoIntegration()
 
     // Garden initialization is now handled in the page component
 
@@ -139,9 +144,11 @@ export function GardenPlanner() {
                 <div className="space-y-6">
                     {showToolbar && (
                         <div className="flex flex-col xl:flex-row gap-4">
-                            <HorizontalCropSelector />
-                            <HorizontalFertilizerSelector />
-                            <HorizontalToolSelector />
+                            <div className="flex flex-col sm:flex-row gap-4">
+                                <HorizontalCropSelector />
+                                <HorizontalFertilizerSelector />
+                                <HorizontalToolSelector />
+                            </div>
                             <CurrentSelectionDisplay showLabel={false} />
                         </div>
                     )}

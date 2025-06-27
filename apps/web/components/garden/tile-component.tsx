@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import uniqid from 'uniqid'
 import { Tile } from '@/lib/garden-planner/classes'
 import { useSelectedItem, useGarden, useToasts, useUISettings } from '@/stores'
+import { useUndoRedo } from '@/stores'
 import { CropType, FertiliserType, Bonus, CropSize } from '@/lib/garden-planner/enums'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@workspace/ui/components/tooltip'
 import {
@@ -53,6 +54,18 @@ export function TileComponent({
     const { garden, forceUpdate } = useGarden()
     const { addToast } = useToasts()
     const { showTooltips } = useUISettings()
+    const { saveSnapshot: saveSnapshotToStore } = useUndoRedo()
+
+    // Helper function to save snapshot with current garden state
+    const saveSnapshot = useCallback((actionType: any, description: string) => {
+        if (garden) {
+            // Get fresh garden state
+            const { garden: currentGarden } = useGarden.getState()
+            if (currentGarden) {
+                saveSnapshotToStore(currentGarden, actionType, description)
+            }
+        }
+    }, [garden, saveSnapshotToStore])
 
     // Helper function to get crop size dimensions
     const getCropSizeDimensions = (cropSize: CropSize) => {
@@ -174,6 +187,11 @@ export function TileComponent({
                         // Recalculate bonuses after erasing multi-tile crop
                         garden.calculateBonuses()
                         forceUpdate()
+
+                        // Save snapshot for undo/redo after state is updated
+                        setTimeout(() => {
+                            saveSnapshot('clear_tile', `Cleared ${cropType} (${erasedCount} tiles)`)
+                        }, 0)
                     } else {
                         // Single tile crop
                         tile.crop = null
@@ -182,6 +200,15 @@ export function TileComponent({
                             type: 'info',
                             message: 'Tile cleared (both crop and fertilizer)'
                         })
+
+                        // Calculate bonuses and trigger re-render first
+                        garden.calculateBonuses()
+                        forceUpdate()
+
+                        // Save snapshot for undo/redo after state is updated
+                        setTimeout(() => {
+                            saveSnapshot('clear_tile', 'Cleared tile (crop and fertilizer)')
+                        }, 0)
                     }
                 } else {
                     // No crop, just clear fertilizer
@@ -190,6 +217,15 @@ export function TileComponent({
                         type: 'info',
                         message: 'Fertilizer cleared from tile'
                     })
+
+                    // Calculate bonuses and trigger re-render first
+                    garden.calculateBonuses()
+                    forceUpdate()
+
+                    // Save snapshot for undo/redo after state is updated
+                    setTimeout(() => {
+                        saveSnapshot('remove_fertilizer', 'Cleared fertilizer from tile')
+                    }, 0)
                 }
             } else if (isEraseCropMode) {
                 // Erase crop mode - clear crop from tile or entire multi-tile group
@@ -227,6 +263,12 @@ export function TileComponent({
 
                         // Recalculate bonuses after erasing multi-tile crop
                         garden.calculateBonuses()
+                        forceUpdate()
+
+                        // Save snapshot for undo/redo after state is updated
+                        setTimeout(() => {
+                            saveSnapshot('remove_crop', `Cleared ${cropType} (${erasedCount} tiles)`)
+                        }, 0)
                     } else {
                         // Single tile crop
                         tile.crop = null
@@ -234,6 +276,15 @@ export function TileComponent({
                             type: 'info',
                             message: 'Crop cleared from tile'
                         })
+
+                        // Calculate bonuses and trigger re-render first
+                        garden.calculateBonuses()
+                        forceUpdate()
+
+                        // Save snapshot for undo/redo after state is updated
+                        setTimeout(() => {
+                            saveSnapshot('remove_crop', 'Cleared crop from tile')
+                        }, 0)
                     }
                 }
             } else if (isEraseFertiliserMode) {
@@ -243,6 +294,15 @@ export function TileComponent({
                     type: 'info',
                     message: 'Fertilizer cleared from tile'
                 })
+
+                // Calculate bonuses and trigger re-render first
+                garden.calculateBonuses()
+                forceUpdate()
+
+                // Save snapshot for undo/redo after state is updated
+                setTimeout(() => {
+                    saveSnapshot('remove_fertilizer', 'Cleared fertilizer from tile')
+                }, 0)
             } else if (isErasePlotMode) {
                 // Erase plot mode - clear entire plot
                 garden.clearPlot(plotRowIndex, plotColIndex)
@@ -250,6 +310,15 @@ export function TileComponent({
                     type: 'info',
                     message: 'Entire plot cleared'
                 })
+
+                // Calculate bonuses and trigger re-render first
+                garden.calculateBonuses()
+                forceUpdate()
+
+                // Save snapshot for undo/redo after state is updated
+                setTimeout(() => {
+                    saveSnapshot('clear_plot', 'Cleared entire plot')
+                }, 0)
             } else if (isErasePlotCropMode) {
                 // Erase plot crop mode - clear only crops from entire plot
                 for (let r = 0; r < 3; r++) {
@@ -264,6 +333,15 @@ export function TileComponent({
                     type: 'info',
                     message: 'All crops cleared from plot'
                 })
+
+                // Calculate bonuses and trigger re-render first
+                garden.calculateBonuses()
+                forceUpdate()
+
+                // Save snapshot for undo/redo after state is updated
+                setTimeout(() => {
+                    saveSnapshot('clear_plot_crops', 'Cleared all crops from plot')
+                }, 0)
             } else if (isErasePlotFertiliserMode) {
                 // Erase plot fertilizer mode - clear only fertilizers from entire plot
                 for (let r = 0; r < 3; r++) {
@@ -278,6 +356,15 @@ export function TileComponent({
                     type: 'info',
                     message: 'All fertilizers cleared from plot'
                 })
+
+                // Calculate bonuses and trigger re-render first
+                garden.calculateBonuses()
+                forceUpdate()
+
+                // Save snapshot for undo/redo after state is updated
+                setTimeout(() => {
+                    saveSnapshot('clear_plot_fertilizers', 'Cleared all fertilizers from plot')
+                }, 0)
             } else if (selectedItemType === 'crop' && selectedItem) {
                 const crop = selectedItem as any
 
@@ -317,6 +404,15 @@ export function TileComponent({
                     type: 'success',
                     message: `${crop.type || 'Crop'} planted`
                 })
+
+                // Calculate bonuses and trigger re-render first
+                garden.calculateBonuses()
+                forceUpdate()
+
+                // Save snapshot for undo/redo after state is updated
+                setTimeout(() => {
+                    saveSnapshot('place_crop', `Planted ${crop.type || 'crop'}`)
+                }, 0)
             } else if (selectedItemType === 'fertiliser' && selectedItem) {
                 // Place fertiliser using the plot method to handle multi-size crops
                 plot.addFertiliserToTile(tileRowIndex, tileColIndex, selectedItem as any)
@@ -324,11 +420,21 @@ export function TileComponent({
                     type: 'success',
                     message: `Fertiliser applied`
                 })
-            }
 
-            // Calculate bonuses and trigger re-render
-            garden.calculateBonuses()
-            forceUpdate()
+                // Calculate bonuses and trigger re-render first
+                garden.calculateBonuses()
+                forceUpdate()
+
+                // Save snapshot for undo/redo after state is updated
+                const fertiliser = selectedItem as any
+                setTimeout(() => {
+                    saveSnapshot('place_fertilizer', `Applied ${fertiliser.type || 'fertilizer'}`)
+                }, 0)
+            } else {
+                // Calculate bonuses and trigger re-render for other actions
+                garden.calculateBonuses()
+                forceUpdate()
+            }
         } catch (error) {
             addToast({
                 type: 'error',

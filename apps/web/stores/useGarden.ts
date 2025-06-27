@@ -21,6 +21,10 @@ interface GardenState {
     importFromVueSaveCode: (saveCode: string) => boolean
     forceUpdate: () => void // Add method to force updates
     updateUrlWithCurrentLayout: () => void // Add method to update URL with current layout
+    // Undo/Redo methods
+    undo: () => void
+    redo: () => void
+    loadFromSnapshot: (saveCode: string) => void
 }
 
 export const useGarden = create<GardenState>()(
@@ -36,6 +40,13 @@ export const useGarden = create<GardenState>()(
             if (garden) {
                 garden.clearAllPlots()
                 set({ garden }) // Trigger re-render with same garden instance
+                
+                // Save snapshot for undo/redo
+                setTimeout(() => {
+                    const { useUndoRedo } = require('@/stores/useUndoRedo')
+                    const { saveSnapshot } = useUndoRedo.getState()
+                    saveSnapshot(garden, 'clear_garden', 'Cleared entire garden')
+                }, 0)
             }
         },
         clearAllFertilizers: () => {
@@ -60,6 +71,13 @@ export const useGarden = create<GardenState>()(
                 // Recalculate bonuses after removing fertilizers
                 garden.calculateBonuses()
                 set((state) => ({ version: state.version + 1 })) // Force update
+                
+                // Save snapshot for undo/redo
+                setTimeout(() => {
+                    const { useUndoRedo } = require('@/stores/useUndoRedo')
+                    const { saveSnapshot } = useUndoRedo.getState()
+                    saveSnapshot(garden, 'clear_all_fertilizers', 'Cleared all fertilizers')
+                }, 0)
             }
         },
         clearAllCrops: () => {
@@ -84,6 +102,13 @@ export const useGarden = create<GardenState>()(
                 // Recalculate bonuses after removing crops
                 garden.calculateBonuses()
                 set((state) => ({ version: state.version + 1 })) // Force update
+                
+                // Save snapshot for undo/redo
+                setTimeout(() => {
+                    const { useUndoRedo } = require('@/stores/useUndoRedo')
+                    const { saveSnapshot } = useUndoRedo.getState()
+                    saveSnapshot(garden, 'clear_all_crops', 'Cleared all crops')
+                }, 0)
             }
         },
         setLoading: (isLoading) => set({ isLoading }),
@@ -155,6 +180,33 @@ export const useGarden = create<GardenState>()(
                 if (saveCode) {
                     updateUrlWithLayout(saveCode)
                 }
+            }
+        },
+        
+        // Undo/Redo implementations
+        undo: () => {
+            // This will be called from the undo/redo hook
+            // The actual logic is handled in the useUndoRedoIntegration hook
+        },
+        
+        redo: () => {
+            // This will be called from the undo/redo hook
+            // The actual logic is handled in the useUndoRedoIntegration hook
+        },
+        
+        loadFromSnapshot: (saveCode: string) => {
+            try {
+                const newGarden = new Garden()
+                const success = newGarden.loadLayout(saveCode)
+                if (success) {
+                    set((state) => ({ garden: newGarden, error: null, version: state.version + 1 }))
+                } else {
+                    set({ error: 'Failed to load from snapshot' })
+                }
+            } catch (error) {
+                set({
+                    error: error instanceof Error ? error.message : 'Failed to load from snapshot'
+                })
             }
         },
     }))

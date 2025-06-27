@@ -133,127 +133,113 @@ export function DailyScheduleWidget({ showDays = 7, className }: DailyScheduleWi
     }
 
     return (
-        <Card className={className}>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <Clock className="w-5 h-5" />
-                    Daily Schedule
-                    <Badge variant="outline" className="ml-auto">
-                        {upcomingEntries.length} days
-                    </Badge>
-                </CardTitle>
-            </CardHeader>
+        <ScrollArea className="h-[70vh]">
+            <div className="space-y-3 p-4">
+                {upcomingEntries.map((entry: ScheduleEntry) => (
+                    <div
+                        key={entry.day}
+                        className={`border rounded-lg p-4 transition-all ${entry.isCompleted ? 'opacity-60 bg-muted/50' : 'bg-background'
+                            }`}
+                    >
+                        {/* Day Header */}
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                                <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() =>
+                                        entry.isCompleted
+                                            ? markDayIncomplete(entry.day)
+                                            : markDayCompleted(entry.day)
+                                    }
+                                    className="p-0 h-auto"
+                                >
+                                    {entry.isCompleted ? (
+                                        <CheckCircle className="w-5 h-5 text-green-500" />
+                                    ) : (
+                                        <Circle className="w-5 h-5 text-muted-foreground" />
+                                    )}
+                                </Button>
 
-            <CardContent className="p-0">
-                <ScrollArea className="h-[400px]">
-                    <div className="space-y-3 p-4">
-                        {upcomingEntries.map((entry: ScheduleEntry) => (
-                            <div
-                                key={entry.day}
-                                className={`border rounded-lg p-4 transition-all ${entry.isCompleted ? 'opacity-60 bg-muted/50' : 'bg-background'
-                                    }`}
-                            >
-                                {/* Day Header */}
-                                <div className="flex items-center justify-between mb-3">
-                                    <div className="flex items-center gap-3">
-                                        <Button
-                                            size="sm"
-                                            variant="ghost"
-                                            onClick={() =>
-                                                entry.isCompleted
-                                                    ? markDayIncomplete(entry.day)
-                                                    : markDayCompleted(entry.day)
-                                            }
-                                            className="p-0 h-auto"
-                                        >
-                                            {entry.isCompleted ? (
-                                                <CheckCircle className="w-5 h-5 text-green-500" />
-                                            ) : (
-                                                <Circle className="w-5 h-5 text-muted-foreground" />
-                                            )}
-                                        </Button>
-
-                                        <div>
-                                            <div className="font-medium">
-                                                Palia Day {entry.day}
-                                            </div>
-                                            <div className="text-sm text-muted-foreground">
-                                                {formatRelativeTime(entry.earthTime)}
-                                            </div>
-                                        </div>
+                                <div>
+                                    <div className="font-medium">
+                                        Palia Day {entry.day}
                                     </div>
-
-                                    <div className="text-right">
-                                        <div className="text-sm font-medium">
-                                            {getTimeUntil(entry.earthTime)}
-                                        </div>
-                                        <div className="text-xs text-muted-foreground">
-                                            {entry.actions.length} action{entry.actions.length !== 1 ? 's' : ''}
-                                        </div>
+                                    <div className="text-sm text-muted-foreground">
+                                        {formatRelativeTime(entry.earthTime)}
                                     </div>
-                                </div>
-
-                                {/* Actions */}
-                                <div className="space-y-2">
-                                    {entry.actions.map((action, actionIndex) => (
-                                        <div
-                                            key={actionIndex}
-                                            className={`border rounded-md p-3 ${getActionColor(action.type)}`}
-                                        >
-                                            <div className="flex items-center justify-between mb-2">
-                                                <div className="flex items-center gap-2">
-                                                    {getActionIcon(action.type)}
-                                                    <span className="font-medium capitalize">
-                                                        {action.type}
-                                                    </span>
-                                                    {getPriorityBadge(action.priority)}
-                                                </div>
-
-                                                <div className="text-sm text-muted-foreground">
-                                                    {action.crops.reduce((sum, crop) => sum + crop.count, 0)} crops
-                                                </div>
-                                            </div>
-
-                                            {/* Crop Details */}
-                                            <div className="space-y-2">
-                                                {action.crops.map((crop, cropIndex) => (
-                                                    <div
-                                                        key={cropIndex}
-                                                        className="flex items-center gap-3 text-sm"
-                                                    >
-                                                        {crop.image && (
-                                                            <img
-                                                                src={crop.image}
-                                                                alt={crop.cropType}
-                                                                className="w-6 h-6 rounded border bg-white"
-                                                            />
-                                                        )}
-
-                                                        <div className="flex-1">
-                                                            <span className="font-medium">{crop.cropType}</span>
-                                                            {crop.isReharvestable && crop.reharvestCount && crop.reharvestCount > 1 && (
-                                                                <span className="text-muted-foreground ml-1">
-                                                                    (Cycle {crop.reharvestCount})
-                                                                </span>
-                                                            )}
-                                                        </div>
-
-                                                        <div className="flex items-center gap-2 text-muted-foreground">
-                                                            <span>×{crop.count}</span>
-                                                            <MapPin className="w-3 h-3" />
-                                                            <span>{crop.locations.length} plot{crop.locations.length !== 1 ? 's' : ''}</span>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    ))}
                                 </div>
                             </div>
-                        ))}
+
+                            <div className="text-right">
+                                <div className="text-sm font-medium">
+                                    {getTimeUntil(entry.earthTime)}
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                    {entry.actions.length} action{entry.actions.length !== 1 ? 's' : ''}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="space-y-2">
+                            {entry.actions.map((action, actionIndex) => (
+                                <div
+                                    key={actionIndex}
+                                    className={`border rounded-md p-3 ${getActionColor(action.type)}`}
+                                >
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                            {getActionIcon(action.type)}
+                                            <span className="font-medium capitalize">
+                                                {action.type}
+                                            </span>
+                                            {getPriorityBadge(action.priority)}
+                                        </div>
+
+                                        <div className="text-sm text-muted-foreground">
+                                            {action.crops.reduce((sum, crop) => sum + crop.count, 0)} crops
+                                        </div>
+                                    </div>
+
+                                    {/* Crop Details */}
+                                    <div className="space-y-2">
+                                        {action.crops.map((crop, cropIndex) => (
+                                            <div
+                                                key={cropIndex}
+                                                className="flex items-center gap-3 text-sm"
+                                            >
+                                                {crop.image && (
+                                                    <img
+                                                        src={crop.image}
+                                                        alt={crop.cropType}
+                                                        className="w-6 h-6 rounded border bg-white"
+                                                    />
+                                                )}
+
+                                                <div className="flex-1">
+                                                    <span className="font-medium">{crop.cropType}</span>
+                                                    {crop.isReharvestable && crop.reharvestCount && crop.reharvestCount > 1 && (
+                                                        <span className="text-muted-foreground ml-1">
+                                                            (Cycle {crop.reharvestCount})
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                <div className="flex items-center gap-2 text-muted-foreground">
+                                                    <span>×{crop.count}</span>
+                                                    <MapPin className="w-3 h-3" />
+                                                    <span>{crop.locations.length} plot{crop.locations.length !== 1 ? 's' : ''}</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                </ScrollArea>
-            </CardContent>
-        </Card>
+                ))}
+            </div>
+        </ScrollArea>
     )
 } 

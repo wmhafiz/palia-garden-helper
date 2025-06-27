@@ -13,6 +13,7 @@ import { ProcessorOutputWidget } from './widgets/processor-output-widget'
 import { HarvestScheduleWidget } from './widgets/harvest-schedule-widget'
 import { ScheduleControlPanel } from './widgets/schedule-control-panel'
 import { DailyScheduleWidget } from './widgets/daily-schedule-widget'
+import { ScheduleCalendarWidget } from './widgets/schedule-calendar-widget'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@workspace/ui/components/accordion'
 
 export function StatsDisplay() {
@@ -43,10 +44,7 @@ export function StatsDisplay() {
 
     return (
         <div className="space-y-4">
-            {/* Crop Watering Schedule - Always visible when crops are present */}
-            {stats.totalCrops > 0 && (
-                <ScheduleControlPanel />
-            )}
+
 
             <Accordion type="multiple" defaultValue={['item-1']}>
                 {stats.totalCrops > 0 && (
@@ -58,32 +56,29 @@ export function StatsDisplay() {
                     </AccordionItem>
                 )}
 
+
+                {/* Crop Watering Schedule - Always visible when crops are present */}
                 {stats.totalCrops > 0 && (
                     <AccordionItem value="item-2">
-                        <AccordionTrigger>Schedule & Details</AccordionTrigger>
+                        <AccordionTrigger>Schedule</AccordionTrigger>
                         <AccordionContent>
-                            <div className="space-y-4">
-                                {/* Daily Schedule Widget */}
-                                <DailyScheduleWidget />
+                            <ScheduleControlPanel />
+                        </AccordionContent>
+                    </AccordionItem>
 
-                                <div className="flex flex-row gap-4">
-                                    <div className="flex-1">
-                                        {/* Harvest Schedule */}
-                                        <HarvestScheduleWidget />
-                                    </div>
+                )}
 
-                                    <div className="flex-2">
-                                        {/* Processor Settings */}
-                                        <ProcessorSettingsWidget />
-                                    </div>
-                                </div>
-                            </div>
+                {stats.totalCrops > 0 && (
+                    <AccordionItem value="item-3">
+                        <AccordionTrigger>Processors</AccordionTrigger>
+                        <AccordionContent>
+                            <ProcessorSettingsWidget />
                         </AccordionContent>
                     </AccordionItem>
                 )}
 
                 {stats.totalCrops > 0 && (
-                    <AccordionItem value="item-3">
+                    <AccordionItem value="item-4">
                         <AccordionTrigger>Tips</AccordionTrigger>
                         <AccordionContent>
                             <div className="flex flex-row gap-4">

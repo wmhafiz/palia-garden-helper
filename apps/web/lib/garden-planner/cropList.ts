@@ -92,7 +92,6 @@ const RICE = new Crop(
   {
     base: 2,
     growthTime: 3,
-    isReharvestable: true,
   },
   {
     crop: 27,

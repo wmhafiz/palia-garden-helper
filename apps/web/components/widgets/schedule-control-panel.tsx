@@ -1,12 +1,15 @@
 'use client'
 
-import { Play, Square, RefreshCw, Calendar, Clock } from 'lucide-react'
+import { Play, Square, RefreshCw, Calendar, Clock, Droplets, Pause, PlayCircle } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card'
 import { Button } from '@workspace/ui/components/button'
 import { Badge } from '@workspace/ui/components/badge'
 import { useWateringSchedule } from '@/stores'
+import { useGardenStats } from '@/hooks/useGardenStats'
 import { formatDuration, calculateMinutesUntilNextHarvest } from '@/lib/utils/palia-time'
 import { format } from 'date-fns'
+import { Bonus } from '@/lib/garden-planner'
+import { ScheduleCalendarWidget } from './schedule-calendar-widget'
 
 export interface ScheduleControlPanelProps {
     className?: string
@@ -15,14 +18,20 @@ export interface ScheduleControlPanelProps {
 export function ScheduleControlPanel({ className }: ScheduleControlPanelProps) {
     const {
         isActive,
+        isPaused,
         startTime,
         schedule,
         startSchedule,
         stopSchedule,
+        pauseSchedule,
+        resumeSchedule,
         regenerateSchedule,
         getNextActionTime,
         getTodaysActions
     } = useWateringSchedule()
+
+    const { totalCrops, bonusCoverage } = useGardenStats()
+    const waterRetentionPercentage = totalCrops > 0 ? Math.round((bonusCoverage[Bonus.WaterRetain] || 0) / totalCrops * 100) : 0
 
     const nextActionTime = getNextActionTime()
     const todaysActions = getTodaysActions()
@@ -31,6 +40,10 @@ export function ScheduleControlPanel({ className }: ScheduleControlPanelProps) {
     const getStatusBadge = () => {
         if (!isActive) {
             return <Badge variant="secondary">Inactive</Badge>
+        }
+
+        if (isPaused) {
+            return <Badge variant="destructive">Paused (Offline)</Badge>
         }
 
         if (nextActionTime) {
@@ -80,11 +93,26 @@ export function ScheduleControlPanel({ className }: ScheduleControlPanelProps) {
                             <Play className="w-4 h-4 mr-2" />
                             Start Schedule
                         </Button>
+                    ) : isPaused ? (
+                        <>
+                            <Button onClick={resumeSchedule} className="flex-1">
+                                <PlayCircle className="w-4 h-4 mr-2" />
+                                Resume (Back Online)
+                            </Button>
+                            <Button onClick={stopSchedule} variant="destructive">
+                                <Square className="w-4 h-4 mr-2" />
+                                Stop
+                            </Button>
+                        </>
                     ) : (
                         <>
-                            <Button onClick={stopSchedule} variant="destructive" className="flex-1">
+                            <Button onClick={pauseSchedule} variant="outline" className="flex-1">
+                                <Pause className="w-4 h-4 mr-2" />
+                                Pause (Going Offline)
+                            </Button>
+                            <Button onClick={stopSchedule} variant="destructive">
                                 <Square className="w-4 h-4 mr-2" />
-                                Stop Schedule
+                                Stop
                             </Button>
                             <Button onClick={regenerateSchedule} variant="outline" size="icon">
                                 <RefreshCw className="w-4 h-4" />
@@ -96,57 +124,19 @@ export function ScheduleControlPanel({ className }: ScheduleControlPanelProps) {
                 {/* Schedule Status */}
                 {isActive && (
                     <div className="space-y-3 pt-2 border-t">
-                        {/* Schedule Info */}
-                        <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div>
-                                <span className="text-muted-foreground">Started:</span>
-                                <div className="font-medium">
-                                    {startTime ? format(startTime, 'MMM d, h:mm a') : 'Unknown'}
+                        {isPaused && (
+                            <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                                <div className="flex items-center gap-2 text-orange-800 mb-2">
+                                    <Pause className="w-4 h-4" />
+                                    <span className="font-medium">Schedule Paused</span>
                                 </div>
-                            </div>
-                            <div>
-                                <span className="text-muted-foreground">Total Days:</span>
-                                <div className="font-medium">{schedule.length}</div>
-                            </div>
-                        </div>
-
-                        {/* Next Action */}
-                        {nextAction && (
-                            <div className="p-3 bg-muted rounded-lg">
-                                <div className="flex items-center gap-2 mb-1">
-                                    <Clock className="w-4 h-4 text-muted-foreground" />
-                                    <span className="text-sm font-medium">Next Action</span>
-                                </div>
-                                <div className="text-sm text-muted-foreground">
-                                    {nextAction.type.charAt(0).toUpperCase() + nextAction.type.slice(1)} in {nextAction.duration}
-                                </div>
-                                <div className="text-xs text-muted-foreground">
-                                    {format(nextAction.time, 'MMM d, h:mm a')}
-                                </div>
+                                <p className="text-sm text-orange-700">
+                                    Your crops will grow one stage while you're offline, then stop growing until you return online.
+                                    Resume the schedule when you're back to continue normal growth timing.
+                                </p>
                             </div>
                         )}
-
-                        {/* Today's Actions */}
-                        {todaysActions && (
-                            <div className="p-3 bg-muted rounded-lg">
-                                <div className="text-sm font-medium mb-2">Today's Actions</div>
-                                <div className="space-y-1">
-                                    {todaysActions.actions.map((action, index) => (
-                                        <div key={index} className="flex items-center justify-between text-sm">
-                                            <span className="capitalize">{action.type}</span>
-                                            <span className="text-muted-foreground">
-                                                {action.crops.reduce((sum, crop) => sum + crop.count, 0)} crops
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Next Harvest Time */}
-                        <div className="text-xs text-muted-foreground text-center pt-2 border-t">
-                            Next Palia harvest boost in {formatDuration(minutesUntilNextHarvest)}
-                        </div>
+                        <ScheduleCalendarWidget />
                     </div>
                 )}
 

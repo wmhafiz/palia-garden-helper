@@ -85,6 +85,11 @@ export function calculateEarthTimeForPaliaDateTime(
   paliaHour: number, 
   startTime: Date
 ): Date {
+  // Ensure startTime is a proper Date object
+  if (!(startTime instanceof Date)) {
+    startTime = new Date(startTime)
+  }
+  
   // Calculate total Palia hours from start
   const totalPaliaHours = (paliaDay - 1) * PALIA_HOURS_PER_DAY + paliaHour
   
@@ -99,6 +104,11 @@ export function calculateEarthTimeForPaliaDateTime(
  * This aligns with the existing harvest time system
  */
 export function calculateEarthTimeForPaliaDay(paliaDay: number, startTime: Date): Date {
+  // Ensure startTime is a proper Date object
+  if (!(startTime instanceof Date)) {
+    startTime = new Date(startTime)
+  }
+  
   // Each Palia day is 1 real hour
   const hoursFromStart = paliaDay - 1
   const earthTime = new Date(startTime.getTime() + (hoursFromStart * 60 * 60 * 1000))

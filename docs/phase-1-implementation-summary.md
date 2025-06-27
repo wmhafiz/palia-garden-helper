@@ -111,10 +111,8 @@ interface ScheduleEntry {
 The implementation is designed to easily support future enhancements:
 
 1. **Advanced Fertilizer Logic**: HydratePro and adjacency bonuses
-2. **Calendar Integration**: Export to external calendar apps
-3. **Notifications**: Browser and sound notifications
-4. **Multi-tile Crop Support**: Enhanced logic for trees and bushes
-5. **Replanting Actions**: Automatic replanting suggestions
+2. **Notifications**: Browser and sound notifications
+3. **Multi-tile Crop Support**: Enhanced logic for trees and bushes
 
 ## Testing
 

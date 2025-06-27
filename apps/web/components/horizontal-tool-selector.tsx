@@ -1,6 +1,6 @@
 'use client'
 
-import { useSelectedItem } from '@/stores'
+import { useSelectedItem, useGarden } from '@/stores'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@workspace/ui/components/tooltip'
 import { ScrollArea, ScrollBar } from '@workspace/ui/components/scroll-area'
 
@@ -16,6 +16,8 @@ export function HorizontalToolSelector() {
         isErasePlotMode,
         clearSelection
     } = useSelectedItem()
+
+    const { clearAllFertilizers } = useGarden()
 
     return (
         <div className="bg-card border border-border rounded-lg flex-1 min-w-0">
@@ -140,6 +142,29 @@ export function HorizontalToolSelector() {
                                 <div className="text-xs">
                                     <div className="font-semibold">Erase Plot</div>
                                     <div className="text-gray-500">Clear entire plot (all 9 tiles)</div>
+                                </div>
+                            </TooltipContent>
+                        </Tooltip>
+
+                        {/* Erase all fertilizers */}
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <button
+                                    onClick={() => {
+                                        clearAllFertilizers()
+                                        clearSelection()
+                                    }}
+                                    className="relative flex-shrink-0 w-16 h-16 rounded-lg border-2 border-border bg-card hover:border-red-500 hover:bg-red-500/10 hover:shadow-sm hover:scale-105 transition-all duration-200"
+                                >
+                                    <div className="w-full h-full flex items-center justify-center text-2xl">
+                                        🧪❌
+                                    </div>
+                                </button>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom" sideOffset={8}>
+                                <div className="text-xs">
+                                    <div className="font-semibold">Clear All Fertilizers</div>
+                                    <div className="text-gray-500">Remove all fertilizers from the entire garden</div>
                                 </div>
                             </TooltipContent>
                         </Tooltip>

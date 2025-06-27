@@ -11,6 +11,7 @@ interface GardenState {
     // Actions
     setGarden: (garden: Garden) => void
     clearGarden: () => void
+    clearAllFertilizers: () => void
     setLoading: (loading: boolean) => void
     setError: (error: string | null) => void
     initializeGarden: (rows: number, cols: number) => void
@@ -32,6 +33,30 @@ export const useGarden = create<GardenState>()(
             if (garden) {
                 garden.clearAllPlots()
                 set({ garden }) // Trigger re-render with same garden instance
+            }
+        },
+        clearAllFertilizers: () => {
+            const { garden } = get()
+            if (garden) {
+                // Loop through all plots and tiles to remove fertilizers
+                for (let i = 0; i < garden.rows; i++) {
+                    for (let j = 0; j < garden.columns; j++) {
+                        const plot = garden.getPlot(i, j)
+                        if (plot && plot.isActive) {
+                            for (let ti = 0; ti < 3; ti++) {
+                                for (let tj = 0; tj < 3; tj++) {
+                                    const tile = plot.getTile(ti, tj)
+                                    if (tile) {
+                                        tile.fertiliser = null
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                // Recalculate bonuses after removing fertilizers
+                garden.calculateBonuses()
+                set((state) => ({ version: state.version + 1 })) // Force update
             }
         },
         setLoading: (isLoading) => set({ isLoading }),

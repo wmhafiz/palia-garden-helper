@@ -1,11 +1,12 @@
 'use client'
 
-import { Sparkles, Droplets, Shield, Wheat, Star, Zap, Clock, DollarSign } from 'lucide-react'
+import { Sparkles, Droplets, Shield, Wheat, Star, Zap, Clock, DollarSign, ChevronDown } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card'
 import { Badge } from '@workspace/ui/components/badge'
 import { Button } from '@workspace/ui/components/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/select'
 import { useOutputData, getFertilizerDisplayName, getBonusDisplayName, type PlayMode } from '@/hooks/useOutputData'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@workspace/ui/components/collapsible'
 
 export function FertilizerTipsWidget() {
     const {
@@ -28,54 +29,64 @@ export function FertilizerTipsWidget() {
                 </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-                {/* Summary */}
-                <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div>
-                        <div className="text-muted-foreground flex items-center gap-1">
-                            <Droplets className="w-3 h-3" />
-                            Missing Water Retain
+
+                <Collapsible>
+                    <CollapsibleTrigger>
+                        <div className="flex items-center gap-2">
+                            Summary <ChevronDown className="w-4 h-4" />
                         </div>
-                        <div className="font-medium text-blue-600">
-                            {fertilizerAnalysis.summary.waterRetain} / {fertilizerAnalysis.summary.total}
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                        {/* Summary */}
+                        <div className="grid grid-cols-3 gap-4 text-sm mt-2">
+                            <div>
+                                <div className="text-muted-foreground flex items-center gap-1">
+                                    <Droplets className="w-3 h-3" />
+                                    Missing Water Retain
+                                </div>
+                                <div className="font-medium text-blue-600">
+                                    {fertilizerAnalysis.summary.waterRetain} / {fertilizerAnalysis.summary.total}
+                                </div>
+                            </div>
+                            <div>
+                                <div className="text-muted-foreground flex items-center gap-1">
+                                    <Shield className="w-3 h-3" />
+                                    Missing Weed Prevention
+                                </div>
+                                <div className="font-medium text-green-600">
+                                    {fertilizerAnalysis.summary.weedPrevention} / {fertilizerAnalysis.summary.total}
+                                </div>
+                            </div>
+                            <div>
+                                <div className="text-muted-foreground flex items-center gap-1">
+                                    <Wheat className="w-3 h-3" />
+                                    Missing Harvest Boost
+                                </div>
+                                <div className="font-medium text-orange-600">
+                                    {fertilizerAnalysis.summary.harvestIncrease} / {fertilizerAnalysis.summary.total}
+                                </div>
+                            </div>
+                            <div>
+                                <div className="text-muted-foreground flex items-center gap-1">
+                                    <Star className="w-3 h-3" />
+                                    Missing Quality Boost
+                                </div>
+                                <div className="font-medium text-yellow-600">
+                                    {fertilizerAnalysis.summary.qualityIncrease} / {fertilizerAnalysis.summary.total}
+                                </div>
+                            </div>
+                            <div>
+                                <div className="text-muted-foreground flex items-center gap-1">
+                                    <Zap className="w-3 h-3" />
+                                    Missing Speed Boost
+                                </div>
+                                <div className="font-medium text-purple-600">
+                                    {fertilizerAnalysis.summary.speedIncrease} / {fertilizerAnalysis.summary.total}
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div>
-                        <div className="text-muted-foreground flex items-center gap-1">
-                            <Shield className="w-3 h-3" />
-                            Missing Weed Prevention
-                        </div>
-                        <div className="font-medium text-green-600">
-                            {fertilizerAnalysis.summary.weedPrevention} / {fertilizerAnalysis.summary.total}
-                        </div>
-                    </div>
-                    <div>
-                        <div className="text-muted-foreground flex items-center gap-1">
-                            <Wheat className="w-3 h-3" />
-                            Missing Harvest Boost
-                        </div>
-                        <div className="font-medium text-orange-600">
-                            {fertilizerAnalysis.summary.harvestIncrease} / {fertilizerAnalysis.summary.total}
-                        </div>
-                    </div>
-                    <div>
-                        <div className="text-muted-foreground flex items-center gap-1">
-                            <Star className="w-3 h-3" />
-                            Missing Quality Boost
-                        </div>
-                        <div className="font-medium text-yellow-600">
-                            {fertilizerAnalysis.summary.qualityIncrease} / {fertilizerAnalysis.summary.total}
-                        </div>
-                    </div>
-                    <div>
-                        <div className="text-muted-foreground flex items-center gap-1">
-                            <Zap className="w-3 h-3" />
-                            Missing Speed Boost
-                        </div>
-                        <div className="font-medium text-purple-600">
-                            {fertilizerAnalysis.summary.speedIncrease} / {fertilizerAnalysis.summary.total}
-                        </div>
-                    </div>
-                </div>
+                    </CollapsibleContent>
+                </Collapsible>
 
                 {/* Play Mode Selection */}
                 <div className="space-y-2">

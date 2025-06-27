@@ -38,20 +38,29 @@ export function StatsDisplay() {
 
     return (
         <div className="space-y-4">
-            {/* Bonus Coverage Statistics */}
-            <BonusCoverageWidget />
+            <div className="flex flex-row gap-4">
+                {/* Bonus Coverage Statistics */}
+                <BonusCoverageWidget />
+                <div className="flex-1">
+                    {/* Harvest Summary */}
+                    <HarvestSummaryWidget />
 
-            {/* Fertilizer Tips */}
-            <FertilizerTipsWidget />
+                </div>
+            </div>
 
-            {/* Harvest Summary */}
-            <HarvestSummaryWidget />
+            <div className="flex flex-row gap-4">
+                <div className="flex-1">
+                    {/* Harvest Summary */}
+                    <FertilizerTipsWidget />
+                </div>
+
+                {/* Bonus Coverage Statistics */}
+                <ProcessingTipsWidget />
+            </div>
 
             {/* Crop Breakdown */}
             <CropBreakdownWidget />
 
-            {/* Processing Tips */}
-            <ProcessingTipsWidget />
 
             {/* Crop Statistics */}
             <CropStatisticsWidget />

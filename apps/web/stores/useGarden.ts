@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 import { Garden } from '@/lib/garden-planner/classes'
+import { updateUrlWithLayout } from '@/lib/utils/url-helpers'
 
 interface GardenState {
     garden: Garden | null
@@ -19,6 +20,7 @@ interface GardenState {
     initializeGardenWithPattern: (rows: number, cols: number, plotPattern: boolean[][]) => void
     importFromVueSaveCode: (saveCode: string) => boolean
     forceUpdate: () => void // Add method to force updates
+    updateUrlWithCurrentLayout: () => void // Add method to update URL with current layout
 }
 
 export const useGarden = create<GardenState>()(
@@ -129,6 +131,15 @@ export const useGarden = create<GardenState>()(
                     isLoading: false
                 })
                 return false
+            }
+        },
+        updateUrlWithCurrentLayout: () => {
+            const { garden } = get()
+            if (garden) {
+                const saveCode = garden.saveLayout()
+                if (saveCode) {
+                    updateUrlWithLayout(saveCode)
+                }
             }
         },
     }))

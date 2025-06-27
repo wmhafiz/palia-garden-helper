@@ -25,21 +25,20 @@ export function GardenPlanner() {
     const hasShownWelcome = useRef(false)
     const [isSelectorsOpen, setIsSelectorsOpen] = useState(true)
 
-    useEffect(() => {
-        // Initialize with a default 3x3 garden
-        if (!garden) {
-            initializeGarden(3, 3)
-        }
-    }, [garden, initializeGarden])
+    // Garden initialization is now handled in the page component
 
     // Show welcome message after garden is initialized and component is mounted
     useEffect(() => {
         if (garden && !hasShownWelcome.current) {
             hasShownWelcome.current = true
-            addToast({
-                type: 'info',
-                message: 'Welcome to Palia Garden Helper! Your garden has been initialized with a 3x3 layout.'
-            })
+            // Only show welcome message if no layout was loaded from URL
+            const urlParams = new URLSearchParams(window.location.search)
+            if (!urlParams.get('layout')) {
+                addToast({
+                    type: 'info',
+                    message: `Welcome to Palia Garden Helper! Your garden has been initialized with a ${garden.rows}x${garden.columns} layout.`
+                })
+            }
         }
     }, [garden, addToast])
 

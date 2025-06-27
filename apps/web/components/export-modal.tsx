@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Download, Copy, Check } from 'lucide-react'
+import { Download, Copy, Check, Share } from 'lucide-react'
 import {
     Dialog,
     DialogContent,
@@ -14,6 +14,7 @@ import { Textarea } from '@workspace/ui/components/textarea'
 import { Label } from '@workspace/ui/components/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@workspace/ui/components/tabs'
 import { useGarden } from '@/stores'
+import { generateShareableUrl } from '@/lib/utils/url-helpers'
 
 interface ExportModalProps {
     open: boolean
@@ -23,8 +24,10 @@ interface ExportModalProps {
 export function ExportModal({ open, onOpenChange }: ExportModalProps) {
     const { garden } = useGarden()
     const [copied, setCopied] = useState(false)
+    const [urlCopied, setUrlCopied] = useState(false)
 
     const saveCode = garden ? garden.saveLayout() : ''
+    const shareableUrl = saveCode ? generateShareableUrl(saveCode) : ''
 
     const handleCopyToClipboard = async () => {
         if (saveCode) {
@@ -34,6 +37,18 @@ export function ExportModal({ open, onOpenChange }: ExportModalProps) {
                 setTimeout(() => setCopied(false), 2000)
             } catch (error) {
                 console.error('Failed to copy to clipboard:', error)
+            }
+        }
+    }
+
+    const handleCopyUrl = async () => {
+        if (shareableUrl) {
+            try {
+                await navigator.clipboard.writeText(shareableUrl)
+                setUrlCopied(true)
+                setTimeout(() => setUrlCopied(false), 2000)
+            } catch (error) {
+                console.error('Failed to copy URL to clipboard:', error)
             }
         }
     }
@@ -129,8 +144,9 @@ export function ExportModal({ open, onOpenChange }: ExportModalProps) {
                     </div>
                 ) : (
                     <Tabs defaultValue="save-code" className="w-full">
-                        <TabsList className="grid w-full grid-cols-2">
+                        <TabsList className="grid w-full grid-cols-3">
                             <TabsTrigger value="save-code">Save Code</TabsTrigger>
+                            <TabsTrigger value="share-url">Share URL</TabsTrigger>
                             <TabsTrigger value="text">Text Summary</TabsTrigger>
                         </TabsList>
 
@@ -165,6 +181,37 @@ export function ExportModal({ open, onOpenChange }: ExportModalProps) {
                                 <Button onClick={handleDownloadSaveCode}>
                                     <Download className="w-4 h-4 mr-2" />
                                     Download Save Code
+                                </Button>
+                            </div>
+                        </TabsContent>
+
+                        <TabsContent value="share-url" className="space-y-4">
+                            <div className="space-y-2">
+                                <Label>Shareable URL</Label>
+                                <Textarea
+                                    value={shareableUrl}
+                                    readOnly
+                                    className="min-h-[100px] font-mono text-sm"
+                                    placeholder="Shareable URL will appear here..."
+                                />
+                                <p className="text-sm text-gray-500">
+                                    Share this URL with others to let them view your garden layout. They can copy it and open it in any browser to see your garden.
+                                </p>
+                            </div>
+
+                            <div className="flex gap-2">
+                                <Button onClick={handleCopyUrl} variant="outline">
+                                    {urlCopied ? (
+                                        <>
+                                            <Check className="w-4 h-4 mr-2" />
+                                            Copied!
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Share className="w-4 h-4 mr-2" />
+                                            Copy URL
+                                        </>
+                                    )}
                                 </Button>
                             </div>
                         </TabsContent>

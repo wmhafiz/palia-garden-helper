@@ -46,7 +46,9 @@ export function TileComponent({
         isEraseMode,
         isEraseCropMode,
         isEraseFertiliserMode,
-        isErasePlotMode
+        isErasePlotMode,
+        isErasePlotCropMode,
+        isErasePlotFertiliserMode
     } = useSelectedItem()
     const { garden, forceUpdate } = useGarden()
     const { addToast } = useToasts()
@@ -162,6 +164,34 @@ export function TileComponent({
                 addToast({
                     type: 'info',
                     message: 'Entire plot cleared'
+                })
+            } else if (isErasePlotCropMode) {
+                // Erase plot crop mode - clear only crops from entire plot
+                for (let r = 0; r < 3; r++) {
+                    for (let c = 0; c < 3; c++) {
+                        const plotTile = plot.getTile(r, c)
+                        if (plotTile) {
+                            plotTile.crop = null
+                        }
+                    }
+                }
+                addToast({
+                    type: 'info',
+                    message: 'All crops cleared from plot'
+                })
+            } else if (isErasePlotFertiliserMode) {
+                // Erase plot fertilizer mode - clear only fertilizers from entire plot
+                for (let r = 0; r < 3; r++) {
+                    for (let c = 0; c < 3; c++) {
+                        const plotTile = plot.getTile(r, c)
+                        if (plotTile) {
+                            plotTile.fertiliser = null
+                        }
+                    }
+                }
+                addToast({
+                    type: 'info',
+                    message: 'All fertilizers cleared from plot'
                 })
             } else if (selectedItemType === 'crop' && selectedItem) {
                 const crop = selectedItem as any

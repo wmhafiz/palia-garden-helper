@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { Crop, Fertiliser } from '@/lib/garden-planner'
 
-type SelectedItemType = 'crop' | 'fertiliser' | 'erase' | 'eraseCrop' | 'eraseFertiliser' | 'erasePlot' | null
+type SelectedItemType = 'crop' | 'fertiliser' | 'erase' | 'eraseCrop' | 'eraseFertiliser' | 'erasePlot' | 'erasePlotCrop' | 'erasePlotFertiliser' | null
 
 interface SelectedItemState {
     selectedItem: Crop | Fertiliser | null
@@ -10,6 +10,8 @@ interface SelectedItemState {
     isEraseCropMode: boolean
     isEraseFertiliserMode: boolean
     isErasePlotMode: boolean
+    isErasePlotCropMode: boolean
+    isErasePlotFertiliserMode: boolean
 
     // Actions
     selectCrop: (crop: Crop) => void
@@ -18,6 +20,8 @@ interface SelectedItemState {
     setEraseCropMode: () => void
     setEraseFertiliserMode: () => void
     setErasePlotMode: () => void
+    setErasePlotCropMode: () => void
+    setErasePlotFertiliserMode: () => void
     clearSelection: () => void
 }
 
@@ -28,6 +32,8 @@ export const useSelectedItem = create<SelectedItemState>((set) => ({
     isEraseCropMode: false,
     isEraseFertiliserMode: false,
     isErasePlotMode: false,
+    isErasePlotCropMode: false,
+    isErasePlotFertiliserMode: false,
 
     selectCrop: (crop) => set({
         selectedItem: crop,
@@ -36,6 +42,8 @@ export const useSelectedItem = create<SelectedItemState>((set) => ({
         isEraseCropMode: false,
         isEraseFertiliserMode: false,
         isErasePlotMode: false,
+        isErasePlotCropMode: false,
+        isErasePlotFertiliserMode: false,
     }),
 
     selectFertiliser: (fertiliser) => set({
@@ -45,6 +53,8 @@ export const useSelectedItem = create<SelectedItemState>((set) => ({
         isEraseCropMode: false,
         isEraseFertiliserMode: false,
         isErasePlotMode: false,
+        isErasePlotCropMode: false,
+        isErasePlotFertiliserMode: false,
     }),
 
     setEraseMode: () => set({
@@ -54,6 +64,8 @@ export const useSelectedItem = create<SelectedItemState>((set) => ({
         isEraseCropMode: false,
         isEraseFertiliserMode: false,
         isErasePlotMode: false,
+        isErasePlotCropMode: false,
+        isErasePlotFertiliserMode: false,
     }),
 
     setEraseCropMode: () => set({
@@ -63,6 +75,8 @@ export const useSelectedItem = create<SelectedItemState>((set) => ({
         isEraseCropMode: true,
         isEraseFertiliserMode: false,
         isErasePlotMode: false,
+        isErasePlotCropMode: false,
+        isErasePlotFertiliserMode: false,
     }),
 
     setEraseFertiliserMode: () => set({
@@ -72,6 +86,8 @@ export const useSelectedItem = create<SelectedItemState>((set) => ({
         isEraseCropMode: false,
         isEraseFertiliserMode: true,
         isErasePlotMode: false,
+        isErasePlotCropMode: false,
+        isErasePlotFertiliserMode: false,
     }),
 
     setErasePlotMode: () => set({
@@ -81,6 +97,30 @@ export const useSelectedItem = create<SelectedItemState>((set) => ({
         isEraseCropMode: false,
         isEraseFertiliserMode: false,
         isErasePlotMode: true,
+        isErasePlotCropMode: false,
+        isErasePlotFertiliserMode: false,
+    }),
+
+    setErasePlotCropMode: () => set({
+        selectedItem: null,
+        selectedItemType: 'erasePlotCrop',
+        isEraseMode: false,
+        isEraseCropMode: false,
+        isEraseFertiliserMode: false,
+        isErasePlotMode: false,
+        isErasePlotCropMode: true,
+        isErasePlotFertiliserMode: false,
+    }),
+
+    setErasePlotFertiliserMode: () => set({
+        selectedItem: null,
+        selectedItemType: 'erasePlotFertiliser',
+        isEraseMode: false,
+        isEraseCropMode: false,
+        isEraseFertiliserMode: false,
+        isErasePlotMode: false,
+        isErasePlotCropMode: false,
+        isErasePlotFertiliserMode: true,
     }),
 
     clearSelection: () => set({
@@ -90,5 +130,7 @@ export const useSelectedItem = create<SelectedItemState>((set) => ({
         isEraseCropMode: false,
         isEraseFertiliserMode: false,
         isErasePlotMode: false,
+        isErasePlotCropMode: false,
+        isErasePlotFertiliserMode: false,
     }),
 })) 

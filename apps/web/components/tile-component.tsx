@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import uniqid from 'uniqid'
 import { Tile } from '@/lib/garden-planner/classes'
 import { useSelectedItem, useGarden, useToasts, useUISettings } from '@/stores'
 import { CropType, FertiliserType, Bonus, CropSize } from '@/lib/garden-planner/enums'
@@ -178,14 +179,16 @@ export function TileComponent({
                         return
                     }
 
-                    // Place crop on all required tiles
+                    // Place crop on all required tiles with the same ID
                     const { width, height } = getCropSizeDimensions(crop.size)
+                    const cropId = uniqid() // Generate a unique ID for this multi-size crop
                     for (let r = originRow; r < originRow + height; r++) {
                         for (let c = originCol; c < originCol + width; c++) {
                             if (r < 3 && c < 3) {
                                 const targetTile = plot.getTile(r, c)
                                 if (targetTile) {
                                     targetTile.crop = crop
+                                    targetTile.id = cropId // Assign the same ID to all tiles
                                 }
                             }
                         }
@@ -200,8 +203,8 @@ export function TileComponent({
                     message: `${crop.type || 'Crop'} planted`
                 })
             } else if (selectedItemType === 'fertiliser' && selectedItem) {
-                // Place fertiliser
-                tile.fertiliser = selectedItem as any // Fertiliser instance
+                // Place fertiliser using the plot method to handle multi-size crops
+                plot.addFertiliserToTile(tileRowIndex, tileColIndex, selectedItem as any)
                 addToast({
                     type: 'success',
                     message: `Fertiliser applied`

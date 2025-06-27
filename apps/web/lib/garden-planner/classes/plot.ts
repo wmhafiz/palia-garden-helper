@@ -84,16 +84,116 @@ class Plot {
     addFertiliserToTile(row: number, column: number, fertiliser: Fertiliser | null, options: { removeSameId?: boolean; fertiliserForcedId?: string } = {}): void {
         if (!this._isActive) return
 
-        if (row >= 0 && row < TILE_ROWS && column >= 0 && column < TILE_COLS && this._tiles[row] && this._tiles[row][column]) {
-            this._tiles[row][column].fertiliser = fertiliser
+        // Bounds checking
+        if (row < 0 || row >= TILE_ROWS || column < 0 || column >= TILE_COLS || !this._tiles[row] || !this._tiles[row][column]) {
+            return
+        }
+
+        const { removeSameId = true, fertiliserForcedId = '' } = options
+
+        if (fertiliser === null) {
+            this.removeFertiliserFromTile(row, column, removeSameId)
+            return
+        }
+
+        // Prevents fertilisers with the same id from being added to the same tile
+        // This check is needed because the code for adding fertilisers to adjacent tiles is recursive
+        if (this._tiles[row][column]!.fertiliser !== null && this._tiles[row][column]!.fertiliser?.id === fertiliser.id)
+            return
+
+        // forced id is used when adding fertilisers to bushes and trees
+        const fertiliserId = (fertiliserForcedId === '') ? uniqid() : fertiliserForcedId
+
+        fertiliser.id = fertiliserId
+        this._tiles[row][column]!.fertiliser = fertiliser
+
+        if (this._tiles[row][column]!.crop?.size === 'tree' || this._tiles[row][column]!.crop?.size === 'bush') {
+            const tileId = this._tiles[row][column]!.id
+
+            // look for adjacent tiles with the same id and recursively add fertiliser to them
+            const matchingTiles: Tile[] = this._tiles.flat().filter((tile: Tile) => tile.id === tileId)
+            matchingTiles.forEach((tile: Tile) => {
+                const tileX: number = this._tiles.findIndex((row: Tile[]) => row.includes(tile))
+                const tileRow = this._tiles[tileX]
+                if (tileX >= 0 && tileRow) {
+                    const tileY: number = tileRow.findIndex((t: Tile) => t === tile)
+                    if (tileY >= 0 && tileRow[tileY]) {
+                        tileRow[tileY]!.fertiliser = fertiliser
+                    }
+                }
+            })
+
+            // look for adjacent tiles with the same id in adjacent plots and recursively add fertiliser to them
+            for (const adjacentPlot of Object.values(this._adjacentPlots)) {
+                if (adjacentPlot === null)
+                    continue
+                const matchingTiles: Tile[] = adjacentPlot.tiles.flat().filter((tile: Tile) => tile.id === tileId)
+                matchingTiles.forEach((tile: Tile) => {
+                    const tileX: number = adjacentPlot.tiles.findIndex((row: Tile[]) => row.includes(tile))
+                    const tileRow = adjacentPlot.tiles[tileX]
+                    if (tileX >= 0 && tileRow) {
+                        const tileY: number = tileRow.findIndex((t: Tile) => t === tile)
+                        if (tileY >= 0) {
+                            adjacentPlot.addFertiliserToTile(tileX, tileY, fertiliser, {
+                                removeSameId,
+                                fertiliserForcedId: fertiliserId,
+                            })
+                        }
+                    }
+                })
+            }
         }
     }
 
-    removeFertiliserFromTile(row: number, column: number): void {
+    removeFertiliserFromTile(row: number, column: number, removeSameId: boolean = true): void {
         if (!this._isActive) return
 
-        if (row >= 0 && row < TILE_ROWS && column >= 0 && column < TILE_COLS && this._tiles[row] && this._tiles[row][column]) {
-            this._tiles[row][column].fertiliser = null
+        // Bounds checking
+        if (row < 0 || row >= TILE_ROWS || column < 0 || column >= TILE_COLS || !this._tiles[row] || !this._tiles[row][column]) {
+            return
+        }
+
+        const tileHadFertiliser = (this._tiles[row][column]!.fertiliser !== null)
+        if (!tileHadFertiliser)
+            return
+        this._tiles[row][column]!.fertiliser = null
+
+        // Code to remove fertilisers added to bushes and trees
+        if (this._tiles[row][column]!.crop?.size === 'tree' || this._tiles[row][column]!.crop?.size === 'bush') {
+            if (!removeSameId)
+                return
+
+            // remove fertilisers with the same id from the same plot
+            const fertiliserId = this._tiles[row][column]!.id
+            const matchingTiles: Tile[] = this._tiles.flat().filter((tile: Tile) => tile.id === fertiliserId)
+            matchingTiles.forEach((tile: Tile) => {
+                const tileX: number = this._tiles.findIndex((row: Tile[]) => row.includes(tile))
+                const tileRow = this._tiles[tileX]
+                if (tileX >= 0 && tileRow) {
+                    const tileY: number = tileRow.findIndex((t: Tile) => t === tile)
+                    if (tileY >= 0 && tileRow[tileY]) {
+                        tileRow[tileY]!.fertiliser = null
+                    }
+                }
+            })
+
+            // look for adjacent tiles with the same id in adjacent plots and recursively remove them
+            for (const adjacentPlot of Object.values(this._adjacentPlots)) {
+                if (adjacentPlot === null)
+                    continue
+                const matchingTiles: Tile[] = adjacentPlot.tiles.flat().filter((tile: Tile) => tile.id === fertiliserId)
+
+                matchingTiles.forEach((tile: Tile) => {
+                    const tileX: number = adjacentPlot.tiles.findIndex((row: Tile[]) => row.includes(tile))
+                    const tileRow = adjacentPlot.tiles[tileX]
+                    if (tileX >= 0 && tileRow) {
+                        const tileY: number = tileRow.findIndex((t: Tile) => t === tile)
+                        if (tileY >= 0) {
+                            adjacentPlot.removeFertiliserFromTile(tileX, tileY, removeSameId)
+                        }
+                    }
+                })
+            }
         }
     }
 

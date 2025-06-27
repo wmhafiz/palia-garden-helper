@@ -134,11 +134,24 @@ export function OutputDisplay() {
     }, [garden, version])
 
     const fertilizerAnalysis = useMemo(() => {
-        if (!garden) return { tiles: [], summary: { waterRetain: 0, weedPrevention: 0, total: 0 } }
+        if (!garden) return {
+            tiles: [],
+            summary: {
+                waterRetain: 0,
+                weedPrevention: 0,
+                harvestIncrease: 0,
+                qualityIncrease: 0,
+                speedIncrease: 0,
+                total: 0
+            }
+        }
 
         const tiles: TileAnalysis[] = []
         let missingWaterRetain = 0
         let missingWeedPrevention = 0
+        let missingHarvestIncrease = 0
+        let missingQualityIncrease = 0
+        let missingSpeedIncrease = 0
         let totalCropTiles = 0
 
         for (let i = 0; i < garden.rows; i++) {
@@ -161,6 +174,18 @@ export function OutputDisplay() {
                                 if (!activeBonuses.includes(Bonus.WeedPrevention)) {
                                     missingBonuses.push(Bonus.WeedPrevention)
                                     missingWeedPrevention++
+                                }
+                                if (!activeBonuses.includes(Bonus.HarvestIncrease)) {
+                                    missingBonuses.push(Bonus.HarvestIncrease)
+                                    missingHarvestIncrease++
+                                }
+                                if (!activeBonuses.includes(Bonus.QualityIncrease)) {
+                                    missingBonuses.push(Bonus.QualityIncrease)
+                                    missingQualityIncrease++
+                                }
+                                if (!activeBonuses.includes(Bonus.SpeedIncrease)) {
+                                    missingBonuses.push(Bonus.SpeedIncrease)
+                                    missingSpeedIncrease++
                                 }
 
                                 if (missingBonuses.length > 0) {
@@ -187,6 +212,9 @@ export function OutputDisplay() {
             summary: {
                 waterRetain: missingWaterRetain,
                 weedPrevention: missingWeedPrevention,
+                harvestIncrease: missingHarvestIncrease,
+                qualityIncrease: missingQualityIncrease,
+                speedIncrease: missingSpeedIncrease,
                 total: totalCropTiles
             }
         }
@@ -307,7 +335,7 @@ export function OutputDisplay() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         {/* Summary */}
-                        <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className="grid grid-cols-3 gap-4 text-sm">
                             <div>
                                 <div className="text-muted-foreground flex items-center gap-1">
                                     <Droplets className="w-3 h-3" />
@@ -322,8 +350,35 @@ export function OutputDisplay() {
                                     <Shield className="w-3 h-3" />
                                     Missing Weed Prevention
                                 </div>
-                                <div className="font-medium text-chart-4">
+                                <div className="font-medium text-green-600">
                                     {fertilizerAnalysis.summary.weedPrevention} / {fertilizerAnalysis.summary.total}
+                                </div>
+                            </div>
+                            <div>
+                                <div className="text-muted-foreground flex items-center gap-1">
+                                    <Wheat className="w-3 h-3" />
+                                    Missing Harvest Boost
+                                </div>
+                                <div className="font-medium text-orange-600">
+                                    {fertilizerAnalysis.summary.harvestIncrease} / {fertilizerAnalysis.summary.total}
+                                </div>
+                            </div>
+                            <div>
+                                <div className="text-muted-foreground flex items-center gap-1">
+                                    <Star className="w-3 h-3" />
+                                    Missing Quality Boost
+                                </div>
+                                <div className="font-medium text-yellow-600">
+                                    {fertilizerAnalysis.summary.qualityIncrease} / {fertilizerAnalysis.summary.total}
+                                </div>
+                            </div>
+                            <div>
+                                <div className="text-muted-foreground flex items-center gap-1">
+                                    <Zap className="w-3 h-3" />
+                                    Missing Speed Boost
+                                </div>
+                                <div className="font-medium text-purple-600">
+                                    {fertilizerAnalysis.summary.speedIncrease} / {fertilizerAnalysis.summary.total}
                                 </div>
                             </div>
                         </div>
@@ -389,11 +444,11 @@ export function OutputDisplay() {
                                                     </Badge>
                                                 )}
                                             </div>
-                                            <div className="flex gap-1 mt-1">
+                                            <div className="flex flex-wrap gap-1 mt-1">
                                                 {tile.missingBonuses.map((bonus) => (
-                                                    <span key={bonus} className="text-xs text-muted-foreground">
-                                                        Missing: {bonus}
-                                                    </span>
+                                                    <Badge key={bonus} variant="secondary" className="text-xs">
+                                                        {getBonusDisplayName(bonus)}
+                                                    </Badge>
                                                 ))}
                                             </div>
                                         </div>
@@ -578,5 +633,22 @@ function getFertilizerDisplayName(fertilizer: FertiliserType): string {
             return 'Quality Up'
         default:
             return 'None'
+    }
+}
+
+function getBonusDisplayName(bonus: Bonus): string {
+    switch (bonus) {
+        case Bonus.WaterRetain:
+            return 'Water Retain'
+        case Bonus.WeedPrevention:
+            return 'Weed Block'
+        case Bonus.HarvestIncrease:
+            return 'Harvest Boost'
+        case Bonus.QualityIncrease:
+            return 'Quality Boost'
+        case Bonus.SpeedIncrease:
+            return 'Speed Boost'
+        default:
+            return 'Unknown'
     }
 } 

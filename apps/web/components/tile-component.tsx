@@ -234,29 +234,29 @@ export function TileComponent({
             // Return background color based on crop's bonus type
             switch (tile.crop.cropBonus) {
                 case Bonus.SpeedIncrease:
-                    return 'bg-orange-100' // Speed increase
+                    return 'bg-orange-100 dark:bg-orange-900/30' // Speed increase
                 case Bonus.HarvestIncrease:
-                    return 'bg-green-100' // Harvest boost
+                    return 'bg-green-100 dark:bg-green-900/30' // Harvest boost
                 case Bonus.QualityIncrease:
-                    return 'bg-yellow-100' // Quality increase
+                    return 'bg-yellow-100 dark:bg-yellow-900/30' // Quality increase
                 case Bonus.WaterRetain:
-                    return 'bg-blue-100' // Water retain
+                    return 'bg-blue-100 dark:bg-blue-900/30' // Water retain
                 case Bonus.WeedPrevention:
-                    return 'bg-purple-100' // Weed prevention
+                    return 'bg-purple-100 dark:bg-purple-900/30' // Weed prevention
                 default:
-                    return 'bg-green-200'
+                    return 'bg-green-200 dark:bg-green-800/30'
             }
         }
         if (tile.fertiliser) {
-            return 'bg-blue-100'
+            return 'bg-blue-100 dark:bg-blue-900/30'
         }
-        return 'bg-gray-50'
+        return 'bg-muted'
     }
 
     const getTileBorder = () => {
         if (isHovered) return 'border-palia-blue border-2'
-        if (isPlotHovered) return 'border-gray-400 border'
-        return 'border-gray-300 border'
+        if (isPlotHovered) return 'border-muted-foreground border'
+        return 'border-border border'
     }
 
     const getBonusIndicators = () => {
@@ -282,7 +282,7 @@ export function TileComponent({
         }
 
         return (
-            <div className="absolute top-0 left-0 flex gap-0.5 p-0.5 bg-white/80 rounded-br-md">
+            <div className="absolute top-0 left-0 flex gap-0.5 p-0.5 bg-background/80 rounded-br-md border border-border">
                 {tile.bonuses.map((bonus, index) => (
                     <div key={`${bonus}-${index}`} className="flex items-center justify-center">
                         {getBonusIcon(bonus)}
@@ -346,7 +346,7 @@ export function TileComponent({
 
             {/* Fertiliser display */}
             {tile.fertiliser && (
-                <div className="absolute bottom-0 left-0 w-4 h-4 md:w-6 md:h-6 lg:w-7 lg:h-7 bg-blue-100 rounded-full flex items-center justify-center overflow-hidden border border-blue-300">
+                <div className="absolute bottom-0 left-0 w-4 h-4 md:w-6 md:h-6 lg:w-7 lg:h-7 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center overflow-hidden border border-blue-300 dark:border-blue-600">
                     <img
                         src={tile.fertiliser.image}
                         alt={tile.fertiliser.type}

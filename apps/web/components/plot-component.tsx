@@ -125,9 +125,9 @@ export function PlotComponent({
 
     const plotBorder = () => {
         if (showGridLines) {
-            return 'border-2 border-dashed border-gray-400'
+            return 'border-2 border-dashed border-muted-foreground'
         }
-        return 'border border-gray-300'
+        return 'border border-border'
     }
 
     // If plot is not active, render a gray bordered area with same dimensions as active plots
@@ -136,7 +136,7 @@ export function PlotComponent({
             <div
                 className={`
                     plot-component m-1 transition-all duration-200
-                    border-2 border-green-50
+                    border-2 border-muted
                     flex items-center justify-center
                     ${plotBorder()}
                 `}

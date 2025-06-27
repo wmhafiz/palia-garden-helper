@@ -135,7 +135,7 @@ export function CurrentSelectionDisplay({
 
     // Default variant
     return (
-        <div className={`bg-muted border border-border rounded-lg p-2 sm:p-3 flex-1 min-w-0 ${className}`}>
+        <div className={`bg-muted border border-border rounded-lg p-2 sm:p-3 flex-1 min-w-0 ${className} flex items-end`}>
             <div className="flex items-center space-x-2 sm:space-x-3">
                 {showLabel && (
                     <span className="text-xs sm:text-sm font-medium text-foreground hidden sm:inline">Current selection:</span>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useGarden, useToasts, useSelectedItem } from '@/stores'
 import { GardenDisplay } from './garden-display'
 import { HorizontalCropSelector } from './horizontal-crop-selector'
@@ -10,6 +10,7 @@ import { MenuBar } from './menu-bar'
 import { StatsDisplay } from './stats-display'
 import { CurrentSelectionDisplay } from './current-selection-display'
 import { ScrollArea } from '@workspace/ui/components/scroll-area'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@workspace/ui/components/collapsible'
 
 export function GardenPlanner() {
     const { garden, initializeGarden, isLoading, error } = useGarden()
@@ -22,6 +23,7 @@ export function GardenPlanner() {
         clearSelection
     } = useSelectedItem()
     const hasShownWelcome = useRef(false)
+    const [isSelectorsOpen, setIsSelectorsOpen] = useState(true)
 
     useEffect(() => {
         // Initialize with a default 3x3 garden
@@ -136,13 +138,26 @@ export function GardenPlanner() {
             {/* Main Content */}
             <main className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-40">
                 <div className="space-y-6">
-                    {/* Selector Bars - Single Row */}
-                    <div className="flex gap-4">
-                        <HorizontalCropSelector />
-                        <HorizontalFertilizerSelector />
-                        <HorizontalToolSelector />
-                        <CurrentSelectionDisplay showLabel={false} />
-                    </div>
+                    {/* Collapsible Selector Bars */}
+                    <Collapsible open={isSelectorsOpen} onOpenChange={setIsSelectorsOpen}>
+                        <CollapsibleTrigger asChild>
+                            <button className="flex items-center justify-between p-3 bg-card border border-border rounded-lg hover:bg-muted transition-colors">
+                                <div className={`transform transition-transform duration-200 ${isSelectorsOpen ? 'rotate-180' : ''}`}>
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </button>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="mt-4">
+                            <div className="flex flex-col xl:flex-row gap-4">
+                                <HorizontalCropSelector />
+                                <HorizontalFertilizerSelector />
+                                <HorizontalToolSelector />
+                                <CurrentSelectionDisplay showLabel={false} />
+                            </div>
+                        </CollapsibleContent>
+                    </Collapsible>
 
                     {/* Garden and Stats Layout */}
                     <div className="flex flex-col 2xl:flex-row gap-4 2xl:gap-8">

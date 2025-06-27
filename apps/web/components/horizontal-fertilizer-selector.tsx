@@ -6,7 +6,6 @@ import fertiliserList from '@/lib/garden-planner/fertiliserList'
 import { FertiliserType, CropSize } from '@/lib/garden-planner/enums'
 import { Fertiliser } from '@/lib/garden-planner/classes'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@workspace/ui/components/tooltip'
-import { ScrollArea, ScrollBar } from '@workspace/ui/components/scroll-area'
 
 export function HorizontalFertilizerSelector() {
     const { selectedItem, selectedItemType, selectFertiliser } = useSelectedItem()
@@ -82,68 +81,65 @@ export function HorizontalFertilizerSelector() {
 
             {/* Content */}
             <div className="p-2 sm:p-3">
-                <ScrollArea className="w-full">
-                    <div className="flex space-x-2 pb-2 w-max">
-                        {fertilisers.map((fertiliser: Fertiliser) => {
-                            const isSelected = isItemSelected(fertiliser)
-                            const count = getFertilizerCount(fertiliser.type)
+                <div className="flex flex-wrap gap-2">
+                    {fertilisers.map((fertiliser: Fertiliser) => {
+                        const isSelected = isItemSelected(fertiliser)
+                        const count = getFertilizerCount(fertiliser.type)
 
-                            const fertilizerButton = (
-                                <button
-                                    key={fertiliser.type}
-                                    onClick={() => handleFertiliserSelect(fertiliser.type)}
-                                    className={`
-                                        relative flex-shrink-0 w-16 h-16 rounded-lg border-2 transition-all duration-200 hover:scale-105
-                                        ${isSelected
-                                            ? 'border-purple-500 bg-purple-500/20 shadow-lg ring-2 ring-purple-500/30 z-10'
-                                            : 'border-border bg-card hover:border-palia-blue hover:shadow-sm z-0'
-                                        }
-                                    `}
-                                    style={{
-                                        zIndex: isSelected ? 10 : 1
-                                    }}
-                                >
-                                    <div className="w-full h-full flex items-center justify-center overflow-hidden rounded-md">
-                                        <img
-                                            src={fertiliser.image}
-                                            alt={fertiliser.type}
-                                            className="w-12 h-12 object-contain"
-                                        />
+                        const fertilizerButton = (
+                            <button
+                                key={fertiliser.type}
+                                onClick={() => handleFertiliserSelect(fertiliser.type)}
+                                className={`
+                                    relative flex-shrink-0 w-16 h-16 rounded-lg border-2 transition-all duration-200 hover:scale-105
+                                    ${isSelected
+                                        ? 'border-purple-500 bg-purple-500/20 shadow-lg ring-2 ring-purple-500/30 z-10'
+                                        : 'border-border bg-card hover:border-palia-blue hover:shadow-sm z-0'
+                                    }
+                                `}
+                                style={{
+                                    zIndex: isSelected ? 10 : 1
+                                }}
+                            >
+                                <div className="w-full h-full flex items-center justify-center overflow-hidden rounded-md">
+                                    <img
+                                        src={fertiliser.image}
+                                        alt={fertiliser.type}
+                                        className="w-12 h-12 object-contain"
+                                    />
+                                </div>
+
+                                {/* Quantity indicator - overlapping the icon */}
+                                {count > 0 && (
+                                    <div className="absolute bottom-0 left-0 min-w-[28px] h-7 bg-orange-500 text-white text-sm font-bold rounded-full flex items-center justify-center px-2 shadow-lg border-2 border-white z-20">
+                                        {count}
                                     </div>
+                                )}
+                            </button>
+                        )
 
-                                    {/* Quantity indicator - overlapping the icon */}
-                                    {count > 0 && (
-                                        <div className="absolute bottom-0 left-0 min-w-[28px] h-7 bg-orange-500 text-white text-sm font-bold rounded-full flex items-center justify-center px-2 shadow-lg border-2 border-white z-20">
-                                            {count}
-                                        </div>
-                                    )}
-                                </button>
-                            )
-
-                            return showTooltips ? (
-                                <Tooltip key={fertiliser.type}>
-                                    <TooltipTrigger asChild>
-                                        {fertilizerButton}
-                                    </TooltipTrigger>
-                                    <TooltipContent
-                                        side="bottom"
-                                        sideOffset={8}
-                                        className="z-50 max-w-xs"
-                                    >
-                                        <div className="text-xs">
-                                            <div className="font-semibold">{fertiliser.type}</div>
-                                            <div className="text-muted-foreground">Effect: {fertiliser.effect}</div>
-                                            {count > 0 && (
-                                                <div className="text-palia-blue font-semibold">Applied: {count}</div>
-                                            )}
-                                        </div>
-                                    </TooltipContent>
-                                </Tooltip>
-                            ) : fertilizerButton
-                        })}
-                    </div>
-                    <ScrollBar orientation="horizontal" />
-                </ScrollArea>
+                        return showTooltips ? (
+                            <Tooltip key={fertiliser.type}>
+                                <TooltipTrigger asChild>
+                                    {fertilizerButton}
+                                </TooltipTrigger>
+                                <TooltipContent
+                                    side="bottom"
+                                    sideOffset={8}
+                                    className="z-50 max-w-xs"
+                                >
+                                    <div className="text-xs">
+                                        <div className="font-semibold">{fertiliser.type}</div>
+                                        <div className="text-muted-foreground">Effect: {fertiliser.effect}</div>
+                                        {count > 0 && (
+                                            <div className="text-palia-blue font-semibold">Applied: {count}</div>
+                                        )}
+                                    </div>
+                                </TooltipContent>
+                            </Tooltip>
+                        ) : fertilizerButton
+                    })}
+                </div>
             </div>
         </div>
     )

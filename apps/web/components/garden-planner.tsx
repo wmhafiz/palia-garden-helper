@@ -161,7 +161,7 @@ export function GardenPlanner() {
                     {/* Garden and Stats Layout */}
                     <div className="flex flex-col 2xl:flex-row gap-4 2xl:gap-8">
                         {/* Garden Display - Main Content */}
-                        <div className="flex-1">
+                        <div className="flex-2">
                             <div className="bg-card rounded-lg shadow p-3 sm:p-4 lg:p-6 border border-border" data-garden-display>
                                 <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Garden Layout</h2>
                                 <ScrollArea className="max-h-[65vh] overflow-auto p-4 border rounded-lg">
@@ -171,7 +171,7 @@ export function GardenPlanner() {
                         </div>
 
                         {/* Stats Display - Right Sidebar */}
-                        <div className="flex-1">
+                        <div className="flex-3">
                             <ScrollArea className="max-h-[70vh] overflow-auto p-4 border rounded-lg pr-4 lg:pr-8">
                                 <StatsDisplay />
                             </ScrollArea>

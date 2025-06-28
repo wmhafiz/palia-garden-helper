@@ -41,156 +41,137 @@ export function ProcessorSettingsWidget() {
         }
 
         return (
-            <div className="space-y-3">
-                {/* Process As Visual Buttons */}
-                <div className="space-y-2">
-                    <Label className="text-sm">Process As</Label>
-                    <div className="flex gap-2">
-                        {/* Crop Button */}
+            <div className="flex items-center gap-2 ml-auto">
+                {/* Process As Compact Buttons */}
+                <div className="flex gap-1">
+                    {/* Crop Button */}
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button
+                                variant={currentSetting.processAs === 'crop' ? 'default' : 'outline'}
+                                size="sm"
+                                className="h-7 w-7 p-0"
+                                onClick={() => updateCropSetting(cropId, { processAs: 'crop' })}
+                            >
+                                <img
+                                    src={`/crops/${cropType.toLowerCase().replace(/\s+/g, '-')}.webp`}
+                                    alt={`${cropType} crop`}
+                                    className="w-4 h-4 object-contain"
+                                />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Keep as raw crop</p>
+                        </TooltipContent>
+                    </Tooltip>
+
+                    {/* Seed Button */}
+                    {canMakeSeeds && (
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button
-                                    variant={currentSetting.processAs === 'crop' ? 'default' : 'outline'}
+                                    variant={currentSetting.processAs === 'seed' ? 'default' : 'outline'}
                                     size="sm"
-                                    className="flex items-center gap-2 h-auto p-3"
-                                    onClick={() => updateCropSetting(cropId, { processAs: 'crop' })}
+                                    className="h-7 w-7 p-0"
+                                    onClick={() => updateCropSetting(cropId, { processAs: 'seed' })}
+                                    disabled={harvesterOptions.level < 5}
                                 >
                                     <img
-                                        src={`/crops/${cropType.toLowerCase().replace(/\s+/g, '-')}.webp`}
-                                        alt={`${cropType} crop`}
-                                        className="w-6 h-6 object-contain"
+                                        src={`/seeds/${cropType.toLowerCase().replace(/\s+/g, '-')}.webp`}
+                                        alt={`${cropType} seed`}
+                                        className="w-4 h-4 object-contain"
                                     />
-                                    <span className="text-xs">Crop</span>
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent>
-                                <p>Keep as raw crop</p>
+                                <p>Process into seeds</p>
+                                {harvesterOptions.level < 5 && <p className="text-xs text-red-400">Requires level 5+</p>}
+                                {crop?.conversionInfo && (
+                                    <p className="text-xs opacity-75">
+                                        {crop.conversionInfo.cropsPerSeed} crops → 1 seed
+                                    </p>
+                                )}
                             </TooltipContent>
                         </Tooltip>
+                    )}
 
-                        {/* Seed Button */}
-                        {canMakeSeeds && (
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button
-                                        variant={currentSetting.processAs === 'seed' ? 'default' : 'outline'}
-                                        size="sm"
-                                        className="flex items-center gap-2 h-auto p-3"
-                                        onClick={() => updateCropSetting(cropId, { processAs: 'seed' })}
-                                        disabled={harvesterOptions.level < 5}
-                                    >
-                                        <img
-                                            src={`/seeds/${cropType.toLowerCase().replace(/\s+/g, '-')}.webp`}
-                                            alt={`${cropType} seed`}
-                                            className="w-6 h-6 object-contain"
-                                        />
-                                        <span className="text-xs">Seed</span>
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <p>Process into seeds</p>
-                                    {harvesterOptions.level < 5 && <p className="text-xs text-red-400">Requires level 5+</p>}
-                                    {crop?.conversionInfo && (
-                                        <p className="text-xs opacity-75">
-                                            {crop.conversionInfo.cropsPerSeed} crops → 1 seed
-                                        </p>
-                                    )}
-                                </TooltipContent>
-                            </Tooltip>
-                        )}
-
-                        {/* Preserve Button */}
-                        {canMakePreserves && (
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button
-                                        variant={currentSetting.processAs === 'preserve' ? 'default' : 'outline'}
-                                        size="sm"
-                                        className="flex items-center gap-2 h-auto p-3"
-                                        onClick={() => updateCropSetting(cropId, { processAs: 'preserve' })}
-                                        disabled={harvesterOptions.level < 8}
-                                    >
-                                        <img
-                                            src={`/jars/${cropType.toLowerCase().replace(/\s+/g, '-')}.webp`}
-                                            alt={`${cropType} preserve`}
-                                            className="w-6 h-6 object-contain"
-                                        />
-                                        <span className="text-xs">Preserve</span>
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <p>Process into preserves</p>
-                                    {harvesterOptions.level < 8 && <p className="text-xs text-red-400">Requires level 8+</p>}
-                                    {crop?.conversionInfo && (
-                                        <p className="text-xs opacity-75">
-                                            {crop.conversionInfo.cropsPerPreserve} crops → 1 preserve
-                                        </p>
-                                    )}
-                                </TooltipContent>
-                            </Tooltip>
-                        )}
-                    </div>
+                    {/* Preserve Button */}
+                    {canMakePreserves && (
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    variant={currentSetting.processAs === 'preserve' ? 'default' : 'outline'}
+                                    size="sm"
+                                    className="h-7 w-7 p-0"
+                                    onClick={() => updateCropSetting(cropId, { processAs: 'preserve' })}
+                                    disabled={harvesterOptions.level < 8}
+                                >
+                                    <img
+                                        src={`/jars/${cropType.toLowerCase().replace(/\s+/g, '-')}.webp`}
+                                        alt={`${cropType} preserve`}
+                                        className="w-4 h-4 object-contain"
+                                    />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Process into preserves</p>
+                                {harvesterOptions.level < 8 && <p className="text-xs text-red-400">Requires level 8+</p>}
+                                {crop?.conversionInfo && (
+                                    <p className="text-xs opacity-75">
+                                        {crop.conversionInfo.cropsPerPreserve} crops → 1 preserve
+                                    </p>
+                                )}
+                            </TooltipContent>
+                        </Tooltip>
+                    )}
                 </div>
 
-                {/* Crafters Input */}
+                {/* Crafters Input - Only show when not processing as crop */}
                 {currentSetting.processAs !== 'crop' && (
-                    <div className="flex items-center gap-3">
-                        <Label className="text-sm min-w-0">Crafters:</Label>
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-8 w-8 p-0"
-                                onClick={() => updateCropSetting(cropId, {
-                                    crafters: Math.max(1, currentSetting.crafters - 1)
-                                })}
-                                disabled={currentSetting.crafters <= 1}
-                            >
-                                -
-                            </Button>
-                            <Input
-                                type="number"
-                                min="1"
-                                max="30"
-                                value={currentSetting.crafters}
-                                onChange={(e) =>
-                                    updateCropSetting(cropId, {
-                                        crafters: Math.max(1, Math.min(30, parseInt(e.target.value) || 1))
-                                    })
-                                }
-                                className="h-8 w-16 text-center"
-                            />
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-8 w-8 p-0"
-                                onClick={() => updateCropSetting(cropId, {
-                                    crafters: Math.min(30, currentSetting.crafters + 1)
-                                })}
-                                disabled={currentSetting.crafters >= 30}
-                            >
-                                +
-                            </Button>
-                        </div>
+                    <div className="flex items-center gap-1">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-6 w-6 p-0 text-xs"
+                            onClick={() => updateCropSetting(cropId, {
+                                crafters: Math.max(1, currentSetting.crafters - 1)
+                            })}
+                            disabled={currentSetting.crafters <= 1}
+                        >
+                            -
+                        </Button>
+                        <span className="text-xs min-w-0 text-center w-6">{currentSetting.crafters}</span>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-6 w-6 p-0 text-xs"
+                            onClick={() => updateCropSetting(cropId, {
+                                crafters: Math.min(30, currentSetting.crafters + 1)
+                            })}
+                            disabled={currentSetting.crafters >= 30}
+                        >
+                            +
+                        </Button>
                     </div>
                 )}
 
-                {/* Production Info */}
+                {/* Production Info as Tooltip */}
                 {currentSetting.isActive && currentSetting.processAs !== 'crop' && crop?.conversionInfo && (
-                    <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded">
-                        {currentSetting.processAs === 'seed' && (
-                            <p>
-                                Will produce ~{Math.floor(cropYield / crop.conversionInfo.cropsPerSeed)} seeds
-                                ({crop.conversionInfo.seedProcessMinutes} min each)
-                            </p>
-                        )}
-                        {currentSetting.processAs === 'preserve' && (
-                            <p>
-                                Will produce ~{Math.floor(cropYield / crop.conversionInfo.cropsPerPreserve)} preserves
-                                ({crop.conversionInfo.preserveProcessMinutes} min each)
-                            </p>
-                        )}
-                    </div>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <div className="text-xs text-muted-foreground cursor-help">
+                                {currentSetting.processAs === 'seed' && (
+                                    <span>~{Math.floor(cropYield / crop.conversionInfo.cropsPerSeed)} seeds ({crop.conversionInfo.seedProcessMinutes} min each)</span>
+                                )}
+                                {currentSetting.processAs === 'preserve' && (
+                                    <span>~{Math.floor(cropYield / crop.conversionInfo.cropsPerPreserve)} preserves ({crop.conversionInfo.preserveProcessMinutes} min each)</span>
+                                )}
+                            </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Production estimate with {currentSetting.crafters} crafter{currentSetting.crafters > 1 ? 's' : ''}</p>
+                        </TooltipContent>
+                    </Tooltip>
                 )}
             </div>
         )
@@ -216,61 +197,65 @@ export function ProcessorSettingsWidget() {
 
     return (
         <TooltipProvider>
-            {/* Crop Processing Settings */}
-            <div className="space-y-3">
-                <ScrollArea className="space-y-4 max-h-160 overflow-y-auto">
-                    {availableCrops.map((harvest) => {
-                        const crop = getCropFromType(harvest.cropType as any)
+            <Card>
+                <CardContent>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Settings className="w-5 h-5" />
+                            Processor Settings
+                        </CardTitle>
+                    </CardHeader>
+                    <div className="space-y-3 p-4">
+                        <ScrollArea className="space-y-4 max-h-160 overflow-y-auto">
+                            {availableCrops.map((harvest) => {
+                                const crop = getCropFromType(harvest.cropType as any)
 
-                        // Calculate star and base yields
-                        const starYield = Math.round(harvest.totalYield * finalStarChance)
-                        const baseYield = harvest.totalYield - starYield
+                                // Calculate star and base yields
+                                const starYield = Math.round(harvest.totalYield * finalStarChance)
+                                const baseYield = harvest.totalYield - starYield
 
-                        const canMakeSeeds = crop?.conversionInfo?.seedProcessMinutes && crop.conversionInfo.seedProcessMinutes > 0
-                        const canMakePreserves = crop?.conversionInfo?.preserveProcessMinutes && crop.conversionInfo.preserveProcessMinutes > 0 && crop.conversionInfo.cropsPerPreserve > 0
+                                const canMakeSeeds = crop?.conversionInfo?.seedProcessMinutes && crop.conversionInfo.seedProcessMinutes > 0
+                                const canMakePreserves = crop?.conversionInfo?.preserveProcessMinutes && crop.conversionInfo.preserveProcessMinutes > 0 && crop.conversionInfo.cropsPerPreserve > 0
 
-                        return (
-                            <div key={harvest.cropType} className="border rounded-lg p-4 space-y-4">
-                                {/* Header with crop info */}
-                                <div className="flex items-center gap-3">
-                                    <img
-                                        src={`/crops/${harvest.cropType.toLowerCase().replace(/\s+/g, '-')}.webp`}
-                                        alt={harvest.cropType}
-                                        className="w-10 h-10 object-contain"
-                                    />
-                                    <div>
-                                        <h4 className="font-medium capitalize">{harvest.cropType}</h4>
-                                        <p className="text-sm text-muted-foreground">
-                                            {harvest.totalYield} total ({starYield} ⭐ + {baseYield} base)
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {/* Star Crop Settings */}
-                                {starYield > 0 && (
-                                    <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg">
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <Star className="w-4 h-4 text-yellow-500" />
-                                            <span className="text-sm font-medium">Star {harvest.cropType} ({starYield})</span>
+                                return (
+                                    <div key={harvest.cropType} className="space-y-2">
+                                        {/* Crop Header */}
+                                        <div className="flex items-center gap-2 pb-1 border-b">
+                                            <img
+                                                src={`/crops/${harvest.cropType.toLowerCase().replace(/\s+/g, '-')}.webp`}
+                                                alt={harvest.cropType}
+                                                className="w-6 h-6 object-contain"
+                                            />
+                                            <h4 className="font-medium text-sm capitalize">{harvest.cropType}</h4>
+                                            <span className="text-xs text-muted-foreground ml-auto">
+                                                {harvest.totalYield} total ({starYield} ⭐ + {baseYield} base)
+                                            </span>
                                         </div>
-                                        {renderCropProcessingOptions(`${harvest.cropType}-star`, harvest.cropType, starYield, true, !!canMakeSeeds, !!canMakePreserves, crop)}
-                                    </div>
-                                )}
 
-                                {/* Base Crop Settings */}
-                                {baseYield > 0 && (
-                                    <div className="bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg">
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <span className="text-sm font-medium">Base {harvest.cropType} ({baseYield})</span>
-                                        </div>
-                                        {renderCropProcessingOptions(`${harvest.cropType}-base`, harvest.cropType, baseYield, false, !!canMakeSeeds, !!canMakePreserves, crop)}
+                                        {/* Star Crop Settings */}
+                                        {starYield > 0 && (
+                                            <div className="flex items-center gap-2 py-1">
+                                                <Star className="w-3 h-3 text-yellow-500 flex-shrink-0" />
+                                                <span className="text-xs font-medium min-w-0 flex-shrink-0">Star {harvest.cropType} ({starYield})</span>
+                                                {renderCropProcessingOptions(`${harvest.cropType}-star`, harvest.cropType, starYield, true, !!canMakeSeeds, !!canMakePreserves, crop)}
+                                            </div>
+                                        )}
+
+                                        {/* Base Crop Settings */}
+                                        {baseYield > 0 && (
+                                            <div className="flex items-center gap-2 py-1">
+                                                <div className="w-3 h-3 flex-shrink-0" /> {/* Spacer to align with star */}
+                                                <span className="text-xs font-medium min-w-0 flex-shrink-0">Base {harvest.cropType} ({baseYield})</span>
+                                                {renderCropProcessingOptions(`${harvest.cropType}-base`, harvest.cropType, baseYield, false, !!canMakeSeeds, !!canMakePreserves, crop)}
+                                            </div>
+                                        )}
                                     </div>
-                                )}
-                            </div>
-                        )
-                    })}
-                </ScrollArea>
-            </div>
+                                )
+                            })}
+                        </ScrollArea>
+                    </div>
+                </CardContent>
+            </Card>
         </TooltipProvider>
     )
 } 

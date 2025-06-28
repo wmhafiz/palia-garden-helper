@@ -50,7 +50,16 @@ export function StatsDisplay() {
                     <AccordionItem value="item-1">
                         <AccordionTrigger>Outputs</AccordionTrigger>
                         <AccordionContent>
-                            <ProcessorOutputWidget />
+                            <div className="flex flex-col xl:flex-row gap-4">
+                                <div className="flex-1">
+                                    {/* Harvest Summary */}
+                                    <ProcessorOutputWidget />
+                                </div>
+                                <div className="flex-1">
+                                    {/* Bonus Coverage Statistics */}
+                                    <ProcessorSettingsWidget />
+                                </div>
+                            </div>
                         </AccordionContent>
                     </AccordionItem>
                 )}
@@ -65,15 +74,6 @@ export function StatsDisplay() {
                         </AccordionContent>
                     </AccordionItem>
 
-                )}
-
-                {stats.totalCrops > 0 && (
-                    <AccordionItem value="item-3">
-                        <AccordionTrigger>Processors</AccordionTrigger>
-                        <AccordionContent>
-                            <ProcessorSettingsWidget />
-                        </AccordionContent>
-                    </AccordionItem>
                 )}
 
                 {stats.totalCrops > 0 && (

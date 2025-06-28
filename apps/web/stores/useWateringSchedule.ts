@@ -58,6 +58,8 @@ interface WateringScheduleState {
   // Actions
   startSchedule: () => void
   stopSchedule: () => void
+  resetSchedule: () => void
+  clearLocalStorage: () => void
   pauseSchedule: () => void
   resumeSchedule: () => void
   markDayCompleted: (day: number) => void
@@ -118,6 +120,35 @@ export const useWateringSchedule = create<WateringScheduleState>()(
         currentDay: 0,
         replantedCrops: []
       })
+      
+      // Explicitly clear local storage
+      localStorage.removeItem('watering-schedule-storage')
+    },
+
+    resetSchedule: () => {
+      const { isActive } = get()
+      if (isActive) {
+        // Reset schedule state while keeping it active
+        const startTime = new Date()
+        set({ 
+          startTime, 
+          pausedTime: null,
+          offlineGrowthTime: null,
+          schedule: [], 
+          currentDay: 0,
+          replantedCrops: []
+        })
+        
+        // Generate new schedule
+        get().regenerateSchedule()
+        
+        // Auto-mark Day 0 as completed (crops are planted with initial watering)
+        get().markDayCompleted(0)
+      }
+    },
+
+    clearLocalStorage: () => {
+      localStorage.removeItem('watering-schedule-storage')
     },
 
     pauseSchedule: () => {

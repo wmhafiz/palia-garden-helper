@@ -183,6 +183,33 @@ export function ScheduleCalendarWidget({ showDays = 30, className }: ScheduleCal
 
     return (
         <>
+            {/* Week Navigation Header */}
+            <div className="flex items-center justify-between mb-4">
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigateWeek('prev')}
+                    disabled={currentWeekStart <= 0}
+                    className="flex items-center gap-1"
+                >
+                    <ChevronLeft className="w-4 h-4" />
+                    Previous Week
+                </Button>
+
+                <div className="text-sm font-medium text-muted-foreground">
+                    Week {currentWeekStart + 1} • Days {currentWeekStart * 7} - {currentWeekStart * 7 + 6}
+                </div>
+
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigateWeek('next')}
+                    className="flex items-center gap-1"
+                >
+                    Next Week
+                    <ChevronRight className="w-4 h-4" />
+                </Button>
+            </div>
 
             {/* Calendar Grid */}
             <div className="grid grid-cols-7 gap-2">

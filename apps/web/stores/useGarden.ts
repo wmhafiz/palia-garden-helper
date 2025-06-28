@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
-import { Garden } from '@/lib/garden-planner/classes'
+import { Garden } from '@/lib/garden-planner'
 import { updateUrlWithLayout } from '@/lib/utils/url-helpers'
 
 interface GardenState {
@@ -11,6 +11,7 @@ interface GardenState {
 
     // Actions
     setGarden: (garden: Garden) => void
+    setGardenFromLoad: (garden: Garden, gardenName: string) => void // New method for tracking loaded gardens
     clearGarden: () => void
     clearAllFertilizers: () => void
     clearAllCrops: () => void
@@ -35,6 +36,16 @@ export const useGarden = create<GardenState>()(
         version: 0,
 
         setGarden: (garden) => set((state) => ({ garden, error: null, version: state.version + 1 })),
+        setGardenFromLoad: (garden, gardenName) => {
+            set((state) => ({ garden, error: null, version: state.version + 1 }))
+            
+            // Save snapshot for undo/redo after loading saved garden
+            setTimeout(() => {
+                const { useUndoRedo } = require('@/stores/useUndoRedo')
+                const { saveSnapshot } = useUndoRedo.getState()
+                saveSnapshot(garden, 'load_saved_garden', `Loaded garden: ${gardenName}`)
+            }, 0)
+        },
         clearGarden: () => {
             const { garden } = get()
             if (garden) {
@@ -159,6 +170,13 @@ export const useGarden = create<GardenState>()(
                         console.warn('Failed to load processor settings:', settingsError)
                         // Don't fail the whole import for settings issues
                     }
+                    
+                    // Save snapshot for undo/redo after successful import
+                    setTimeout(() => {
+                        const { useUndoRedo } = require('@/stores/useUndoRedo')
+                        const { saveSnapshot } = useUndoRedo.getState()
+                        saveSnapshot(newGarden, 'import_save_code', 'Imported garden from save code')
+                    }, 0)
                     
                     return true
                 } else {

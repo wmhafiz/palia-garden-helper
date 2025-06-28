@@ -31,7 +31,7 @@ interface LoadModalProps {
 }
 
 export function LoadModal({ open, onOpenChange }: LoadModalProps) {
-    const { setGarden } = useGarden()
+    const { setGardenFromLoad } = useGarden()
     const { savedGardens, loadGarden, deleteGarden, renameSavedGarden, isLoading } = useSaveLoad()
 
     const [editingId, setEditingId] = useState<string | null>(null)
@@ -40,8 +40,9 @@ export function LoadModal({ open, onOpenChange }: LoadModalProps) {
 
     const handleLoad = async (id: string) => {
         const garden = await loadGarden(id)
-        if (garden) {
-            setGarden(garden)
+        const savedGarden = savedGardens.find(g => g.id === id)
+        if (garden && savedGarden) {
+            setGardenFromLoad(garden, savedGarden.name)
             onOpenChange(false)
         }
     }

@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { Garden } from '@/lib/garden-planner/classes'
+import { Garden } from '@/lib/garden-planner'
 import { subscribeWithSelector } from 'zustand/middleware'
 
 // Define action types for better tracking
@@ -17,6 +17,8 @@ export type ActionType =
     | 'clear_garden'
     | 'initialize_garden'
     | 'load_layout'
+    | 'import_save_code'
+    | 'load_saved_garden'
 
 // Snapshot of garden state for undo/redo
 interface GardenSnapshot {

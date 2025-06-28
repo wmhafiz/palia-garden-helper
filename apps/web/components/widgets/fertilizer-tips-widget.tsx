@@ -7,6 +7,7 @@ import { Button } from '@workspace/ui/components/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/select'
 import { useOutputData, getFertilizerDisplayName, getBonusDisplayName, type PlayMode } from '@/hooks/useOutputData'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@workspace/ui/components/collapsible'
+import { ScrollArea } from '@workspace/ui/components/scroll-area'
 
 export function FertilizerTipsWidget() {
     const {
@@ -137,7 +138,7 @@ export function FertilizerTipsWidget() {
                 {fertilizerAnalysis.tiles.length > 0 && (
                     <div className="space-y-2">
                         <h4 className="text-sm font-medium">Recommendations ({fertilizerAnalysis.tiles.length} tiles)</h4>
-                        <div className="max-h-32 overflow-y-auto space-y-1">
+                        <ScrollArea className="h-[70vh]">
                             {fertilizerAnalysis.tiles.slice(0, 10).map((tile, index) => (
                                 <div key={index} className="text-xs bg-muted p-2 rounded">
                                     <div className="flex justify-between items-center">
@@ -162,7 +163,7 @@ export function FertilizerTipsWidget() {
                                     ... and {fertilizerAnalysis.tiles.length - 10} more tiles
                                 </div>
                             )}
-                        </div>
+                        </ScrollArea>
                     </div>
                 )}
 

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useGarden, useToasts } from '@/stores'
+import { useGarden, useToasts, useProcessor } from '@/stores'
 import { getCropFromType, Bonus, FertiliserType, getFertiliserFromType } from '@/lib/garden-planner'
 
 export interface CropHarvestInfo {
@@ -37,13 +37,35 @@ export interface FertilizerAnalysis {
     }
 }
 
+export interface ProcessingRecommendation {
+    cropType: string
+    cropCount: number
+    isStar: boolean
+    recommendations: {
+        processAs: 'crop' | 'seed' | 'preserve'
+        profitability: number
+        goldPerHour: number
+        inputItems: number
+        outputItems: number
+        goldValue: number
+        processingTime: number
+        requiredLevel: number
+        canProcess: boolean
+        inputImage: string
+        outputImage: string
+        reason: string
+    }[]
+    bestOption: 'crop' | 'seed' | 'preserve'
+    levelWarning?: string
+}
+
 export interface HarvestData {
     totalCrops: number
     totalValue: number
     averageGrowthTime: number
     cropHarvests: CropHarvestInfo[]
     totalYield: number
-    processingRecommendations: string[]
+    processingRecommendations: ProcessingRecommendation[]
 }
 
 export type PlayMode = 'afk' | 'speed' | 'profit'
@@ -51,6 +73,7 @@ export type PlayMode = 'afk' | 'speed' | 'profit'
 export function useOutputData() {
     const { garden, version, forceUpdate } = useGarden()
     const { addToast } = useToasts()
+    const { harvesterOptions } = useProcessor()
     const [selectedPlayMode, setSelectedPlayMode] = useState<PlayMode>('afk')
 
     const harvestData = useMemo((): HarvestData => {
@@ -133,7 +156,7 @@ export function useOutputData() {
             : 0
 
         // Processing recommendations
-        const processingRecommendations = generateProcessingRecommendations(cropHarvests)
+        const processingRecommendations = generateProcessingRecommendations(cropHarvests, harvesterOptions.level)
 
         return {
             totalCrops,
@@ -143,7 +166,7 @@ export function useOutputData() {
             totalYield,
             processingRecommendations
         }
-    }, [garden, version])
+    }, [garden, version, harvesterOptions.level])
 
     const fertilizerAnalysis = useMemo((): FertilizerAnalysis => {
         if (!garden) return {
@@ -301,19 +324,117 @@ function getCropBaseValue(cropType: string): number {
     return values[cropType.toLowerCase()] ?? 20
 }
 
-function generateProcessingRecommendations(harvests: CropHarvestInfo[]): string[] {
-    const recommendations: string[] = []
+function generateProcessingRecommendations(harvests: CropHarvestInfo[], userLevel: number = 0): ProcessingRecommendation[] {
+    const recommendations: ProcessingRecommendation[] = []
     
     harvests.forEach(harvest => {
-        if (harvest.count >= 10) {
-            recommendations.push(`Consider processing ${harvest.cropType} into preserves for higher value`)
+        if (harvest.count < 5) return // Skip crops with very low yield
+        
+        const crop = getCropFromType(harvest.cropType as any)
+        if (!crop) return
+        
+        const isStar = false // For now, assuming base crops - could be enhanced to handle star crops
+        const cropCount = harvest.count
+        
+        const options: ProcessingRecommendation['recommendations'] = []
+        
+        // Raw crop option
+        const rawGoldValue = cropCount * (isStar ? crop.goldValues.cropStar : crop.goldValues.crop)
+        options.push({
+            processAs: 'crop',
+            profitability: 1.0, // Base profitability
+            goldPerHour: Infinity, // Instant processing
+            inputItems: cropCount,
+            outputItems: cropCount,
+            goldValue: rawGoldValue,
+            processingTime: 0,
+            requiredLevel: 0,
+            canProcess: true,
+            inputImage: crop.image,
+            outputImage: crop.image,
+            reason: 'Sell immediately - no processing time required'
+        })
+        
+        // Seed option
+        if (crop.conversionInfo.seedProcessMinutes > 0) {
+            const conversions = Math.floor(cropCount / crop.conversionInfo.cropsPerSeed)
+            const seedsProduced = conversions * crop.conversionInfo.seedsPerConversion
+            const seedGoldValue = seedsProduced * (isStar ? crop.goldValues.seedStar : crop.goldValues.seed)
+            const processingTime = conversions * crop.conversionInfo.seedProcessMinutes
+            const goldPerHour = processingTime > 0 ? (seedGoldValue / (processingTime / 60)) : 0
+            const profitability = rawGoldValue > 0 ? (seedGoldValue / rawGoldValue) : 0
+            
+            options.push({
+                processAs: 'seed',
+                profitability,
+                goldPerHour,
+                inputItems: conversions * crop.conversionInfo.cropsPerSeed,
+                outputItems: seedsProduced,
+                goldValue: seedGoldValue,
+                processingTime,
+                requiredLevel: 5,
+                canProcess: userLevel >= 5,
+                inputImage: crop.image,
+                outputImage: crop.seedImage || `/seeds/${harvest.cropType.toLowerCase().replace(/\s+/g, '-')}.webp`,
+                reason: profitability > 1.1 ? 'Highly profitable seed conversion' : 
+                       profitability > 1.0 ? 'Moderately profitable seed conversion' : 
+                       'Less profitable than raw crops'
+            })
         }
-        if (harvest.totalValue > 500) {
-            recommendations.push(`${harvest.cropType} is highly profitable - prioritize quality bonuses`)
+        
+        // Preserve option
+        if (crop.goldValues.hasPreserve && crop.conversionInfo.preserveProcessMinutes > 0) {
+            const preservesProduced = Math.floor(cropCount / crop.conversionInfo.cropsPerPreserve)
+            const preserveGoldValue = preservesProduced * (isStar ? crop.goldValues.preserveStar : crop.goldValues.preserve)
+            const processingTime = preservesProduced * crop.conversionInfo.preserveProcessMinutes
+            const goldPerHour = processingTime > 0 ? (preserveGoldValue / (processingTime / 60)) : 0
+            const profitability = rawGoldValue > 0 ? (preserveGoldValue / rawGoldValue) : 0
+            
+            options.push({
+                processAs: 'preserve',
+                profitability,
+                goldPerHour,
+                inputItems: preservesProduced * crop.conversionInfo.cropsPerPreserve,
+                outputItems: preservesProduced,
+                goldValue: preserveGoldValue,
+                processingTime,
+                requiredLevel: 8,
+                canProcess: userLevel >= 8,
+                inputImage: crop.image,
+                outputImage: crop.preserveImage || `/jars/${harvest.cropType.toLowerCase().replace(/\s+/g, '-')}.webp`,
+                reason: profitability > 1.1 ? 'Highly profitable preserve conversion' : 
+                       profitability > 1.0 ? 'Moderately profitable preserve conversion' : 
+                       'Less profitable than raw crops'
+            })
         }
+        
+        // Find best option (prioritize profitability, then gold per hour)
+        const availableOptions = options.filter(opt => opt.canProcess)
+        const bestOption = availableOptions.length > 0 ? availableOptions.reduce((best, current) => {
+            if (current.profitability > best.profitability) return current
+            if (current.profitability === best.profitability && current.goldPerHour > best.goldPerHour) return current
+            return best
+        }) : options[0]
+        
+        // Generate level warning if needed
+        let levelWarning: string | undefined
+        const blockedOptions = options.filter(opt => !opt.canProcess)
+        if (blockedOptions.length > 0) {
+            const maxRequiredLevel = Math.max(...blockedOptions.map(opt => opt.requiredLevel))
+            levelWarning = `Upgrade to level ${maxRequiredLevel} to unlock ${blockedOptions.map(opt => opt.processAs).join(' and ')} processing`
+        }
+        
+        recommendations.push({
+            cropType: harvest.cropType,
+            cropCount,
+            isStar,
+            recommendations: options.sort((a, b) => b.profitability - a.profitability),
+            bestOption: bestOption?.processAs || 'crop',
+            levelWarning
+        })
     })
     
-    return recommendations
+    return recommendations.filter(rec => rec.recommendations.length > 1) // Only show crops with multiple options
 }
 
 function getRecommendedFertilizer(missingBonuses: Bonus[], mode: PlayMode, activeBonuses: Bonus[]): FertiliserType | undefined {

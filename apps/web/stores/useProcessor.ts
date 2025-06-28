@@ -286,7 +286,8 @@ export const useProcessor = create<ProcessorState>((set, get) => ({
         const processCropYield = (cropId: string, cropType: string, cropYield: number, isStar: boolean, cropSetting: ProcessorSetting | undefined) => {
             if (!cropSetting || !cropSetting.isActive) {
                 // Process as crop (no processing)
-                const goldValue = cropYield * (isStar ? 1.5 : 1) * 10 // Simplified gold calculation
+                const crop = getCropFromType(cropType as any)
+                const goldValue = cropYield * (isStar ? crop?.goldValues.cropStar || 0 : crop?.goldValues.crop || 0)
                 crops.set(cropId, {
                     count: cropYield,
                     minutesProcessedTotal: 0,
@@ -303,9 +304,10 @@ export const useProcessor = create<ProcessorState>((set, get) => ({
                 const crop = getCropFromType(cropType as any)
                 
                 if (cropSetting.processAs === 'seed' && crop?.conversionInfo) {
-                    const seedCount = Math.floor(cropYield / crop.conversionInfo.cropsPerSeed)
-                    const processTime = seedCount * crop.conversionInfo.seedProcessMinutes
-                    const goldValue = seedCount * (crop.goldValues?.seed || crop.goldValues?.crop || 0) * (isStar ? 1.5 : 1)
+                    const conversions = Math.floor(cropYield / crop.conversionInfo.cropsPerSeed)
+                    const seedCount = conversions * crop.conversionInfo.seedsPerConversion
+                    const processTime = conversions * crop.conversionInfo.seedProcessMinutes
+                    const goldValue = seedCount * (isStar ? crop.goldValues.seedStar : crop.goldValues.seed)
                     
                     seeds.set(cropId, {
                         count: seedCount,
@@ -325,7 +327,7 @@ export const useProcessor = create<ProcessorState>((set, get) => ({
                 } else if (cropSetting.processAs === 'preserve' && crop?.conversionInfo && crop.conversionInfo.cropsPerPreserve > 0) {
                     const preserveCount = Math.floor(cropYield / crop.conversionInfo.cropsPerPreserve)
                     const processTime = preserveCount * crop.conversionInfo.preserveProcessMinutes
-                    const goldValue = preserveCount * (crop.goldValues?.preserve || crop.goldValues?.crop || 0) * (isStar ? 1.5 : 1)
+                    const goldValue = preserveCount * (isStar ? crop.goldValues.preserveStar : crop.goldValues.preserve)
                     
                     preserves.set(cropId, {
                         count: preserveCount,
@@ -343,7 +345,7 @@ export const useProcessor = create<ProcessorState>((set, get) => ({
                     preserveJarsCount += cropSetting.crafters
                 } else {
                     // Default to crop processing
-                    const goldValue = cropYield * (isStar ? 1.5 : 1) * 10
+                    const goldValue = cropYield * (isStar ? crop?.goldValues.cropStar || 0 : crop?.goldValues.crop || 0)
                     crops.set(cropId, {
                         count: cropYield,
                         minutesProcessedTotal: 0,

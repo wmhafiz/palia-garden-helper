@@ -80,12 +80,12 @@ export function StatsDisplay() {
                     <AccordionItem value="item-4">
                         <AccordionTrigger>Tips</AccordionTrigger>
                         <AccordionContent>
-                            <div className="flex flex-row gap-4">
+                            <div className="flex flex-col xl:flex-row gap-4">
                                 <div className="flex-1">
                                     {/* Harvest Summary */}
                                     <FertilizerTipsWidget />
                                 </div>
-                                <div className="flex-1">
+                                <div className="flex-3">
                                     {/* Bonus Coverage Statistics */}
                                     <ProcessingTipsWidget />
                                 </div>

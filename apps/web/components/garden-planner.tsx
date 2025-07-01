@@ -14,16 +14,6 @@ import { StatsDisplay } from './stats-display'
 import { CurrentSelectionDisplay } from './tools/current-selection-display'
 import { ScrollArea } from '@workspace/ui/components/scroll-area'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@workspace/ui/components/collapsible'
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from '@workspace/ui/components/alert-dialog'
 
 export function GardenPlanner() {
     const { garden, initializeGarden, isLoading, error } = useGarden()
@@ -42,7 +32,7 @@ export function GardenPlanner() {
     useUndoRedoIntegration()
 
     // Initialize schedule integration
-    const { showConfirmDialog, setShowConfirmDialog, handleConfirmReset, handleCancelReset } = useScheduleIntegration()
+    useScheduleIntegration()
 
     // Garden initialization is now handled in the page component
 
@@ -184,27 +174,6 @@ export function GardenPlanner() {
                 </div>
             </main>
 
-            {/* Schedule Reset Confirmation Dialog */}
-            <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Garden Layout Changed</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Your garden layout has changed. This will reset your watering schedule and you'll need to start it over.
-                            Do you want to continue?
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel onClick={handleCancelReset}>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={handleConfirmReset}
-                            className="bg-destructive hover:bg-destructive/90"
-                        >
-                            Reset Schedule
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
         </div>
     )
 } 

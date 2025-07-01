@@ -1,18 +1,17 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { useGarden, useWateringSchedule } from '@/stores'
 
 /**
  * Hook that integrates the watering schedule with garden changes
- * Shows confirmation popup and resets the schedule when the garden state changes
+ * Silently resets the schedule when the garden state changes
  */
 export function useScheduleIntegration() {
   const { garden, version } = useGarden()
   const { isActive, stopSchedule } = useWateringSchedule()
   const previousVersionRef = useRef<number>(version)
   const isInitialLoadRef = useRef<boolean>(true)
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
-  // Handle garden changes with confirmation popup
+  // Handle garden changes by silently resetting the schedule
   useEffect(() => {
     // Skip on initial load
     if (isInitialLoadRef.current) {
@@ -21,27 +20,10 @@ export function useScheduleIntegration() {
       return
     }
 
-    // Only show popup if schedule is active and garden version changed
+    // Silently reset schedule if it's active and garden version changed
     if (isActive && garden && version !== previousVersionRef.current) {
-      setShowConfirmDialog(true)
+      stopSchedule()
       previousVersionRef.current = version
     }
-  }, [garden, version, isActive])
-
-  const handleConfirmReset = () => {
-    // Stop the schedule completely (this clears local storage too)
-    stopSchedule()
-    setShowConfirmDialog(false)
-  }
-
-  const handleCancelReset = () => {
-    setShowConfirmDialog(false)
-  }
-
-  return {
-    showConfirmDialog,
-    setShowConfirmDialog,
-    handleConfirmReset,
-    handleCancelReset
-  }
-} 
+  }, [garden, version, isActive, stopSchedule])
+}

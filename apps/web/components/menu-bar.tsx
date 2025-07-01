@@ -9,7 +9,6 @@ import {
     Settings,
     Trash2,
     Grid3x3,
-    Camera,
     Clock,
     ExternalLink,
     BookOpen,
@@ -52,28 +51,6 @@ export function MenuBar() {
         }
     }
 
-    const handleScreenshot = async () => {
-        try {
-            const { default: html2canvas } = await import('html2canvas')
-            const gardenElement = document.querySelector('[data-garden-display]')
-
-            if (gardenElement) {
-                const canvas = await html2canvas(gardenElement as HTMLElement, {
-                    backgroundColor: '#ffffff',
-                    scale: 2,
-                    useCORS: true
-                })
-
-                // Create download link
-                const link = document.createElement('a')
-                link.download = `palia-garden-${new Date().toISOString().split('T')[0]}.png`
-                link.href = canvas.toDataURL()
-                link.click()
-            }
-        } catch (error) {
-            console.error('Failed to take screenshot:', error)
-        }
-    }
 
     const handleExternalLink = (url: string) => {
         window.open(url, '_blank', 'noopener,noreferrer')
@@ -153,10 +130,6 @@ export function MenuBar() {
                                 <DropdownMenuItem onClick={() => setLayoutModalOpen(true)}>
                                     <Grid3x3 className="w-4 h-4 mr-2" />
                                     Layout Creator
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={handleScreenshot}>
-                                    <Camera className="w-4 h-4 mr-2" />
-                                    Take Screenshot
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem

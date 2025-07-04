@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { GardenPlanner } from '@/components/garden-planner'
+import { ModeBasedGardenPlanner } from '@/components/mode-based-garden-planner'
 import { useGarden, useToasts } from '@/stores'
 
 function HomeContent() {
@@ -42,7 +42,7 @@ function HomeContent() {
     hasInitialized.current = true
   }, [searchParams, importFromVueSaveCode, initializeGarden, addToast])
 
-  return <GardenPlanner />
+  return <ModeBasedGardenPlanner />
 }
 
 export default function Home() {

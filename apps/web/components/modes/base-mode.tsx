@@ -64,24 +64,24 @@ export function ModeLayout({
             onModeChange={onModeChange}
             className={className}
         >
-            <div className="flex flex-col h-full">
+            <div className="flex flex-col h-full overflow-hidden">
                 {/* Contextual Tools Bar */}
                 {contextualTools && (
-                    <div className="mode-tools-bar bg-background/50 backdrop-blur-sm border-b border-border p-4">
+                    <div className="mode-tools-bar bg-background/50 backdrop-blur-sm border-b border-border p-4 flex-shrink-0">
                         {contextualTools}
                     </div>
                 )}
 
                 {/* Main Content Area */}
-                <div className="flex-1 flex">
+                <div className="flex overflow-hidden min-h-0">
                     {/* Primary Interface */}
-                    <div className="flex-1 mode-primary-interface p-4">
+                    <div className="flex-1 mode-primary-interface overflow-hidden">
                         {primaryInterface}
                     </div>
 
                     {/* Widgets Sidebar */}
                     {widgets && (
-                        <div className="w-80 mode-widgets-sidebar bg-background/30 backdrop-blur-sm border-l border-border p-4 overflow-y-auto">
+                        <div className="flex-1 p-4 mode-widgets-sidebar bg-background/30 backdrop-blur-sm border-l border-border overflow-hidden flex-shrink-0">
                             {widgets}
                         </div>
                     )}
@@ -171,27 +171,6 @@ export function ToolGroup({
     )
 }
 
-// Widget container component for organizing widgets
-export function WidgetContainer({
-    children,
-    layout = 'vertical',
-    className,
-}: {
-    children: ReactNode
-    layout?: 'vertical' | 'horizontal' | 'grid'
-    className?: string
-}) {
-    return (
-        <div className={cn(
-            "widget-container space-y-4",
-            layout === 'horizontal' && "flex space-y-0 space-x-4",
-            layout === 'grid' && "grid grid-cols-2 gap-4 space-y-0",
-            className
-        )}>
-            {children}
-        </div>
-    )
-}
 
 // Mode transition wrapper for smooth animations
 export function ModeTransition({

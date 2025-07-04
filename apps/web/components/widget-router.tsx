@@ -5,6 +5,7 @@ import { GardenMode } from '@/types/mode'
 import { useCurrentMode } from '@/stores'
 import { isWidgetVisibleInMode } from '@/lib/mode-config'
 import { cn } from '@workspace/ui/lib/utils'
+import { getWidgetsForMode } from '@/lib/mode-config'
 
 // Widget loading skeleton
 function WidgetSkeleton({ className }: { className?: string }) {
@@ -166,20 +167,8 @@ export function ModeWidgets({
     className?: string
 }) {
     const widgets = useMemo(() => {
-        switch (mode) {
-            case GardenMode.DESIGN:
-                return ['crop-statistics', 'quick-info']
-            case GardenMode.OPTIMIZE:
-                return ['fertilizer-tips', 'bonus-coverage', 'fertilizer-statistics']
-            case GardenMode.ANALYZE:
-                return ['harvest-summary', 'crop-breakdown', 'crop-statistics', 'processing-tips']
-            case GardenMode.PROCESS:
-                return ['processor-settings', 'processor-output', 'processing-tips']
-            case GardenMode.SCHEDULE:
-                return ['daily-schedule', 'schedule-calendar', 'harvest-schedule', 'schedule-control-panel']
-            default:
-                return []
-        }
+        // Get widgets from mode configuration instead of hardcoded arrays
+        return getWidgetsForMode(mode)
     }, [mode])
 
     return (
@@ -192,25 +181,6 @@ export function ModeWidgets({
     )
 }
 
-// Adaptive widget container that responds to mode changes
-export function AdaptiveWidgetContainer({
-    className,
-    layout = 'vertical',
-}: {
-    className?: string
-    layout?: 'vertical' | 'horizontal' | 'grid'
-}) {
-    const currentMode = useCurrentMode()
-
-    return (
-        <div className={cn("adaptive-widget-container", className)}>
-            <ModeWidgets
-                mode={currentMode}
-                layout={layout}
-            />
-        </div>
-    )
-}
 
 // Widget visibility hook
 export function useWidgetVisibility(widgetId: string, mode?: GardenMode) {

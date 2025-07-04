@@ -10,8 +10,9 @@ import { MenuBar } from './menu-bar'
 import { ModeIndicator } from './mode-switcher'
 import { DesignMode } from './modes/design-mode'
 import { OptimizeMode } from './modes/optimize-mode'
-import { AdaptiveWidgetContainer } from './widget-router'
-import { ScrollArea } from '@workspace/ui/components/scroll-area'
+import { AnalyzeMode } from './modes/analyze-mode'
+import { ProcessMode } from './modes/process-mode'
+import { ScheduleMode } from './modes/schedule-mode'
 
 export function ModeBasedGardenPlanner() {
     const { garden, initializeGarden, isLoading, error } = useGarden()
@@ -162,33 +163,18 @@ export function ModeBasedGardenPlanner() {
             case GardenMode.OPTIMIZE:
                 return <OptimizeMode {...modeProps} />
             case GardenMode.ANALYZE:
-                // TODO: Implement AnalyzeMode
-                return (
-                    <div className="flex items-center justify-center h-64 text-muted-foreground">
-                        Analyze mode coming soon...
-                    </div>
-                )
+                return <AnalyzeMode {...modeProps} />
             case GardenMode.PROCESS:
-                // TODO: Implement ProcessMode
-                return (
-                    <div className="flex items-center justify-center h-64 text-muted-foreground">
-                        Process mode coming soon...
-                    </div>
-                )
+                return <ProcessMode {...modeProps} />
             case GardenMode.SCHEDULE:
-                // TODO: Implement ScheduleMode
-                return (
-                    <div className="flex items-center justify-center h-64 text-muted-foreground">
-                        Schedule mode coming soon...
-                    </div>
-                )
+                return <ScheduleMode {...modeProps} />
             default:
                 return <DesignMode {...modeProps} />
         }
     }
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="h-full bg-background flex flex-col overflow-hidden">
             {/* Menu Bar */}
             <MenuBar />
 
@@ -198,21 +184,12 @@ export function ModeBasedGardenPlanner() {
             </div>
 
             {/* Main Content */}
-            <main className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-32">
-                <div className="space-y-6">
-                    {/* Mode Content */}
-                    <div className="flex flex-col 2xl:flex-row gap-6">
-                        {/* Mode Interface - Main Content */}
-                        <div className="flex-1 min-h-[600px]">
-                            {renderModeContent()}
-                        </div>
-
-                        {/* Adaptive Widgets - Right Sidebar */}
-                        <div className="w-80 2xl:w-96">
-                            <ScrollArea className="max-h-[80vh] overflow-auto">
-                                <AdaptiveWidgetContainer layout="vertical" />
-                            </ScrollArea>
-                        </div>
+            <main className="flex-1 flex flex-col overflow-hidden pt-20">
+                {/* Mode Content */}
+                <div className="flex-1 overflow-hidden">
+                    {/* Mode Interface - Main Content */}
+                    <div className="h-full">
+                        {renderModeContent()}
                     </div>
                 </div>
             </main>

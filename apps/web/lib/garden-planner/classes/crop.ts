@@ -240,6 +240,12 @@ class Crop {
         remainder: number
     } {
         const { cropsPerSeed, seedsPerConversion } = this.conversionInfo
+
+        // Handle invalid conversion info
+        if (!cropsPerSeed || cropsPerSeed <= 0 || !seedsPerConversion || seedsPerConversion <= 0) {
+            return { count: 0, remainder: cropsCount }
+        }
+
         const totalCropsNeeded = cropsPerSeed * seedsPerConversion
         const seedsProduced = Math.floor(cropsCount / totalCropsNeeded) * seedsPerConversion
         const remainder = cropsCount % totalCropsNeeded
@@ -255,6 +261,12 @@ class Crop {
         remainder: number
     } {
         const { cropsPerPreserve } = this.conversionInfo
+
+        // Handle crops that can't be converted to preserves
+        if (!cropsPerPreserve || cropsPerPreserve <= 0) {
+            return { count: 0, remainder: cropsCount }
+        }
+
         const preservesProduced = Math.floor(cropsCount / cropsPerPreserve)
         const remainder = cropsCount % cropsPerPreserve
 

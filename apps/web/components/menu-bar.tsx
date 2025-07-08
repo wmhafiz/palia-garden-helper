@@ -27,7 +27,6 @@ import { ThemeSwitcher } from './theme-switcher'
 import { ModeSwitcher } from './mode-switcher'
 
 export function MenuBar() {
-    const { garden } = useGarden()
     const [saveModalOpen, setSaveModalOpen] = useState(false)
     const [loadModalOpen, setLoadModalOpen] = useState(false)
     const [exportModalOpen, setExportModalOpen] = useState(false)
@@ -84,7 +83,6 @@ export function MenuBar() {
                         </Button>
 
                         <ThemeSwitcher />
-                        <UndoRedoToolbar />
                         <ModeSwitcher />
                     </div>
                 </div>

@@ -47,11 +47,13 @@ export function ModeLayout({
     onModeChange,
     primaryInterface,
     contextualTools,
+    tools,
     widgets,
     className,
 }: ModeComponentProps & {
     primaryInterface: ReactNode
     contextualTools?: ReactNode
+    tools?: ReactNode
     widgets?: ReactNode
     className?: string
 }) {
@@ -74,8 +76,15 @@ export function ModeLayout({
 
                 {/* Main Content Area */}
                 <div className="flex overflow-hidden min-h-0">
+                    {/* Tools Sidebar */}
+                    {tools && (
+                        <div className="w-80 p-4 mode-tools-sidebar bg-background/30 backdrop-blur-sm border-r border-border overflow-hidden flex-shrink-0">
+                            {tools}
+                        </div>
+                    )}
+
                     {/* Primary Interface */}
-                    <div className="flex-1 mode-primary-interface overflow-hidden">
+                    <div className="p-4 mode-primary-interface overflow-hidden">
                         {primaryInterface}
                     </div>
 
@@ -97,6 +106,7 @@ export abstract class BaseModeComponent {
 
     abstract renderPrimaryInterface(): ReactNode
     abstract renderContextualTools(): ReactNode
+    abstract renderTools(): ReactNode
     abstract renderWidgets(): ReactNode
 
     // Optional methods that modes can override
@@ -112,6 +122,7 @@ export abstract class BaseModeComponent {
                 {...props}
                 primaryInterface={this.renderPrimaryInterface()}
                 contextualTools={this.renderContextualTools()}
+                tools={this.renderTools()}
                 widgets={this.renderWidgets()}
             />
         )

@@ -6,6 +6,8 @@ import { useModeData, useSelectedItem } from '@/stores'
 import { ModeLayout, ToolGroup, useModeLifecycle } from './base-mode'
 import { GardenDisplay } from '../garden/garden-display'
 import { HorizontalFertilizerSelector } from '../tools/horizontal-fertilizer-selector'
+import { ModeWidgets } from '../widget-router'
+import { ModeTools } from '../tool-router'
 import { Button } from '@workspace/ui/components/button'
 import { Eye, EyeOff, Zap, Target, Layers, Trash2, RefreshCw } from 'lucide-react'
 
@@ -99,6 +101,18 @@ export function OptimizeMode(props: ModeComponentProps) {
         </div>
     )
 
+    const renderTools = () => (
+        <div className="h-full overflow-hidden">
+            <ModeTools mode={GardenMode.OPTIMIZE} layout="vertical" />
+        </div>
+    )
+
+    const renderWidgets = () => (
+        <div className="h-full overflow-hidden">
+            <ModeWidgets mode={GardenMode.OPTIMIZE} layout="vertical" />
+        </div>
+    )
+
     return (
         <ModeLayout
             mode={mode}
@@ -108,6 +122,8 @@ export function OptimizeMode(props: ModeComponentProps) {
             onModeChange={onModeChange}
             primaryInterface={renderPrimaryInterface()}
             contextualTools={renderContextualTools()}
+            tools={renderTools()}
+            widgets={renderWidgets()}
         />
     )
 }

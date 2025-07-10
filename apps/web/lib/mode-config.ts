@@ -43,8 +43,8 @@ export const MODE_CONFIGS: Record<GardenMode, ModeConfig> = {
         icon: "⚙️",
         description: "Configure processing chains and equipment",
         primaryColor: "#F59E0B",
-        widgets: ["processor-settings", "processor-output", "processing-tips"],
-        tools: ["processor-selector", "chain-builder", "optimization-tools"],
+        widgets: ["processor-settings", "processing-tips"],
+        tools: ["processor-selector", "optimization-tools"],
         shortcuts: ["4", "r", "e", "q"],
     },
     [GardenMode.SCHEDULE]: {

@@ -8,6 +8,7 @@ interface GardenState {
     isLoading: boolean
     error: string | null
     version: number // Add version counter to force updates
+    hasInitialized: boolean // Add initialization flag
 
     // Actions
     setGarden: (garden: Garden) => void
@@ -22,6 +23,8 @@ interface GardenState {
     importFromVueSaveCode: (saveCode: string) => boolean
     forceUpdate: () => void // Add method to force updates
     updateUrlWithCurrentLayout: () => void // Add method to update URL with current layout
+    setHasInitialized: (initialized: boolean) => void // Add method to set initialization flag
+    restoreFromDevSession: () => boolean // Add method to restore from sessionStorage during development
     // Undo/Redo methods
     undo: () => void
     redo: () => void
@@ -34,8 +37,21 @@ export const useGarden = create<GardenState>()(
         isLoading: false,
         error: null,
         version: 0,
+        hasInitialized: false,
 
-        setGarden: (garden) => set((state) => ({ garden, error: null, version: state.version + 1 })),
+        setGarden: (garden) => {
+            set((state) => ({ garden, error: null, version: state.version + 1 }))
+            
+            // In development, save to sessionStorage to persist during hot reloads
+            if (process.env.NODE_ENV === 'development' && garden) {
+                try {
+                    const saveCode = garden.saveLayout()
+                    sessionStorage.setItem('dev-garden-state', saveCode)
+                } catch (error) {
+                    console.warn('Failed to save garden state for hot reload preservation:', error)
+                }
+            }
+        },
         setGardenFromLoad: (garden, gardenName) => {
             set((state) => ({ garden, error: null, version: state.version + 1 }))
             
@@ -128,7 +144,17 @@ export const useGarden = create<GardenState>()(
             try {
                 set({ isLoading: true, error: null })
                 const newGarden = new Garden(rows, cols)
-                set((state) => ({ garden: newGarden, isLoading: false, version: state.version + 1 }))
+                set((state) => ({ garden: newGarden, isLoading: false, version: state.version + 1, hasInitialized: true }))
+                
+                // In development, save to sessionStorage to persist during hot reloads
+                if (process.env.NODE_ENV === 'development') {
+                    try {
+                        const saveCode = newGarden.saveLayout()
+                        sessionStorage.setItem('dev-garden-state', saveCode)
+                    } catch (error) {
+                        console.warn('Failed to save garden state for hot reload preservation:', error)
+                    }
+                }
             } catch (error) {
                 set({
                     error: error instanceof Error ? error.message : 'Failed to initialize garden',
@@ -148,14 +174,29 @@ export const useGarden = create<GardenState>()(
                 })
             }
         },
-        forceUpdate: () => set((state) => ({ version: state.version + 1 })),
+        forceUpdate: () => {
+            set((state) => ({ version: state.version + 1 }))
+            
+            // In development, save to sessionStorage to persist during hot reloads
+            if (process.env.NODE_ENV === 'development') {
+                const { garden } = get()
+                if (garden) {
+                    try {
+                        const saveCode = garden.saveLayout()
+                        sessionStorage.setItem('dev-garden-state', saveCode)
+                    } catch (error) {
+                        console.warn('Failed to save garden state for hot reload preservation:', error)
+                    }
+                }
+            }
+        },
         importFromVueSaveCode: (saveCode: string) => {
             try {
                 set({ isLoading: true, error: null })
                 const newGarden = new Garden()
                 const success = newGarden.loadLayout(saveCode)
                 if (success) {
-                    set((state) => ({ garden: newGarden, isLoading: false, version: state.version + 1 }))
+                    set((state) => ({ garden: newGarden, isLoading: false, version: state.version + 1, hasInitialized: true }))
                     
                     // Also load processor settings if available
                     try {
@@ -199,6 +240,33 @@ export const useGarden = create<GardenState>()(
                     updateUrlWithLayout(saveCode)
                 }
             }
+        },
+        setHasInitialized: (initialized) => set({ hasInitialized: initialized }),
+        
+        // Development-only method to restore state from sessionStorage
+        restoreFromDevSession: () => {
+            if (process.env.NODE_ENV === 'development') {
+                try {
+                    const saveCode = sessionStorage.getItem('dev-garden-state')
+                    if (saveCode) {
+                        const newGarden = new Garden()
+                        const success = newGarden.loadLayout(saveCode)
+                        if (success) {
+                            set((state) => ({ 
+                                garden: newGarden, 
+                                error: null, 
+                                version: state.version + 1, 
+                                hasInitialized: true 
+                            }))
+                            console.log('Restored garden state from hot reload session')
+                            return true
+                        }
+                    }
+                } catch (error) {
+                    console.warn('Failed to restore garden state from session:', error)
+                }
+            }
+            return false
         },
         
         // Undo/Redo implementations

@@ -29,7 +29,7 @@ export function CropStatisticsWidget() {
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                     <TrendingUp className="w-5 h-5" />
-                    Crops ({totalCrops})
+                    Gold Value by Crop and Processing Settings
                 </CardTitle>
             </CardHeader>
             <CardContent>

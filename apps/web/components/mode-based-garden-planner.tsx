@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { useGarden, useToasts, useSelectedItem, useCurrentMode, useIsTransitioning } from '@/stores'
+import { useModeState } from '@/stores/useModeState'
 import { useUndoRedoIntegration } from '@/hooks/useUndoRedoIntegration'
 import { useScheduleIntegration } from '@/hooks/useScheduleIntegration'
 import { GardenMode } from '@/types/mode'
@@ -26,13 +27,34 @@ export function ModeBasedGardenPlanner() {
     } = useSelectedItem()
     const currentMode = useCurrentMode()
     const isTransitioning = useIsTransitioning()
+    const { restoreFromDevSession } = useModeState()
     const hasShownWelcome = useRef(false)
+    const hasModeRestored = useRef(false)
 
     // Initialize undo/redo functionality
     useUndoRedoIntegration()
 
     // Initialize schedule integration
     useScheduleIntegration()
+
+    // Restore mode from sessionStorage during development (hot reload preservation)
+    useEffect(() => {
+        if (process.env.NODE_ENV === 'development' && !hasModeRestored.current) {
+            const restored = restoreFromDevSession()
+            if (restored) {
+                console.log('Mode restored from hot reload session')
+            } else {
+                console.log('Mode restoration not needed or failed')
+                // Save current mode to sessionStorage for future hot reloads
+                try {
+                    sessionStorage.setItem('dev-current-mode', currentMode)
+                } catch (error) {
+                    console.warn('Failed to save initial mode to sessionStorage:', error)
+                }
+            }
+            hasModeRestored.current = true
+        }
+    }, [restoreFromDevSession, currentMode])
 
     // Show welcome message after garden is initialized and component is mounted
     useEffect(() => {

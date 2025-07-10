@@ -138,7 +138,7 @@ export function FertilizerTipsWidget() {
                 {fertilizerAnalysis.tiles.length > 0 && (
                     <div className="space-y-2">
                         <h4 className="text-sm font-medium">Recommendations ({fertilizerAnalysis.tiles.length} tiles)</h4>
-                        <ScrollArea className="h-[70vh]">
+                        <ScrollArea className="h-[50vh]">
                             {fertilizerAnalysis.tiles.slice(0, 10).map((tile, index) => (
                                 <div key={index} className="text-xs bg-muted p-2 rounded">
                                     <div className="flex justify-between items-center">

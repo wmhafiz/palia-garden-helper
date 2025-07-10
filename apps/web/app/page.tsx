@@ -2,18 +2,31 @@
 
 import { useEffect, useRef, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { GardenPlanner } from '@/components/garden-planner'
+import { ModeBasedGardenPlanner } from '@/components/mode-based-garden-planner'
 import { useGarden, useToasts } from '@/stores'
 
 function HomeContent() {
   const searchParams = useSearchParams()
-  const { garden, importFromVueSaveCode, initializeGarden } = useGarden()
+  const { garden, importFromVueSaveCode, initializeGarden, hasInitialized, restoreFromDevSession } = useGarden()
   const { addToast } = useToasts()
-  const hasInitialized = useRef(false)
 
   useEffect(() => {
     // Prevent re-initialization if already done
-    if (hasInitialized.current) return
+    if (hasInitialized) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Garden already initialized, skipping re-initialization during hot reload')
+      }
+      return
+    }
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Initializing garden...')
+
+      // Try to restore from sessionStorage first (development only)
+      if (restoreFromDevSession()) {
+        return
+      }
+    }
 
     const layoutParam = searchParams.get('layout')
 
@@ -38,24 +51,24 @@ function HomeContent() {
       // No layout parameter, initialize with default if no garden exists
       initializeGarden(3, 3)
     }
+  }, [searchParams, importFromVueSaveCode, initializeGarden, addToast, hasInitialized, restoreFromDevSession])
 
-    hasInitialized.current = true
-  }, [searchParams, importFromVueSaveCode, initializeGarden, addToast])
-
-  return <GardenPlanner />
+  return <ModeBasedGardenPlanner />
 }
 
 export default function Home() {
   return (
-    <Suspense fallback={
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-palia-blue mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading Garden Helper...</p>
+    <div className="h-full overflow-hidden">
+      <Suspense fallback={
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-palia-blue mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading Garden Helper...</p>
+          </div>
         </div>
-      </div>
-    }>
-      <HomeContent />
-    </Suspense>
+      }>
+        <HomeContent />
+      </Suspense>
+    </div>
   )
 }
